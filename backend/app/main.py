@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.redis import redis_client
 from app.api.v1.router import api_router
 
 app = FastAPI(
@@ -20,6 +21,20 @@ app.add_middleware(
 
 # API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    """Initialize Redis connection on startup"""
+    redis_client.connect()
+
+
+# Shutdown event
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close Redis connection on shutdown"""
+    redis_client.disconnect()
 
 
 @app.get("/")

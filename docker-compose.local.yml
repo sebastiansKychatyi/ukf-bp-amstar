@@ -59,6 +59,24 @@ services:
     networks:
       - amstar_network_local
 
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: amstar_redis_local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - amstar_redis_data_local:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amstar_network_local
+
   # Nuxt.js Frontend (Development Mode with HMR for Windows)
   frontend:
     image: node:18-alpine
@@ -94,6 +112,8 @@ services:
 volumes:
   amstar_postgres_data_local:
     name: amstar_postgres_data_local
+  amstar_redis_data_local:
+    name: amstar_redis_data_local
   amstar_media_local:
     name: amstar_media_local
 
