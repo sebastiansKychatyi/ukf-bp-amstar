@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: amstar_db_local
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-amstar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-amstar_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-amstar_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - amstar_postgres_data_local:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-amstar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amstar_network_local
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile
+    container_name: amstar_backend_local
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-amstar}:${POSTGRES_PASSWORD:-amstar_dev_password}@db:5432/${POSTGRES_DB:-amstar_db}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-["http://localhost:5173","http://localhost:3000","http://localhost:8080"]}
+      DEBUG: "true"
+      RELOAD: "true"
+      POSTGRES_USER: ${POSTGRES_USER:-amstar}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - amstar_media_local:/var/www/media
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - amstar_network_local
+
+  frontend:
+    image: node:20-alpine
+    container_name: amstar_frontend_local
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+      NODE_ENV: development
+    ports:
+      - "5173:5173"
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+    networks:
+      - amstar_network_local
+
+volumes:
+  amstar_postgres_data_local:
+    name: amstar_postgres_data_local
+  amstar_media_local:
+    name: amstar_media_local
+
+networks:
+  amstar_network_local:
+    name: amstar_network_local
+    driver: bridge

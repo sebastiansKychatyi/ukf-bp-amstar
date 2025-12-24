@@ -1,0 +1,113 @@
+{$DOMAIN:localhost} {
+    # Enable automatic HTTPS
+    # Caddy will automatically obtain and renew SSL certificates
+
+    # Logging
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+
+    # Health check endpoint
+    handle /health {
+        respond "OK" 200
+    }
+
+    # Media files - serve static media
+    handle /media/* {
+        root * /var/www
+        file_server browse
+    }
+
+    # API v1 routes - proxy to backend
+    handle /v1/* {
+        reverse_proxy backend:8000 {
+            # Health check for backend
+            health_uri /health
+            health_interval 30s
+            health_timeout 10s
+
+            # Headers
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # API routes - proxy to backend
+    handle /api/* {
+        reverse_proxy backend:8000 {
+            # Health check for backend
+            health_uri /health
+            health_interval 30s
+            health_timeout 10s
+
+            # Headers
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # OpenAPI docs - proxy to backend
+    handle /docs* {
+        reverse_proxy backend:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Redoc documentation - proxy to backend
+    handle /redoc* {
+        reverse_proxy backend:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # OpenAPI JSON schema - proxy to backend
+    handle /openapi.json {
+        reverse_proxy backend:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Frontend - serve Vue.js SPA (catch-all)
+    handle /* {
+        reverse_proxy frontend:80 {
+            # Headers
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        # Enable XSS protection
+        X-XSS-Protection "1; mode=block"
+        # Clickjacking protection
+        X-Frame-Options "SAMEORIGIN"
+        # Referrer policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Remove server header
+        -Server
+    }
+
+    # Compression
+    encode gzip zstd
+}
