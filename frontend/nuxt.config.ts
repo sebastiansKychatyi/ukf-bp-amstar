@@ -30,5 +30,21 @@ export default defineNuxtConfig({
     },
   },
 
+  // Development server configuration for Docker/Windows HMR
+  vite: {
+    server: {
+      watch: {
+        usePolling: true,
+        interval: 1000,
+      },
+      hmr: {
+        protocol: 'ws',
+        host: 'localhost',
+        port: 24678,
+        clientPort: 24678,
+      },
+    },
+  },
+
   compatibilityDate: '2024-12-24'
 })

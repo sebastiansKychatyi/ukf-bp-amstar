@@ -16,7 +16,6 @@ class Team(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
-    captain = relationship("User", back_populates="teams")
-    challenges_sent = relationship("Challenge", foreign_keys="Challenge.challenger_id", back_populates="challenger")
-    challenges_received = relationship("Challenge", foreign_keys="Challenge.opponent_id", back_populates="opponent")
+    # Relationships (lazy loading to avoid circular import issues)
+    challenges_sent = relationship("Challenge", foreign_keys="Challenge.challenger_id", back_populates="challenger", lazy="select")
+    challenges_received = relationship("Challenge", foreign_keys="Challenge.opponent_id", back_populates="opponent", lazy="select")

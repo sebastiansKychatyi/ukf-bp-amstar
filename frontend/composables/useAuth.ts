@@ -7,6 +7,8 @@ interface User {
   full_name: string | null
   is_active: boolean
   is_superuser: boolean
+  created_at: string
+  updated_at: string
 }
 
 interface LoginCredentials {
@@ -22,39 +24,35 @@ interface RegisterData {
 }
 
 const user = ref<User | null>(null)
-const token = ref<string | null>(null)
 
 export const useAuth = () => {
   const config = useRuntimeConfig()
   const router = useRouter()
 
+  // Use useCookie for SSR compatibility
+  const token = useCookie<string | null>('auth_token', {
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  })
+
   const apiBase = config.public.apiBaseUrl || 'http://localhost:8000/api/v1'
 
   const isAuthenticated = computed(() => !!token.value)
 
-  const initAuth = () => {
-    if (import.meta.client) {
-      const storedToken = localStorage.getItem('auth_token')
-      if (storedToken) {
-        token.value = storedToken
-        fetchCurrentUser()
-      }
+  const initAuth = async () => {
+    if (token.value) {
+      await fetchCurrentUser()
     }
   }
 
   const setToken = (newToken: string) => {
     token.value = newToken
-    if (import.meta.client) {
-      localStorage.setItem('auth_token', newToken)
-    }
   }
 
   const clearToken = () => {
     token.value = null
     user.value = null
-    if (import.meta.client) {
-      localStorage.removeItem('auth_token')
-    }
   }
 
   const login = async (credentials: LoginCredentials) => {
@@ -125,7 +123,7 @@ export const useAuth = () => {
 
   const logout = () => {
     clearToken()
-    router.push('/login')
+    router.push('/auth/login')
   }
 
   return {

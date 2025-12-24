@@ -29,4 +29,10 @@ class UserInDB(UserBase):
 
 
 class User(UserInDB):
+    """User schema for API responses"""
+    pass
+
+
+class UserRead(User):
+    """Alias for User schema - used for response models"""
     pass
