@@ -1,35 +1,44 @@
 # Build stage
-FROM node:20-alpine AS build
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
-RUN npm ci
+RUN npm ci --only=production=false
 
 # Copy application source
 COPY . .
 
-# Build the application
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# Production stage - Node.js for SSR
+FROM node:18-alpine AS production
 
-# Copy custom nginx config
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Copy built files from build stage
-COPY --from=build /app/dist /usr/share/nginx/html
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
 
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nuxtjs -u 1001
 
-# Expose port 80
-EXPOSE 80
+# Copy built application from build stage
+COPY --from=build --chown=nuxtjs:nodejs /app/.output /app/.output
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Switch to non-root user
+USER nuxtjs
+
+# Expose Nuxt default port
+EXPOSE 3000
+
+# Environment variables
+ENV NODE_ENV=production
+ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
+
+# Start Nuxt.js server with dumb-init
+CMD ["dumb-init", "node", ".output/server/index.mjs"]

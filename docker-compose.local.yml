@@ -1,8 +1,13 @@
 version: '3.8'
 
+# =================================================================
+# AmStar Platform - Local Development Environment
+# FastAPI Backend + Nuxt.js Frontend + PostgreSQL 15
+# =================================================================
+
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     container_name: amstar_db_local
     restart: unless-stopped
     environment:
@@ -32,7 +37,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
       ALGORITHM: ${ALGORITHM:-HS256}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
-      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-["http://localhost:5173","http://localhost:3000","http://localhost:8080"]}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-["http://localhost:3000","http://localhost:8000","http://localhost"]}
       DEBUG: "true"
       RELOAD: "true"
       POSTGRES_USER: ${POSTGRES_USER:-amstar}
@@ -53,21 +58,26 @@ services:
     networks:
       - amstar_network_local
 
+  # Nuxt.js Frontend (Development Mode)
   frontend:
-    image: node:20-alpine
+    image: node:18-alpine
     container_name: amstar_frontend_local
     restart: unless-stopped
     working_dir: /app
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+      # Nuxt.js environment variables
+      NUXT_PUBLIC_API_BASE_URL: ${NUXT_PUBLIC_API_BASE_URL:-http://localhost:8000/api/v1}
+      NUXT_HOST: 0.0.0.0
+      NUXT_PORT: 3000
       NODE_ENV: development
     ports:
-      - "5173:5173"
       - "3000:3000"
+      - "24678:24678"  # Nuxt DevTools
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+      - /app/.nuxt
+    command: sh -c "npm install && npm run dev"
     depends_on:
       - backend
     networks:

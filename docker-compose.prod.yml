@@ -1,8 +1,13 @@
 version: '3.8'
 
+# =================================================================
+# AmStar Platform - Production Environment
+# FastAPI Backend + Nuxt.js Frontend + PostgreSQL 15 + Caddy
+# =================================================================
+
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     container_name: amstar_db
     restart: always
     environment:
@@ -55,6 +60,7 @@ services:
     networks:
       - amstar_network
 
+  # Nuxt.js Frontend (SSR Production)
   frontend:
     build:
       context: ./frontend
@@ -63,12 +69,15 @@ services:
     restart: always
     environment:
       NODE_ENV: production
+      NUXT_PUBLIC_API_BASE_URL: ${NUXT_PUBLIC_API_BASE_URL}
+      NUXT_HOST: 0.0.0.0
+      NUXT_PORT: 3000
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
-      timeout: 3s
+      timeout: 5s
       retries: 3
-      start_period: 5s
+      start_period: 10s
     depends_on:
       - backend
     networks:
