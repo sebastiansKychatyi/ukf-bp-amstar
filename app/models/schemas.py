@@ -9,6 +9,16 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+# Import sanitization utilities
+try:
+    from app.utils.sanitization import sanitize_string_field, sanitize_html
+except ImportError:
+    # Fallback if sanitization module not available
+    def sanitize_string_field(v):
+        return v
+    def sanitize_html(v, allow_basic_formatting=False):
+        return v
+
 
 # ============================================================================
 # ENUMS
@@ -95,6 +105,14 @@ class PlayerUpdate(BaseModel):
     profile_picture_url: Optional[str] = None
     bio: Optional[str] = None
 
+    @field_validator('bio')
+    @classmethod
+    def sanitize_bio(cls, v):
+        """Sanitize bio field to prevent XSS attacks"""
+        if v is not None:
+            return sanitize_html(v, allow_basic_formatting=True)
+        return v
+
 
 class PlayerStatistics(BaseModel):
     """Player statistics data"""
@@ -141,6 +159,22 @@ class TeamBase(BaseModel):
     max_players: int = Field(default=25, ge=11, le=50)
     is_recruiting: bool = True
     description: Optional[str] = None
+
+    @field_validator('description')
+    @classmethod
+    def sanitize_description(cls, v):
+        """Sanitize description field to prevent XSS attacks"""
+        if v is not None:
+            return sanitize_html(v, allow_basic_formatting=True)
+        return v
+
+    @field_validator('name', 'short_name', 'home_city')
+    @classmethod
+    def sanitize_text_fields(cls, v):
+        """Sanitize text fields to prevent XSS attacks"""
+        if v is not None:
+            return sanitize_string_field(v)
+        return v
 
 
 class TeamCreate(TeamBase):

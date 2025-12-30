@@ -4,13 +4,34 @@ from app.core.config import settings
 from app.core.redis import redis_client
 from app.api.v1.router import api_router
 
+# Import refactored components
+from app.core.exception_handlers import register_exception_handlers
+from app.middleware.rate_limit import RateLimitMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# CORS middleware
+# Register exception handlers (must be done before middleware)
+register_exception_handlers(app)
+
+# Add security headers middleware
+app.add_middleware(
+    SecurityHeadersMiddleware,
+    enable_hsts=settings.ENVIRONMENT == "production",
+)
+
+# Add rate limiting middleware
+app.add_middleware(
+    RateLimitMiddleware,
+    requests_per_minute=getattr(settings, 'RATE_LIMIT_REQUESTS', 100),
+    auth_requests_per_minute=getattr(settings, 'AUTH_RATE_LIMIT_REQUESTS', 5),
+)
+
+# CORS middleware (should be last)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
