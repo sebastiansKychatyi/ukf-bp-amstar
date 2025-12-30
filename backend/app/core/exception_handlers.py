@@ -94,10 +94,10 @@ async def amstar_exception_handler(request: Request, exc: AmStarException) -> JS
 
     # Log error with context
     logger.warning(
-        f"Business exception: {exc.error_code}",
+        f"Business exception: {exc.error_code} - {exc.message}",
         extra={
             "error_code": exc.error_code,
-            "message": exc.message,
+            "error_message": exc.message,  # Renamed from 'message' to avoid reserved key
             "details": exc.details,
             "path": request.url.path,
             "method": request.method,

@@ -1,0 +1,452 @@
+# ============================================================================
+# AmStar Football Platform - Master .gitignore
+# ============================================================================
+# This file prevents sensitive, temporary, and auto-generated files from
+# being tracked by Git version control.
+#
+# Project Structure:
+# - Root: Docker, environment variables, documentation
+# - Frontend: Nuxt 3 (Node.js)
+# - Backend: FastAPI (Python)
+# ============================================================================
+
+# ============================================================================
+# ENVIRONMENT & SECRETS (CRITICAL - NEVER COMMIT)
+# ============================================================================
+# Environment files contain sensitive data like API keys, database passwords,
+# and secrets. These must NEVER be committed to version control.
+
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+!.env.example
+
+# Backup files that might contain sensitive data
+*.backup
+*.bak
+*.old
+
+# ============================================================================
+# PYTHON / FASTAPI (Backend)
+# ============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+backend/.venv/
+backend/venv/
+
+# Python distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+.hypothesis/
+
+# Flask/Django stuff (if used)
+instance/
+.webassets-cache
+db.sqlite3
+db.sqlite3-journal
+
+# Scrapy stuff
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# ============================================================================
+# NODE.JS / NUXT 3 (Frontend)
+# ============================================================================
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+jspm_packages/
+bower_components/
+
+# Nuxt build output
+.nuxt/
+.output/
+frontend/.nuxt/
+frontend/.output/
+
+# Nuxt generate output
+dist/
+frontend/dist/
+
+# Vite cache
+.vite/
+frontend/.vite/
+
+# Package manager lock files (keep package-lock.json but ignore yarn.lock)
+# Uncomment if using yarn:
+# yarn.lock
+# pnpm-lock.yaml
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Nuxt cache
+.nuxtrc
+.nuxt-cache/
+
+# Nuxt TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# ============================================================================
+# DOCKER
+# ============================================================================
+
+# Docker volumes and data directories
+**/volumes/
+**/data/
+database/data/
+db/data/
+
+# Docker override files (keep base docker-compose files)
+docker-compose.override.yml
+
+# ============================================================================
+# DATABASE
+# ============================================================================
+
+# SQLite databases
+*.sqlite
+*.sqlite3
+*.db
+
+# PostgreSQL
+*.pgsql
+*.sql.gz
+
+# Database dumps
+*.dump
+*.sql
+!database/init.sql
+!backend/app/sql/
+
+# ============================================================================
+# OPERATING SYSTEM
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# IDEs & EDITORS
+# ============================================================================
+
+# VSCode
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.code-workspace
+.history/
+
+# PyCharm / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+.sublime-gulp.cache
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+tags
+[._]*.un~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ============================================================================
+# BUILD ARTIFACTS & TEMPORARY FILES
+# ============================================================================
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.pyc
+*.pyo
+
+# Archives
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.#*
+
+# ============================================================================
+# CLOUD & DEPLOYMENT
+# ============================================================================
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Kubernetes
+*.kubeconfig
+
+# ============================================================================
+# TESTING & CI/CD
+# ============================================================================
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# CI/CD artifacts
+.github/workflows/*.yml.bak
+
+# ============================================================================
+# DOCUMENTATION (Generated)
+# ============================================================================
+
+# Auto-generated docs
+/docs/_build/
+/docs/api/
+site/
+
+# ============================================================================
+# PROJECT-SPECIFIC
+# ============================================================================
+
+# User uploads (if any)
+/backend/uploads/
+/frontend/static/uploads/
+/public/uploads/
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Backup directories
+backup/
+backups/
+*.backup/
+
+# Logs directory
+logs/
+*.log
+
+# ============================================================================
+# IMPORTANT: Files to KEEP (whitelist)
+# ============================================================================
+# These files SHOULD be committed despite being in ignored directories
+
+# Keep example environment files
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# Keep README files everywhere
+!**/README.md
+
+# Keep database initialization scripts
+!database/init/
+!backend/app/sql/
+
+# Keep Docker configuration
+!Dockerfile
+!docker-compose*.yml
+!.dockerignore
+
+# Keep CI/CD configuration
+!.github/workflows/
+!.gitlab-ci.yml
+
+# ============================================================================
+# END OF .gitignore
+# ============================================================================

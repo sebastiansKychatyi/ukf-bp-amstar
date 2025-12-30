@@ -1,130 +1,184 @@
 <template>
-  <div class="flex items-center justify-center py-12 px-4">
-    <div class="text-center max-w-4xl mx-auto">
-      <!-- Hero Section -->
-      <div class="mb-12">
-        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+  <!--
+    Home Page
+    =========
+    Landing page for the AmStar Football Platform
+
+    Features:
+    - Clean, minimalist hero section
+    - Quick stats overview
+    - Call-to-action buttons
+    - System status indicator
+  -->
+  <v-container class="py-12">
+    <!-- Hero Section -->
+    <v-row justify="center" class="mb-12">
+      <v-col cols="12" md="8" class="text-center">
+        <v-icon icon="mdi-soccer" size="80" color="primary" class="mb-4" />
+
+        <h1 class="text-h2 font-weight-bold mb-4">
           Welcome to AmStar
         </h1>
-        <p class="text-2xl text-gray-600 dark:text-gray-400 mb-8">
+
+        <p class="text-h5 text-medium-emphasis mb-6">
           Amateur Football Platform
         </p>
-        <p class="text-lg text-gray-500 dark:text-gray-500 max-w-2xl mx-auto">
-          Connect with teams, organize challenges, and track your performance in the amateur football community.
+
+        <p class="text-body-1 text-medium-emphasis mb-8">
+          Connect with teams, organize challenges, and track your performance
+          in the amateur football community.
         </p>
-      </div>
 
-      <!-- Features Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <!-- Feature 1 -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Team Management</h3>
-          <p class="text-gray-600 dark:text-gray-400 text-sm">Create and manage your football team with ease</p>
-        </div>
-
-        <!-- Feature 2 -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-          <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Challenge System</h3>
-          <p class="text-gray-600 dark:text-gray-400 text-sm">Organize and accept challenges from other teams</p>
-        </div>
-
-        <!-- Feature 3 -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Rating System</h3>
-          <p class="text-gray-600 dark:text-gray-400 text-sm">Track performance and improve your rankings</p>
-        </div>
-      </div>
-
-      <!-- CTA Section -->
-      <div v-if="!isAuthenticated" class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
-        <h2 class="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-        <p class="text-lg mb-6 opacity-90">Join the AmStar community and take your team to the next level</p>
-        <div class="flex gap-4 justify-center">
-          <NuxtLink
-            to="/auth/register"
-            class="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition shadow-lg"
+        <!-- Call-to-Action Buttons -->
+        <div class="d-flex justify-center gap-4 flex-wrap">
+          <v-btn
+            color="primary"
+            size="large"
+            to="/teams"
           >
-            Create Account
-          </NuxtLink>
-          <NuxtLink
-            to="/auth/login"
-            class="bg-blue-700 hover:bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold transition border-2 border-white"
-          >
-            Sign In
-          </NuxtLink>
-        </div>
-      </div>
+            <v-icon start>mdi-shield-account</v-icon>
+            Browse Teams
+          </v-btn>
 
-      <!-- Authenticated User Section -->
-      <div v-else class="bg-gradient-to-r from-green-600 to-teal-600 rounded-2xl p-8 text-white shadow-xl">
-        <h2 class="text-3xl font-bold mb-4">Welcome back, {{ user?.full_name || user?.username }}! 👋</h2>
-        <p class="text-lg mb-6 opacity-90">Ready to continue your journey?</p>
-        <NuxtLink
-          to="/profile"
-          class="inline-block bg-white text-green-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition shadow-lg"
-        >
-          Go to Profile
-        </NuxtLink>
-      </div>
-
-      <!-- System Status -->
-      <div class="mt-12 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">System Status</h2>
-        <div class="flex items-center justify-center space-x-6">
-          <div class="text-center">
-            <p class="text-green-600 dark:text-green-400 font-semibold">✓ Frontend</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Running</p>
-          </div>
-          <div class="text-center">
-            <p class="text-green-600 dark:text-green-400 font-semibold">✓ Backend</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Connected</p>
-          </div>
-          <div class="text-center">
-            <p class="text-green-600 dark:text-green-400 font-semibold">✓ Database</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Active</p>
-          </div>
-        </div>
-        <div class="mt-4">
-          <a
-            href="http://localhost:8000/docs"
-            target="_blank"
-            class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          <v-btn
+            color="secondary"
+            size="large"
+            variant="outlined"
+            to="/players"
           >
-            View API Documentation →
-          </a>
+            <v-icon start>mdi-account-group</v-icon>
+            View Players
+          </v-btn>
         </div>
-      </div>
-    </div>
-  </div>
+      </v-col>
+    </v-row>
+
+    <!-- Platform Statistics -->
+    <v-row class="mb-12">
+      <v-col cols="12">
+        <h2 class="text-h4 font-weight-bold text-center mb-6">
+          Platform Statistics
+        </h2>
+      </v-col>
+
+      <!-- Stat Cards -->
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="text-center pa-6" color="primary" dark>
+          <v-icon icon="mdi-account-group" size="48" class="mb-3" />
+          <div class="text-h4 font-weight-bold mb-1">1,234</div>
+          <div class="text-body-1">Players</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="text-center pa-6" color="secondary" dark>
+          <v-icon icon="mdi-shield-account" size="48" class="mb-3" />
+          <div class="text-h4 font-weight-bold mb-1">456</div>
+          <div class="text-body-1">Teams</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="text-center pa-6" color="success" dark>
+          <v-icon icon="mdi-trophy" size="48" class="mb-3" />
+          <div class="text-h4 font-weight-bold mb-1">789</div>
+          <div class="text-body-1">Matches</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="text-center pa-6" color="info" dark>
+          <v-icon icon="mdi-calendar-check" size="48" class="mb-3" />
+          <div class="text-h4 font-weight-bold mb-1">321</div>
+          <div class="text-body-1">Challenges</div>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- System Status -->
+    <v-row justify="center">
+      <v-col cols="12" md="6">
+        <v-card elevation="2">
+          <v-card-title class="text-center">
+            <v-icon icon="mdi-server-network" class="mr-2" />
+            System Status
+          </v-card-title>
+
+          <v-card-text>
+            <div class="d-flex flex-column gap-3">
+              <!-- Frontend Status -->
+              <div class="d-flex align-center justify-space-between">
+                <span class="text-body-1">Frontend</span>
+                <v-chip color="success" size="small">
+                  <v-icon start>mdi-check-circle</v-icon>
+                  Running
+                </v-chip>
+              </div>
+
+              <!-- Backend Status -->
+              <div class="d-flex align-center justify-space-between">
+                <span class="text-body-1">Backend API</span>
+                <v-chip color="success" size="small">
+                  <v-icon start>mdi-check-circle</v-icon>
+                  Connected
+                </v-chip>
+              </div>
+
+              <!-- Database Status -->
+              <div class="d-flex align-center justify-space-between">
+                <span class="text-body-1">Database</span>
+                <v-chip color="success" size="small">
+                  <v-icon start>mdi-check-circle</v-icon>
+                  Active
+                </v-chip>
+              </div>
+            </div>
+          </v-card-text>
+
+          <v-card-actions class="justify-center">
+            <v-btn
+              href="http://localhost:8000/docs"
+              target="_blank"
+              color="primary"
+              variant="text"
+              prepend-icon="mdi-api"
+            >
+              View API Documentation
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
-const config = useRuntimeConfig()
-const { user, isAuthenticated } = useAuth()
+/**
+ * Home Page Logic
+ * ===============
+ * This page is primarily static content with no complex state management
+ * Statistics are hardcoded for now - replace with API calls in production
+ */
 
-// Test API connection on mount
-onMounted(async () => {
-  try {
-    const apiUrl = config.public.apiBaseUrl
-    const response = await $fetch(`${apiUrl.replace('/api/v1', '')}/health`)
-    console.log('✓ Backend health check:', response)
-  } catch (error) {
-    console.error('✗ Backend health check failed:', error)
-  }
-})
+// TODO: Fetch real-time statistics from backend API
+// Example:
+// const stats = await $fetch('/api/v1/statistics')
 </script>
+
+<style scoped>
+/**
+ * Page-Specific Styles
+ * ====================
+ * Minimal styles - Vuetify utility classes handle most layout
+ */
+
+/* Add spacing between buttons in the CTA section */
+.gap-4 {
+  gap: 1rem;
+}
+
+/* Ensure gap utility works in flex containers */
+.gap-3 {
+  gap: 0.75rem;
+}
+</style>

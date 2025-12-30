@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "AmStar Amateur Football Platform"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
+    ENVIRONMENT: str = "development"  # development, staging, production
 
     # Database
     DATABASE_URL: str = "postgresql://user:password@localhost/amstar_db"
@@ -18,6 +19,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_REQUESTS: int = 100  # requests per minute (global)
+    AUTH_RATE_LIMIT_REQUESTS: int = 5  # requests per minute (auth endpoints)
 
     # CORS
     BACKEND_CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000"]

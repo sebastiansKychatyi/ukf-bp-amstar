@@ -78,8 +78,9 @@ services:
       - amstar_network_local
 
   # Nuxt.js Frontend (Development Mode with HMR for Windows)
+  # Using Node.js 20 LTS to satisfy Nuxt 3.13+ engine requirements
   frontend:
-    image: node:18-alpine
+    image: node:20-alpine
     container_name: amstar_frontend_local
     restart: unless-stopped
     working_dir: /app
@@ -97,13 +98,14 @@ services:
       - "3000:3000"
       - "24678:24678"  # Nuxt DevTools
     volumes:
-      # Mount source code for hot reload
+      # Mount source code for hot reload (cached for better performance on Windows)
       - ./frontend:/app:cached
-      # Prevent overwriting node_modules and build artifacts
-      - /app/node_modules
-      - /app/.nuxt
-      - /app/.output
-    command: sh -c "npm install && npx nuxi dev --host 0.0.0.0 --port 3000"
+      # Named volumes for persistent node_modules and build artifacts
+      # This prevents reinstalling dependencies on every container restart
+      - amstar_frontend_node_modules:/app/node_modules
+      - amstar_frontend_nuxt_cache:/app/.nuxt
+      - amstar_frontend_output:/app/.output
+    command: sh -c "npm install && npm run dev"
     depends_on:
       - backend
     networks:
@@ -116,6 +118,13 @@ volumes:
     name: amstar_redis_data_local
   amstar_media_local:
     name: amstar_media_local
+  # Frontend persistent volumes for faster container restarts
+  amstar_frontend_node_modules:
+    name: amstar_frontend_node_modules_local
+  amstar_frontend_nuxt_cache:
+    name: amstar_frontend_nuxt_cache_local
+  amstar_frontend_output:
+    name: amstar_frontend_output_local
 
 networks:
   amstar_network_local:
