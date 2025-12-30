@@ -119,6 +119,45 @@ class RedisClient:
             logger.error(f"Redis EXPIRE error: {e}")
             return False
 
+    def blacklist_token(self, token: str, expires_in: int) -> bool:
+        """
+        Add a JWT token to the blacklist
+
+        Args:
+            token: The JWT token to blacklist
+            expires_in: TTL in seconds (should match token expiration)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.client:
+            return False
+        try:
+            key = f"blacklist:{token}"
+            return self.client.setex(key, expires_in, "1")
+        except Exception as e:
+            logger.error(f"Redis blacklist_token error: {e}")
+            return False
+
+    def is_token_blacklisted(self, token: str) -> bool:
+        """
+        Check if a JWT token is blacklisted
+
+        Args:
+            token: The JWT token to check
+
+        Returns:
+            True if token is blacklisted, False otherwise
+        """
+        if not self.client:
+            return False
+        try:
+            key = f"blacklist:{token}"
+            return bool(self.client.exists(key))
+        except Exception as e:
+            logger.error(f"Redis is_token_blacklisted error: {e}")
+            return False
+
 
 # Global Redis client instance
 redis_client = RedisClient()

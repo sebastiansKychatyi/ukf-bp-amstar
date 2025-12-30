@@ -80,6 +80,71 @@
             />
           </div>
 
+          <!-- Role Selection -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Select Your Role
+            </label>
+            <div class="grid grid-cols-1 gap-3">
+              <!-- Player Role -->
+              <label class="relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-blue-500" :class="formData.role === 'PLAYER' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'">
+                <input
+                  type="radio"
+                  v-model="formData.role"
+                  value="PLAYER"
+                  class="mt-1 mr-3"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center">
+                    <span class="text-2xl mr-2">⚽</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">Игрок (Player)</span>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Участвуй в матчах и присоединяйся к командам
+                  </p>
+                </div>
+              </label>
+
+              <!-- Captain Role -->
+              <label class="relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-blue-500" :class="formData.role === 'CAPTAIN' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'">
+                <input
+                  type="radio"
+                  v-model="formData.role"
+                  value="CAPTAIN"
+                  class="mt-1 mr-3"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center">
+                    <span class="text-2xl mr-2">👑</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">Капитан (Captain)</span>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Создай и управляй своей командой, бросай вызовы другим
+                  </p>
+                </div>
+              </label>
+
+              <!-- Referee Role -->
+              <label class="relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-blue-500" :class="formData.role === 'REFEREE' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'">
+                <input
+                  type="radio"
+                  v-model="formData.role"
+                  value="REFEREE"
+                  class="mt-1 mr-3"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center">
+                    <span class="text-2xl mr-2">🏁</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">Судья (Referee)</span>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Фиксируй результаты матчей и управляй статистикой
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <!-- Password -->
           <div>
             <label for="password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -156,6 +221,8 @@
 </template>
 
 <script setup lang="ts">
+import { UserRole } from '@/types/auth'
+
 const { register } = useAuth()
 const router = useRouter()
 
@@ -164,6 +231,7 @@ const formData = ref({
   username: '',
   full_name: '',
   password: '',
+  role: UserRole.PLAYER, // Default to PLAYER
 })
 
 const confirmPassword = ref('')

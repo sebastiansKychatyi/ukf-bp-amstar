@@ -9,7 +9,10 @@
       "Bash(docker exec:*)",
       "Bash(docker logs:*)",
       "Bash(docker restart:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(alembic revision:*)",
+      "Bash(alembic upgrade:*)"
     ]
   }
 }

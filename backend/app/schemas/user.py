@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
 from typing import Optional
+from app.models.user import UserRole
 
 
 class UserBase(BaseModel):
@@ -11,14 +12,24 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    role: Optional[UserRole] = UserRole.PLAYER
+
+    @field_validator('role')
+    @classmethod
+    def validate_role(cls, v):
+        if v not in [UserRole.PLAYER, UserRole.CAPTAIN, UserRole.REFEREE]:
+            raise ValueError('Invalid role. Must be PLAYER, CAPTAIN, or REFEREE')
+        return v
 
 
 class UserUpdate(UserBase):
     password: Optional[str] = None
+    # Note: role is NOT included here because roles are permanent (cannot be changed)
 
 
 class UserInDB(UserBase):
     id: int
+    role: UserRole
     is_active: bool
     is_superuser: bool
     created_at: datetime

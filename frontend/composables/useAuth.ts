@@ -1,27 +1,5 @@
 import { ref, computed } from 'vue'
-
-interface User {
-  id: number
-  email: string
-  username: string
-  full_name: string | null
-  is_active: boolean
-  is_superuser: boolean
-  created_at: string
-  updated_at: string
-}
-
-interface LoginCredentials {
-  username: string
-  password: string
-}
-
-interface RegisterData {
-  email: string
-  username: string
-  password: string
-  full_name?: string
-}
+import type { User, LoginCredentials, RegisterData, TokenResponse, UserRole } from '@/types/auth'
 
 const user = ref<User | null>(null)
 
@@ -39,6 +17,11 @@ export const useAuth = () => {
   const apiBase = config.public.apiBaseUrl || 'http://localhost:8000/api/v1'
 
   const isAuthenticated = computed(() => !!token.value)
+
+  // Role-based computed properties
+  const isPlayer = computed(() => user.value?.role === 'PLAYER')
+  const isCaptain = computed(() => user.value?.role === 'CAPTAIN')
+  const isReferee = computed(() => user.value?.role === 'REFEREE')
 
   const initAuth = async () => {
     if (token.value) {
@@ -61,7 +44,7 @@ export const useAuth = () => {
       formData.append('username', credentials.username)
       formData.append('password', credentials.password)
 
-      const response = await $fetch<{ access_token: string; token_type: string }>(
+      const response = await $fetch<TokenResponse>(
         `${apiBase}/auth/login`,
         {
           method: 'POST',
@@ -121,7 +104,21 @@ export const useAuth = () => {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    // Call backend logout endpoint to blacklist token
+    if (token.value) {
+      try {
+        await $fetch(`${apiBase}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
+        })
+      } catch (error) {
+        console.error('Logout API call failed:', error)
+      }
+    }
+
     clearToken()
     router.push('/auth/login')
   }
@@ -130,6 +127,9 @@ export const useAuth = () => {
     user,
     token,
     isAuthenticated,
+    isPlayer,
+    isCaptain,
+    isReferee,
     initAuth,
     login,
     register,

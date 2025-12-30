@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.api.deps import get_db, get_current_active_user
+from jose import jwt, JWTError
+from datetime import datetime
+from app.api.deps import get_db, get_current_active_user, oauth2_scheme
 from app.core.security import create_access_token, verify_password
+from app.core.config import settings
+from app.core.redis import redis_client
 from app.crud.user import user as crud_user
 from app.schemas.token import Token
 from app.schemas.user import User, UserCreate
@@ -47,7 +51,9 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token(data={"sub": str(user.id)})
+    access_token = create_access_token(
+        data={"sub": str(user.id), "role": user.role.value}
+    )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -56,3 +62,34 @@ def get_current_user_info(
     current_user: UserModel = Depends(get_current_active_user)
 ):
     return current_user
+
+
+@router.post("/logout")
+def logout(
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Logout by blacklisting the current token.
+    The token will remain invalid until it expires.
+    """
+    try:
+        # Decode token to get expiration time
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        exp = payload.get("exp")
+
+        if exp:
+            # Calculate remaining TTL for the token
+            current_time = datetime.utcnow().timestamp()
+            ttl = int(exp - current_time)
+
+            if ttl > 0:
+                # Add token to blacklist with remaining TTL
+                redis_client.blacklist_token(token, ttl)
+
+        return {"message": "Successfully logged out"}
+
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
+        )
