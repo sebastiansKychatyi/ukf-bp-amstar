@@ -5,9 +5,9 @@
         <!-- Logo/Header -->
         <div class="text-center mb-6">
           <v-icon size="64" color="primary" class="mb-4">mdi-soccer</v-icon>
-          <h1 class="text-h4 font-weight-bold">Создать аккаунт</h1>
+          <h1 class="text-h4 font-weight-bold">Create Account</h1>
           <p class="text-body-2 text-medium-emphasis mt-2">
-            Присоединяйтесь к AmStar Football Platform
+            Join AmStar Football Platform
           </p>
         </div>
 
@@ -21,8 +21,8 @@
                 variant="tonal"
                 class="mb-4"
               >
-                <v-alert-title>Регистрация успешна!</v-alert-title>
-                Перенаправление на страницу входа...
+                <v-alert-title>Registration successful!</v-alert-title>
+                Redirecting to login...
               </v-alert>
 
               <!-- Error Alert -->
@@ -42,7 +42,7 @@
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="formData.full_name"
-                    label="Полное имя"
+                    label="Full Name"
                     prepend-inner-icon="mdi-account-outline"
                     variant="outlined"
                     density="comfortable"
@@ -53,7 +53,7 @@
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="formData.username"
-                    label="Имя пользователя"
+                    label="Username"
                     prepend-inner-icon="mdi-at"
                     variant="outlined"
                     density="comfortable"
@@ -78,7 +78,7 @@
 
                 <!-- Role Selection -->
                 <v-col cols="12">
-                  <p class="text-subtitle-2 font-weight-medium mb-3">Выберите роль</p>
+                  <p class="text-subtitle-2 font-weight-medium mb-3">Select Your Role</p>
                   <v-item-group v-model="formData.role" mandatory>
                     <v-row>
                       <v-col v-for="role in roles" :key="role.value" cols="12" md="4">
@@ -113,14 +113,14 @@
                   <v-text-field
                     v-model="formData.password"
                     :type="showPassword ? 'text' : 'password'"
-                    label="Пароль"
+                    label="Password"
                     prepend-inner-icon="mdi-lock-outline"
                     :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
                     variant="outlined"
                     density="comfortable"
                     :rules="passwordRules"
                     required
-                    hint="Минимум 6 символов"
+                    hint="Minimum 6 characters"
                     @click:append-inner="showPassword = !showPassword"
                   />
                 </v-col>
@@ -130,7 +130,7 @@
                   <v-text-field
                     v-model="confirmPassword"
                     :type="showConfirmPassword ? 'text' : 'password'"
-                    label="Подтвердите пароль"
+                    label="Confirm Password"
                     prepend-inner-icon="mdi-lock-check-outline"
                     :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
                     variant="outlined"
@@ -152,7 +152,7 @@
                     :disabled="!valid || success"
                   >
                     <v-icon start>mdi-account-plus</v-icon>
-                    Зарегистрироваться
+                    Create Account
                   </v-btn>
                 </v-col>
               </v-row>
@@ -163,9 +163,9 @@
 
           <!-- Login Link -->
           <v-card-text class="text-center pa-0">
-            <span class="text-medium-emphasis">Уже есть аккаунт?</span>
+            <span class="text-medium-emphasis">Already have an account?</span>
             <NuxtLink to="/auth/login" class="text-primary text-decoration-none font-weight-medium ml-1">
-              Войти
+              Sign In
             </NuxtLink>
           </v-card-text>
         </v-card>
@@ -174,7 +174,7 @@
         <div class="text-center mt-6">
           <NuxtLink to="/" class="text-medium-emphasis text-decoration-none">
             <v-icon size="small" class="mr-1">mdi-arrow-left</v-icon>
-            На главную
+            Back to Home
           </NuxtLink>
         </div>
       </v-col>
@@ -209,42 +209,42 @@ const success = ref(false)
 const roles = [
   {
     value: UserRole.PLAYER,
-    title: 'Игрок',
-    description: 'Участвуй в матчах',
+    title: 'Player',
+    description: 'Join matches and teams',
     icon: 'mdi-run',
   },
   {
     value: UserRole.CAPTAIN,
-    title: 'Капитан',
-    description: 'Управляй командой',
+    title: 'Captain',
+    description: 'Manage your team',
     icon: 'mdi-crown',
   },
   {
     value: UserRole.REFEREE,
-    title: 'Судья',
-    description: 'Веди матчи',
+    title: 'Referee',
+    description: 'Officiate matches',
     icon: 'mdi-whistle',
   },
 ]
 
 const emailRules = [
-  (v: string) => !!v || 'Email обязателен',
-  (v: string) => /.+@.+\..+/.test(v) || 'Введите корректный email',
+  (v: string) => !!v || 'Email is required',
+  (v: string) => /.+@.+\..+/.test(v) || 'Please enter a valid email',
 ]
 
 const usernameRules = [
-  (v: string) => !!v || 'Имя пользователя обязательно',
-  (v: string) => v.length >= 3 || 'Минимум 3 символа',
+  (v: string) => !!v || 'Username is required',
+  (v: string) => v.length >= 3 || 'Minimum 3 characters',
 ]
 
 const passwordRules = [
-  (v: string) => !!v || 'Пароль обязателен',
-  (v: string) => v.length >= 6 || 'Минимум 6 символов',
+  (v: string) => !!v || 'Password is required',
+  (v: string) => v.length >= 6 || 'Minimum 6 characters',
 ]
 
 const confirmPasswordRules = [
-  (v: string) => !!v || 'Подтвердите пароль',
-  (v: string) => v === formData.value.password || 'Пароли не совпадают',
+  (v: string) => !!v || 'Please confirm your password',
+  (v: string) => v === formData.value.password || 'Passwords do not match',
 ]
 
 const handleRegister = async () => {
@@ -265,7 +265,7 @@ const handleRegister = async () => {
       router.push('/auth/login')
     }, 2000)
   } else {
-    error.value = result.error || 'Ошибка регистрации. Попробуйте снова.'
+    error.value = result.error || 'Registration failed. Please try again.'
   }
 }
 </script>

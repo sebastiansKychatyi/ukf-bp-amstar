@@ -5,9 +5,9 @@
         <!-- Logo/Header -->
         <div class="text-center mb-6">
           <v-icon size="64" color="primary" class="mb-4">mdi-soccer</v-icon>
-          <h1 class="text-h4 font-weight-bold">Добро пожаловать</h1>
+          <h1 class="text-h4 font-weight-bold">Welcome Back</h1>
           <p class="text-body-2 text-medium-emphasis mt-2">
-            Войдите в свой аккаунт AmStar
+            Sign in to your AmStar account
           </p>
         </div>
 
@@ -43,7 +43,7 @@
               <v-text-field
                 v-model="formData.password"
                 :type="showPassword ? 'text' : 'password'"
-                label="Пароль"
+                label="Password"
                 prepend-inner-icon="mdi-lock-outline"
                 :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
                 variant="outlined"
@@ -58,13 +58,13 @@
               <div class="d-flex justify-space-between align-center mb-4">
                 <v-checkbox
                   v-model="rememberMe"
-                  label="Запомнить меня"
+                  label="Remember me"
                   density="compact"
                   hide-details
                   color="primary"
                 />
                 <a href="#" class="text-primary text-decoration-none text-body-2">
-                  Забыли пароль?
+                  Forgot password?
                 </a>
               </div>
 
@@ -78,7 +78,7 @@
                 :disabled="!valid"
               >
                 <v-icon start>mdi-login</v-icon>
-                Войти
+                Sign In
               </v-btn>
             </v-form>
           </v-card-text>
@@ -87,9 +87,9 @@
 
           <!-- Register Link -->
           <v-card-text class="text-center pa-0">
-            <span class="text-medium-emphasis">Нет аккаунта?</span>
+            <span class="text-medium-emphasis">Don't have an account?</span>
             <NuxtLink to="/auth/register" class="text-primary text-decoration-none font-weight-medium ml-1">
-              Зарегистрироваться
+              Create Account
             </NuxtLink>
           </v-card-text>
         </v-card>
@@ -98,7 +98,7 @@
         <div class="text-center mt-6">
           <NuxtLink to="/" class="text-medium-emphasis text-decoration-none">
             <v-icon size="small" class="mr-1">mdi-arrow-left</v-icon>
-            На главную
+            Back to Home
           </NuxtLink>
         </div>
       </v-col>
@@ -124,13 +124,13 @@ const loading = ref(false)
 const error = ref('')
 
 const emailRules = [
-  (v: string) => !!v || 'Email обязателен',
-  (v: string) => /.+@.+\..+/.test(v) || 'Введите корректный email',
+  (v: string) => !!v || 'Email is required',
+  (v: string) => /.+@.+\..+/.test(v) || 'Please enter a valid email',
 ]
 
 const passwordRules = [
-  (v: string) => !!v || 'Пароль обязателен',
-  (v: string) => v.length >= 6 || 'Минимум 6 символов',
+  (v: string) => !!v || 'Password is required',
+  (v: string) => v.length >= 6 || 'Minimum 6 characters',
 ]
 
 const handleLogin = async () => {
@@ -148,7 +148,7 @@ const handleLogin = async () => {
     const redirect = router.currentRoute.value.query.redirect as string
     router.push(redirect || '/profile')
   } else {
-    error.value = result.error || 'Неверный email или пароль'
+    error.value = result.error || 'Invalid email or password'
   }
 }
 </script>
