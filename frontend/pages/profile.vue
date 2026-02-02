@@ -1,164 +1,342 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Navigation Bar -->
-    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center">
-            <NuxtLink to="/" class="text-xl font-bold text-gray-900 dark:text-white">
-              AmStar
-            </NuxtLink>
-          </div>
-          <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-700 dark:text-gray-300">
-              {{ user?.email }}
-            </span>
-            <button
-              @click="handleLogout"
-              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition text-sm font-medium"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
+  <!--
+    Profile Page - Mobile-First Responsive Design
+    ============================================
+    This page uses Vuetify's responsive grid system and breakpoints
+    to provide an optimal viewing experience on all devices.
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Profile Header -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden mb-6">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 h-32"></div>
-        <div class="px-8 pb-8">
-          <div class="flex items-end space-x-5 -mt-12">
-            <div class="flex-shrink-0">
-              <div class="h-24 w-24 rounded-full bg-white dark:bg-gray-700 border-4 border-white dark:border-gray-800 flex items-center justify-center">
-                <span class="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                  {{ initials }}
-                </span>
-              </div>
-            </div>
-            <div class="flex-1 min-w-0 py-2">
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+    Breakpoints:
+    - xs: 0-599px (mobile phones)
+    - sm: 600-959px (tablets)
+    - md: 960-1279px (small desktops)
+    - lg: 1280-1919px (desktops)
+    - xl: 1920px+ (large desktops)
+
+    Mobile-First Approach:
+    - Single column layout on mobile (xs)
+    - Two column layout on desktop (md+)
+    - Smaller icons and avatars on mobile
+    - Touch-friendly button sizes
+  -->
+  <v-container fluid class="pa-0">
+    <!-- Profile Header Card -->
+    <v-card elevation="0" rounded="0" color="primary" dark class="mb-4">
+      <!-- Hero Background -->
+      <v-sheet color="secondary" height="100" class="d-flex align-end">
+        <v-container>
+          <!-- Avatar positioned to overlap hero -->
+          <v-avatar
+            :size="$vuetify.display.xs ? 80 : 120"
+            color="white"
+            class="elevation-4"
+            style="margin-bottom: -40px"
+          >
+            <span
+              :class="$vuetify.display.xs ? 'text-h5' : 'text-h3'"
+              class="primary--text font-weight-bold"
+            >
+              {{ initials }}
+            </span>
+          </v-avatar>
+        </v-container>
+      </v-sheet>
+
+      <!-- Profile Header Info -->
+      <v-card-text class="pt-12">
+        <v-container>
+          <v-row align="center">
+            <!-- User Name and Username -->
+            <v-col cols="12" sm="8">
+              <h1 :class="$vuetify.display.xs ? 'text-h5' : 'text-h4'" class="font-weight-bold mb-1">
                 {{ user?.full_name || user?.username }}
               </h1>
-              <p class="text-gray-600 dark:text-gray-400">
-                @{{ user?.username }}
-              </p>
-            </div>
-            <div class="flex-shrink-0 py-2">
-              <span
+              <p class="text-subtitle-1 mb-2">@{{ user?.username }}</p>
+              <v-chip
                 v-if="user?.is_active"
-                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                color="success"
+                size="small"
+                prepend-icon="mdi-check-circle"
               >
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                Active
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+                Active Account
+              </v-chip>
+            </v-col>
 
-      <!-- Profile Information -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- User Details Card -->
-        <div class="lg:col-span-2">
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
+            <!-- Logout Button (desktop: right aligned, mobile: full width) -->
+            <v-col cols="12" sm="4" class="text-sm-right">
+              <v-btn
+                color="error"
+                variant="elevated"
+                prepend-icon="mdi-logout"
+                @click="handleLogout"
+                :block="$vuetify.display.xs"
+              >
+                Logout
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+    </v-card>
+
+    <!-- Main Content Area -->
+    <v-container>
+      <v-row>
+        <!-- Account Information Card (Left Column - Full width on mobile, 2/3 on desktop) -->
+        <v-col cols="12" md="8">
+          <v-card elevation="2" rounded="lg">
+            <v-card-title class="text-h5 font-weight-bold">
+              <v-icon start size="small">mdi-account-details</v-icon>
               Account Information
-            </h2>
-            <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Full Name</p>
-                  <p class="mt-1 text-base text-gray-900 dark:text-white">
+            </v-card-title>
+            <v-divider />
+
+            <v-card-text>
+              <!-- Information List -->
+              <v-list lines="two" density="compact">
+                <!-- Full Name -->
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon color="primary" size="small">mdi-account</v-icon>
+                  </template>
+                  <v-list-item-title class="text-caption text-medium-emphasis">
+                    Full Name
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="text-body-1 font-weight-medium">
                     {{ user?.full_name || 'Not set' }}
-                  </p>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Username</p>
-                  <p class="mt-1 text-base text-gray-900 dark:text-white">
+                  </v-list-item-subtitle>
+                </v-list-item>
+
+                <v-divider inset />
+
+                <!-- Username -->
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon color="primary" size="small">mdi-at</v-icon>
+                  </template>
+                  <v-list-item-title class="text-caption text-medium-emphasis">
+                    Username
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="text-body-1 font-weight-medium">
                     {{ user?.username }}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</p>
-                <p class="mt-1 text-base text-gray-900 dark:text-white">
-                  {{ user?.email }}
-                </p>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">User ID</p>
-                <p class="mt-1 text-base text-gray-900 dark:text-white font-mono">
-                  #{{ user?.id }}
-                </p>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</p>
-                <p class="mt-1 text-base text-gray-900 dark:text-white">
-                  {{ formatDate(user?.created_at) }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+                  </v-list-item-subtitle>
+                </v-list-item>
 
-        <!-- Quick Stats Card -->
-        <div class="lg:col-span-1">
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                <v-divider inset />
+
+                <!-- Email -->
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon color="primary" size="small">mdi-email</v-icon>
+                  </template>
+                  <v-list-item-title class="text-caption text-medium-emphasis">
+                    Email Address
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="text-body-1 font-weight-medium">
+                    {{ user?.email }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+
+                <v-divider inset />
+
+                <!-- User ID -->
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon color="primary" size="small">mdi-identifier</v-icon>
+                  </template>
+                  <v-list-item-title class="text-caption text-medium-emphasis">
+                    User ID
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="text-body-1 font-weight-medium font-mono">
+                    #{{ user?.id }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+
+                <v-divider inset />
+
+                <!-- Member Since -->
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon color="primary" size="small">mdi-calendar-check</v-icon>
+                  </template>
+                  <v-list-item-title class="text-caption text-medium-emphasis">
+                    Member Since
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="text-body-1 font-weight-medium">
+                    {{ formatDate(user?.created_at) }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
+        </v-col>
+
+        <!-- Sidebar (Right Column - Full width on mobile, 1/3 on desktop) -->
+        <v-col cols="12" md="4">
+          <!-- Account Status Card -->
+          <v-card elevation="2" rounded="lg" class="mb-4">
+            <v-card-title class="text-h6 font-weight-bold">
+              <v-icon start size="small">mdi-shield-account</v-icon>
               Account Status
-            </h2>
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Account Type</span>
-                <span class="text-sm font-medium text-gray-900 dark:text-white">
-                  {{ user?.is_superuser ? 'Admin' : 'User' }}
-                </span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Status</span>
-                <span class="text-sm font-medium" :class="user?.is_active ? 'text-green-600' : 'text-red-600'">
-                  {{ user?.is_active ? 'Active' : 'Inactive' }}
-                </span>
-              </div>
-            </div>
-          </div>
+            </v-card-title>
+            <v-divider />
 
-          <!-- Quick Actions -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mt-6">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            <v-card-text>
+              <v-list density="compact">
+                <!-- Account Type -->
+                <v-list-item>
+                  <v-list-item-title class="text-caption text-medium-emphasis">
+                    Account Type
+                  </v-list-item-title>
+                  <template #append>
+                    <v-chip
+                      :color="user?.is_superuser ? 'error' : 'primary'"
+                      size="small"
+                      variant="flat"
+                    >
+                      {{ user?.is_superuser ? 'Admin' : 'User' }}
+                    </v-chip>
+                  </template>
+                </v-list-item>
+
+                <v-divider />
+
+                <!-- Account Status -->
+                <v-list-item>
+                  <v-list-item-title class="text-caption text-medium-emphasis">
+                    Status
+                  </v-list-item-title>
+                  <template #append>
+                    <v-chip
+                      :color="user?.is_active ? 'success' : 'error'"
+                      size="small"
+                      variant="flat"
+                    >
+                      {{ user?.is_active ? 'Active' : 'Inactive' }}
+                    </v-chip>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
+
+          <!-- Player Statistics Card (Example for future use) -->
+          <v-card elevation="2" rounded="lg" class="mb-4">
+            <v-card-title class="text-h6 font-weight-bold">
+              <v-icon start size="small">mdi-chart-bar</v-icon>
+              Player Stats
+            </v-card-title>
+            <v-divider />
+
+            <v-card-text>
+              <v-row dense>
+                <!-- Goals Stat -->
+                <v-col cols="6">
+                  <v-card color="primary" dark class="text-center pa-3">
+                    <v-icon size="large" class="mb-2">mdi-soccer</v-icon>
+                    <div class="text-h4 font-weight-bold">0</div>
+                    <div class="text-caption">Goals</div>
+                  </v-card>
+                </v-col>
+
+                <!-- Matches Stat -->
+                <v-col cols="6">
+                  <v-card color="secondary" dark class="text-center pa-3">
+                    <v-icon size="large" class="mb-2">mdi-trophy</v-icon>
+                    <div class="text-h4 font-weight-bold">0</div>
+                    <div class="text-caption">Matches</div>
+                  </v-card>
+                </v-col>
+
+                <!-- Rating Stat -->
+                <v-col cols="12">
+                  <v-card color="success" dark class="text-center pa-3">
+                    <v-icon size="large" class="mb-2">mdi-star</v-icon>
+                    <div class="text-h4 font-weight-bold">0.0</div>
+                    <div class="text-caption">Player Rating</div>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+
+          <!-- Quick Actions Card -->
+          <v-card elevation="2" rounded="lg">
+            <v-card-title class="text-h6 font-weight-bold">
+              <v-icon start size="small">mdi-lightning-bolt</v-icon>
               Quick Actions
-            </h2>
-            <div class="space-y-2">
-              <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition">
-                Edit Profile
-              </button>
-              <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition">
-                Change Password
-              </button>
-              <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition">
-                Notification Settings
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+            </v-card-title>
+            <v-divider />
+
+            <v-list density="compact">
+              <v-list-item
+                prepend-icon="mdi-account-edit"
+                title="Edit Profile"
+                subtitle="Update your information"
+                link
+              />
+              <v-divider />
+
+              <v-list-item
+                prepend-icon="mdi-lock-reset"
+                title="Change Password"
+                subtitle="Secure your account"
+                link
+              />
+              <v-divider />
+
+              <v-list-item
+                prepend-icon="mdi-bell-outline"
+                title="Notifications"
+                subtitle="Manage preferences"
+                link
+              />
+              <v-divider />
+
+              <v-list-item
+                prepend-icon="mdi-shield-check"
+                title="Privacy Settings"
+                subtitle="Control your data"
+                link
+              />
+            </v-list>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-container>
 </template>
 
 <script setup lang="ts">
+/**
+ * Profile Page Component
+ * =====================
+ * Displays user account information and statistics
+ *
+ * Authentication:
+ * - Protected by auth middleware
+ * - Requires valid user session
+ *
+ * Responsive Design:
+ * - Mobile: Single column layout (xs)
+ * - Tablet: Single column with larger components (sm)
+ * - Desktop: Two column layout (md+)
+ */
+
+// Protect route with authentication middleware
 definePageMeta({
   middleware: 'auth'
 })
 
+// Composables
 const { user, logout } = useAuth()
 const router = useRouter()
 
+/**
+ * User Initials
+ * ============
+ * Computed property to generate 1-2 letter initials from user's name
+ * Used for avatar display when no profile picture is available
+ */
 const initials = computed(() => {
   if (user.value?.full_name) {
     return user.value.full_name
@@ -171,7 +349,13 @@ const initials = computed(() => {
   return user.value?.username?.slice(0, 2).toUpperCase() || 'U'
 })
 
-const formatDate = (dateString: string | undefined) => {
+/**
+ * Date Formatter
+ * =============
+ * Formats ISO date strings to human-readable format
+ * Example: "2024-01-15" → "January 15, 2024"
+ */
+const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return 'N/A'
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -180,7 +364,26 @@ const formatDate = (dateString: string | undefined) => {
   })
 }
 
+/**
+ * Logout Handler
+ * =============
+ * Clears user session and redirects to home page
+ */
 const handleLogout = () => {
   logout()
+  router.push('/')
 }
 </script>
+
+<style scoped>
+/**
+ * Component-Specific Styles
+ * =========================
+ * Minimal scoped styles - Vuetify handles most styling
+ */
+
+/* Ensure font-mono works in Vuetify */
+.font-mono {
+  font-family: 'Courier New', Courier, monospace;
+}
+</style>

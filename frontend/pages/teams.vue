@@ -14,8 +14,8 @@
     <!-- Page Header -->
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h3 font-weight-bold mb-2">
-          <v-icon icon="mdi-shield-account" size="large" class="mr-2" />
+        <h1 :class="$vuetify.display.xs ? 'text-h4' : 'text-h3'" class="font-weight-bold mb-2">
+          <v-icon icon="mdi-shield-account" :size="$vuetify.display.xs ? 'default' : 'large'" class="mr-2" />
           Teams
         </h1>
         <p class="text-body-1 text-medium-emphasis">
@@ -42,12 +42,13 @@
             />
           </v-card-title>
 
-          <!-- Teams Table -->
+          <!-- Teams Table (responsive: mobile shows item slots, desktop shows headers) -->
           <v-data-table
             :headers="headers"
             :items="teams"
             :search="search"
             :items-per-page="10"
+            :mobile-breakpoint="600"
             class="elevation-0"
           >
             <!-- Team Name Column with Icon -->
