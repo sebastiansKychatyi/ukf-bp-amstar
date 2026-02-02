@@ -163,15 +163,101 @@ export const useTeamStore = defineStore('team', () => {
     error.value = null
 
     try {
-      await teamApi.promoteToCaptain(teamId, playerId)
+      const updatedTeam = await teamApi.transferCaptaincy(teamId, playerId)
 
       // Update local state
-      const member = teamMembers.value.find(m => m.player_id === playerId)
-      if (member) {
-        member.role = 'CAPTAIN'
+      teamMembers.value.forEach((m) => {
+        if (m.user_id === playerId) {
+          m.role = 'CAPTAIN'
+        } else if (m.role === 'CAPTAIN') {
+          m.role = 'PLAYER'
+        }
+      })
+
+      // Update team captain
+      if (currentTeam.value?.id === teamId) {
+        currentTeam.value = updatedTeam
       }
     } catch (err) {
       error.value = err.response?.data?.detail || 'Failed to promote member'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function leaveTeam(teamId) {
+    loading.value = true
+    error.value = null
+
+    try {
+      await teamApi.leaveTeam(teamId)
+
+      // Clear local state
+      currentTeam.value = null
+      teamMembers.value = []
+    } catch (err) {
+      error.value = err.response?.data?.detail || 'Failed to leave team'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function deleteTeam(teamId) {
+    loading.value = true
+    error.value = null
+
+    try {
+      await teamApi.delete(teamId)
+
+      // Remove from teams array
+      teams.value = teams.value.filter((t) => t.id !== teamId)
+
+      // Clear current team if it was deleted
+      if (currentTeam.value?.id === teamId) {
+        currentTeam.value = null
+        teamMembers.value = []
+      }
+    } catch (err) {
+      error.value = err.response?.data?.detail || 'Failed to delete team'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function searchTeams(query) {
+    loading.value = true
+    error.value = null
+
+    try {
+      const results = await teamApi.search(query)
+      return results
+    } catch (err) {
+      error.value = err.response?.data?.detail || 'Failed to search teams'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updateMember(teamId, userId, updateData) {
+    loading.value = true
+    error.value = null
+
+    try {
+      const updatedMember = await teamApi.updateMember(teamId, userId, updateData)
+
+      // Update local state
+      const index = teamMembers.value.findIndex((m) => m.user_id === userId)
+      if (index !== -1) {
+        teamMembers.value[index] = updatedMember
+      }
+
+      return updatedMember
+    } catch (err) {
+      error.value = err.response?.data?.detail || 'Failed to update member'
       throw err
     } finally {
       loading.value = false
@@ -206,21 +292,38 @@ export const useTeamStore = defineStore('team', () => {
   }
 
   // Join Request Actions
-  async function createJoinRequest(teamId, message) {
+  async function createJoinRequest(teamId, message, position = null) {
     loading.value = true
     error.value = null
 
     try {
       const request = await joinRequestApi.create({
         team_id: teamId,
-        player_id: 'current-player-id', // Get from auth store
         message,
+        position,
       })
 
       myJoinRequests.value.push(request)
       return request
     } catch (err) {
       error.value = err.response?.data?.detail || 'Failed to create join request'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function cancelJoinRequest(requestId) {
+    loading.value = true
+    error.value = null
+
+    try {
+      await joinRequestApi.cancel(requestId)
+
+      // Remove from local state
+      myJoinRequests.value = myJoinRequests.value.filter((r) => r.id !== requestId)
+    } catch (err) {
+      error.value = err.response?.data?.detail || 'Failed to cancel join request'
       throw err
     } finally {
       loading.value = false
@@ -247,17 +350,17 @@ export const useTeamStore = defineStore('team', () => {
 
     try {
       const updatedRequest = await joinRequestApi.review(requestId, {
-        status,
+        status, // 'ACCEPTED' or 'REJECTED'
         review_message: reviewMessage,
       })
 
       // Remove from pending requests
       pendingJoinRequests.value = pendingJoinRequests.value.filter(
-        r => r.id !== requestId
+        (r) => r.id !== requestId
       )
 
-      // If approved, refetch team members
-      if (status === 'APPROVED' && currentTeam.value) {
+      // If accepted, refetch team members
+      if (status === 'ACCEPTED' && currentTeam.value) {
         await fetchTeamMembers(currentTeam.value.id)
       }
 
@@ -319,19 +422,30 @@ export const useTeamStore = defineStore('team', () => {
     isUserCaptain,
     teamCaptains,
 
-    // Actions
+    // Actions - Team CRUD
     fetchAllTeams,
     fetchTeamById,
     createTeam,
     updateTeam,
+    deleteTeam,
+    searchTeams,
+
+    // Actions - Team Members
     fetchTeamMembers,
     removeMember,
+    updateMember,
     promoteToCaptain,
+    leaveTeam,
     uploadTeamLogo,
+
+    // Actions - Join Requests
     createJoinRequest,
+    cancelJoinRequest,
     fetchPendingJoinRequests,
     reviewJoinRequest,
     fetchMyJoinRequests,
+
+    // Utility Actions
     setCurrentTeam,
     clearError,
     resetStore,

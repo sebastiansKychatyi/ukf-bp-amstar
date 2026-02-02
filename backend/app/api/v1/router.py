@@ -8,6 +8,9 @@ try:
 except ImportError:
     USE_REFACTORED_TEAMS = False
 
+# Import new team management endpoints
+from app.api.v1.endpoints import team_members, join_requests
+
 api_router = APIRouter()
 
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -18,6 +21,12 @@ if USE_REFACTORED_TEAMS:
     api_router.include_router(teams_refactored.router, prefix="/teams", tags=["teams"])
 else:
     api_router.include_router(teams.router, prefix="/teams", tags=["teams"])
+
+# Team membership management
+api_router.include_router(team_members.router, prefix="/teams", tags=["team-members"])
+
+# Join requests
+api_router.include_router(join_requests.router, prefix="/join-requests", tags=["join-requests"])
 
 api_router.include_router(challenges.router, prefix="/challenges", tags=["challenges"])
 api_router.include_router(ratings.router, prefix="/ratings", tags=["ratings"])

@@ -20,3 +20,7 @@ class Team(Base):
     captain = relationship("User", back_populates="captained_team", foreign_keys=[captain_id])
     challenges_sent = relationship("Challenge", foreign_keys="Challenge.challenger_id", back_populates="challenger", lazy="select")
     challenges_received = relationship("Challenge", foreign_keys="Challenge.opponent_id", back_populates="opponent", lazy="select")
+
+    # Team members (many-to-many via TeamMember)
+    members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
+    join_requests = relationship("JoinRequest", back_populates="team", cascade="all, delete-orphan")

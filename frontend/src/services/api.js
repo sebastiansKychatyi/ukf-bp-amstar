@@ -131,85 +131,166 @@ export const teamApi = {
    * @returns {Promise} List of teams
    */
   async getAll() {
-    const response = await apiClient.get('/teams')
+    const response = await apiClient.get('/v1/teams')
     return response.data
   },
 
   /**
    * Get team by ID
-   * @param {string} teamId - Team UUID
+   * @param {number} teamId - Team ID
    * @returns {Promise} Team details
    */
   async getById(teamId) {
-    const response = await apiClient.get(`/teams/${teamId}`)
+    const response = await apiClient.get(`/v1/teams/${teamId}`)
     return response.data
   },
 
   /**
-   * Create new team
+   * Create new team (captain only)
    * @param {Object} teamData - Team creation data
    * @returns {Promise} Created team
    */
   async create(teamData) {
-    const response = await apiClient.post('/teams', teamData)
+    const response = await apiClient.post('/v1/teams', teamData)
     return response.data
   },
 
   /**
    * Update team information (captain only)
-   * @param {string} teamId - Team UUID
+   * @param {number} teamId - Team ID
    * @param {Object} updateData - Fields to update
    * @returns {Promise} Updated team
    */
   async update(teamId, updateData) {
-    const response = await apiClient.patch(`/teams/${teamId}`, updateData)
+    const response = await apiClient.put(`/v1/teams/${teamId}`, updateData)
     return response.data
   },
 
   /**
-   * Get team members
-   * @param {string} teamId - Team UUID
+   * Delete team (captain only)
+   * @param {number} teamId - Team ID
+   * @returns {Promise} Deleted team
+   */
+  async delete(teamId) {
+    const response = await apiClient.delete(`/v1/teams/${teamId}`)
+    return response.data
+  },
+
+  /**
+   * Search teams by name or description
+   * @param {string} query - Search query
+   * @returns {Promise} List of matching teams
+   */
+  async search(query) {
+    const response = await apiClient.get('/v1/teams/search/', { params: { q: query } })
+    return response.data
+  },
+
+  /**
+   * Get current user's team (as captain)
+   * @returns {Promise} Captain's team
+   */
+  async getMyTeam() {
+    const response = await apiClient.get('/v1/teams/my/team')
+    return response.data
+  },
+
+  /**
+   * Get team members (roster)
+   * @param {number} teamId - Team ID
    * @returns {Promise} List of team members
    */
   async getMembers(teamId) {
-    const response = await apiClient.get(`/teams/${teamId}/members`)
+    const response = await apiClient.get(`/v1/teams/${teamId}/members`)
     return response.data
   },
 
   /**
-   * Remove team member (captain or self)
-   * @param {string} teamId - Team UUID
-   * @param {string} playerId - Player UUID
-   * @returns {Promise}
+   * Get a specific team member
+   * @param {number} teamId - Team ID
+   * @param {number} userId - User ID
+   * @returns {Promise} Team member details
    */
-  async removeMember(teamId, playerId) {
-    await apiClient.delete(`/teams/${teamId}/members/${playerId}`)
+  async getMember(teamId, userId) {
+    const response = await apiClient.get(`/v1/teams/${teamId}/members/${userId}`)
+    return response.data
   },
 
   /**
-   * Promote member to captain
-   * @param {string} teamId - Team UUID
-   * @param {string} playerId - Player UUID
-   * @returns {Promise}
+   * Remove team member (captain only)
+   * @param {number} teamId - Team ID
+   * @param {number} userId - User ID
+   * @returns {Promise} Removed member
    */
-  async promoteToCaptain(teamId, playerId) {
-    const response = await apiClient.post(`/teams/${teamId}/members/${playerId}/promote`)
+  async removeMember(teamId, userId) {
+    const response = await apiClient.delete(`/v1/teams/${teamId}/members/${userId}`)
+    return response.data
+  },
+
+  /**
+   * Update team member info (captain only)
+   * @param {number} teamId - Team ID
+   * @param {number} userId - User ID
+   * @param {Object} updateData - { position?, jersey_number? }
+   * @returns {Promise} Updated member
+   */
+  async updateMember(teamId, userId, updateData) {
+    const response = await apiClient.put(`/v1/teams/${teamId}/members/${userId}`, updateData)
+    return response.data
+  },
+
+  /**
+   * Leave team (for current player)
+   * @param {number} teamId - Team ID
+   * @returns {Promise} Success message
+   */
+  async leaveTeam(teamId) {
+    const response = await apiClient.post(`/v1/teams/${teamId}/leave`)
+    return response.data
+  },
+
+  /**
+   * Transfer captaincy to another member
+   * @param {number} teamId - Team ID
+   * @param {number} newCaptainId - New captain's user ID
+   * @returns {Promise} Updated team
+   */
+  async transferCaptaincy(teamId, newCaptainId) {
+    const response = await apiClient.post(`/v1/teams/${teamId}/transfer-captaincy/${newCaptainId}`)
+    return response.data
+  },
+
+  /**
+   * Get current user's team membership
+   * @returns {Promise} Membership info
+   */
+  async getMyMembership() {
+    const response = await apiClient.get('/v1/teams/my/membership')
+    return response.data
+  },
+
+  /**
+   * Get team the current user belongs to (as member)
+   * @returns {Promise} Team info
+   */
+  async getMyTeamAsMember() {
+    const response = await apiClient.get('/v1/teams/my/team')
     return response.data
   },
 
   /**
    * Get team statistics
-   * @param {string} teamId - Team UUID
+   * @param {number} teamId - Team ID
    * @returns {Promise} Team statistics
    */
   async getStatistics(teamId) {
-    const response = await apiClient.get(`/statistics/teams/${teamId}`)
+    const response = await apiClient.get(`/v1/statistics/teams/${teamId}`)
     return response.data
   },
 
   /**
    * Upload team logo
-   * @param {string} teamId - Team UUID
+   * @param {number} teamId - Team ID
    * @param {File} logoFile - Image file
    * @returns {Promise} Updated team with logo URL
    */
@@ -217,7 +298,7 @@ export const teamApi = {
     const formData = new FormData()
     formData.append('logo', logoFile)
 
-    const response = await apiClient.post(`/teams/${teamId}/logo`, formData, {
+    const response = await apiClient.post(`/v1/teams/${teamId}/logo`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -233,32 +314,32 @@ export const teamApi = {
 export const joinRequestApi = {
   /**
    * Create join request
-   * @param {Object} requestData - Join request data
+   * @param {Object} requestData - { team_id, message?, position? }
    * @returns {Promise} Created join request
    */
   async create(requestData) {
-    const response = await apiClient.post('/teams/join-requests', requestData)
+    const response = await apiClient.post('/v1/join-requests', requestData)
     return response.data
   },
 
   /**
    * Get pending join requests for a team (captain only)
-   * @param {string} teamId - Team UUID
+   * @param {number} teamId - Team ID
    * @returns {Promise} List of pending requests
    */
   async getPending(teamId) {
-    const response = await apiClient.get(`/teams/join-requests/${teamId}/pending`)
+    const response = await apiClient.get(`/v1/join-requests/team/${teamId}/pending`)
     return response.data
   },
 
   /**
    * Review join request (captain only)
-   * @param {string} requestId - Request UUID
-   * @param {Object} reviewData - Review decision (APPROVED/REJECTED)
+   * @param {number} requestId - Request ID
+   * @param {Object} reviewData - { status: 'ACCEPTED'|'REJECTED', review_message? }
    * @returns {Promise} Updated join request
    */
   async review(requestId, reviewData) {
-    const response = await apiClient.post(`/teams/join-requests/${requestId}/review`, reviewData)
+    const response = await apiClient.post(`/v1/join-requests/${requestId}/review`, reviewData)
     return response.data
   },
 
@@ -267,7 +348,27 @@ export const joinRequestApi = {
    * @returns {Promise} List of player's join requests
    */
   async getMine() {
-    const response = await apiClient.get('/teams/join-requests/mine')
+    const response = await apiClient.get('/v1/join-requests/my')
+    return response.data
+  },
+
+  /**
+   * Cancel a pending join request
+   * @param {number} requestId - Request ID
+   * @returns {Promise} Cancelled join request
+   */
+  async cancel(requestId) {
+    const response = await apiClient.delete(`/v1/join-requests/${requestId}`)
+    return response.data
+  },
+
+  /**
+   * Get a specific join request
+   * @param {number} requestId - Request ID
+   * @returns {Promise} Join request details
+   */
+  async getById(requestId) {
+    const response = await apiClient.get(`/v1/join-requests/${requestId}`)
     return response.data
   },
 }

@@ -211,6 +211,72 @@ class TeamNotActiveError(BusinessRuleViolationError):
         )
 
 
+class PlayerAlreadyInTeamError(BusinessRuleViolationError):
+    """Raised when player is already a member of a team"""
+
+    def __init__(self, user_id: Any = None):
+        message = "Player is already a member of a team"
+        if user_id:
+            message = f"Player {user_id} is already a member of a team"
+        super().__init__(
+            message=message,
+            error_code="PLAYER_ALREADY_IN_TEAM",
+            user_id=str(user_id) if user_id else None
+        )
+
+
+class PlayerNotInTeamError(BusinessRuleViolationError):
+    """Raised when player is not a member of the specified team"""
+
+    def __init__(self, user_id: Any = None, team_id: Any = None):
+        super().__init__(
+            message="Player is not a member of this team",
+            error_code="PLAYER_NOT_IN_TEAM",
+            user_id=str(user_id) if user_id else None,
+            team_id=str(team_id) if team_id else None
+        )
+
+
+class JoinRequestNotFoundError(ResourceNotFoundError):
+    """Raised when join request doesn't exist"""
+
+    def __init__(self, request_id: Any):
+        super().__init__(resource_type="JoinRequest", identifier=request_id)
+
+
+class JoinRequestAlreadyExistsError(BusinessRuleViolationError):
+    """Raised when player already has a pending join request for this team"""
+
+    def __init__(self, team_id: Any):
+        super().__init__(
+            message="You already have a pending join request for this team",
+            error_code="JOIN_REQUEST_ALREADY_EXISTS",
+            team_id=str(team_id)
+        )
+
+
+class InvalidJoinRequestStatusError(BusinessRuleViolationError):
+    """Raised when join request status transition is invalid"""
+
+    def __init__(self, current_status: str, attempted_status: str):
+        super().__init__(
+            message=f"Cannot change join request status from {current_status} to {attempted_status}",
+            error_code="INVALID_JOIN_REQUEST_STATUS",
+            current_status=current_status,
+            attempted_status=attempted_status
+        )
+
+
+class CannotRemoveCaptainError(BusinessRuleViolationError):
+    """Raised when trying to remove captain from team without transferring ownership"""
+
+    def __init__(self):
+        super().__init__(
+            message="Cannot remove captain from team. Transfer captaincy first or delete the team.",
+            error_code="CANNOT_REMOVE_CAPTAIN"
+        )
+
+
 # ============================================================================
 # VALIDATION EXCEPTIONS
 # ============================================================================

@@ -3,3 +3,6 @@ from app.models.user import User
 from app.models.team import Team
 from app.models.challenge import Challenge
 from app.models.rating import Rating
+from app.models.team_member import TeamMember
+from app.models.join_request import JoinRequest
+from app.models.player_statistics import PlayerStatistics, MatchPlayerStatistics

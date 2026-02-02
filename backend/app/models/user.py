@@ -31,3 +31,8 @@ class User(Base):
 
     # Relationships
     captained_team = relationship("Team", back_populates="captain", uselist=False, foreign_keys="Team.captain_id")
+
+    # Team membership (player can be in one team)
+    team_membership = relationship("TeamMember", back_populates="user", uselist=False)
+    join_requests_sent = relationship("JoinRequest", foreign_keys="JoinRequest.user_id", back_populates="user")
+    statistics = relationship("PlayerStatistics", back_populates="user", uselist=False)
