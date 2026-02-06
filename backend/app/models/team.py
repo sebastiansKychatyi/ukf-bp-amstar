@@ -24,3 +24,22 @@ class Team(Base):
     # Team members (many-to-many via TeamMember)
     members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
     join_requests = relationship("JoinRequest", back_populates="team", cascade="all, delete-orphan")
+
+    @property
+    def member_count(self) -> int:
+        """Number of team members (available when members are loaded)."""
+        if self.members is not None:
+            return len(self.members)
+        return 0
+
+    @property
+    def rating_score(self) -> int:
+        """Alias for rating to match schema field name."""
+        return self.rating or 1000
+
+    @property
+    def founded_year(self):
+        """Extract year from founded_date for schema compatibility."""
+        if self.founded_date:
+            return self.founded_date.year
+        return None

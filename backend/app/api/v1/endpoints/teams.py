@@ -1,153 +1,160 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+"""
+Team API Endpoints
+
+Handles team CRUD operations, statistics, match history, and roster:
+- Listing and searching teams
+- Creating, updating, and deleting teams (Captain only)
+- Viewing team stats and match history
+- Viewing team roster with player statistics
+
+All business logic is delegated to TeamService (Separation of Concerns).
+"""
+
 from typing import List
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from app.api.deps import get_db, get_current_captain, get_current_active_user
-from app.crud.team import team as crud_team
-from app.schemas.team import Team, TeamCreate, TeamUpdate
+
+from app.db.session import get_db
+from app.api.deps import get_current_captain, get_current_active_user
+from app.schemas.team import (
+    Team, TeamCreate, TeamUpdate, TeamDetailResponse,
+    MatchHistoryItem, TeamStatsSummary,
+)
+from app.schemas.team_member import TeamMemberWithStats
 from app.models.user import User
+from app.services.team_service import TeamService
+
 
 router = APIRouter()
 
 
+# ============================================================================
+# DEPENDENCY INJECTION
+# ============================================================================
+
+
+def get_team_service(db: Session = Depends(get_db)) -> TeamService:
+    """Dependency injection for TeamService."""
+    return TeamService(db)
+
+
+# ============================================================================
+# TEAM RETRIEVAL ENDPOINTS
+# ============================================================================
+
+
 @router.get("/", response_model=List[Team])
 def get_teams(
-    db: Session = Depends(get_db),
     skip: int = 0,
-    limit: int = 100
+    limit: int = 100,
+    service: TeamService = Depends(get_team_service),
+):
+    """Get all teams with pagination."""
+    return service.get_teams(skip=skip, limit=limit)
+
+
+@router.get("/my/team", response_model=TeamDetailResponse)
+def get_my_team(
+    current_user: User = Depends(get_current_active_user),
+    service: TeamService = Depends(get_team_service),
 ):
     """
-    Get all teams.
+    Get the current user's team.
 
-    Available to all authenticated users.
+    Works for both captains (team they own) and players (team they belong to).
     """
-    teams = crud_team.get_multi(db, skip=skip, limit=limit)
-    return teams
+    return service.get_my_team(user_id=current_user.id)
 
 
-@router.get("/{team_id}", response_model=Team)
+@router.get("/{team_id}", response_model=TeamDetailResponse)
 def get_team(
     team_id: int,
-    db: Session = Depends(get_db)
+    service: TeamService = Depends(get_team_service),
 ):
-    """
-    Get a specific team by ID.
+    """Get a specific team by ID with captain info."""
+    return service.get_team_by_id(team_id)
 
-    Available to all authenticated users.
-    """
-    team = crud_team.get(db, id=team_id)
-    if not team:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Team not found"
-        )
-    return team
+
+@router.get("/{team_id}/stats", response_model=TeamStatsSummary)
+def get_team_stats(
+    team_id: int,
+    service: TeamService = Depends(get_team_service),
+):
+    """Get aggregated statistics for a team from completed challenges."""
+    return service.get_team_stats(team_id)
+
+
+@router.get("/{team_id}/matches", response_model=List[MatchHistoryItem])
+def get_team_match_history(
+    team_id: int,
+    skip: int = 0,
+    limit: int = 20,
+    service: TeamService = Depends(get_team_service),
+):
+    """Get match history for a team (completed and accepted challenges)."""
+    return service.get_team_match_history(team_id, skip=skip, limit=limit)
+
+
+@router.get("/{team_id}/roster-stats", response_model=List[TeamMemberWithStats])
+def get_team_roster_with_stats(
+    team_id: int,
+    service: TeamService = Depends(get_team_service),
+):
+    """Get team roster with player statistics."""
+    return service.get_team_roster_with_stats(team_id)
+
+
+# ============================================================================
+# TEAM MUTATION ENDPOINTS (Captain only)
+# ============================================================================
 
 
 @router.post("/", response_model=Team, status_code=status.HTTP_201_CREATED)
 def create_team(
     team_in: TeamCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_captain)
+    current_user: User = Depends(get_current_captain),
+    service: TeamService = Depends(get_team_service),
 ):
     """
     Create a new team.
 
     **CAPTAIN role required.**
     Each captain can only create ONE team.
+    Captain is automatically added as a team member.
     """
-    # Check if captain already has a team
-    existing_team = crud_team.get_by_captain(db, captain_id=current_user.id)
-    if existing_team:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You already have a team. Each captain can only own one team."
-        )
-
-    # Check if team name is already taken
-    existing_name = crud_team.get_by_name(db, name=team_in.name)
-    if existing_name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Team name already taken"
-        )
-
-    team = crud_team.create_with_captain(db, obj_in=team_in, captain_id=current_user.id)
-    return team
+    return service.create_team(team_in=team_in, captain_id=current_user.id)
 
 
 @router.put("/{team_id}", response_model=Team)
 def update_team(
     team_id: int,
     team_in: TeamUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_captain)
+    current_user: User = Depends(get_current_captain),
+    service: TeamService = Depends(get_team_service),
 ):
     """
     Update a team.
 
     **CAPTAIN role required** and you must be the captain of this team.
     """
-    team = crud_team.get(db, id=team_id)
-    if not team:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Team not found"
-        )
-
-    # Verify ownership
-    if team.captain_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only update your own team"
-        )
-
-    team = crud_team.update(db, db_obj=team, obj_in=team_in)
-    return team
+    return service.update_team(
+        team_id=team_id,
+        team_in=team_in,
+        current_user_id=current_user.id,
+    )
 
 
 @router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_team(
     team_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_captain)
+    current_user: User = Depends(get_current_captain),
+    service: TeamService = Depends(get_team_service),
 ):
     """
     Delete a team.
 
     **CAPTAIN role required** and you must be the captain of this team.
+    Removes all team members and pending join requests.
     """
-    team = crud_team.get(db, id=team_id)
-    if not team:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Team not found"
-        )
-
-    # Verify ownership
-    if team.captain_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only delete your own team"
-        )
-
-    crud_team.remove(db, id=team_id)
+    service.delete_team(team_id=team_id, current_user_id=current_user.id)
     return None
-
-
-@router.get("/my/team", response_model=Team)
-def get_my_team(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """
-    Get the current user's team (if they are a captain).
-
-    Returns the team owned by the current captain, or 404 if they don't have a team.
-    """
-    team = crud_team.get_by_captain(db, captain_id=current_user.id)
-    if not team:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="You don't have a team yet"
-        )
-    return team

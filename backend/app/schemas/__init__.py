@@ -1,4 +1,8 @@
-from .team import Team, TeamCreate, TeamUpdate, TeamResponse
+from .team import (
+    Team, TeamCreate, TeamUpdate, TeamResponse,
+    TeamWithCaptain, TeamDetailResponse, CaptainInfo,
+    MatchHistoryItem, TeamStatsSummary,
+)
 from .user import User, UserCreate, UserUpdate
 from .token import Token, TokenPayload
 from .team_member import (
@@ -33,6 +37,11 @@ __all__ = [
     "TeamCreate",
     "TeamUpdate",
     "TeamResponse",
+    "TeamWithCaptain",
+    "TeamDetailResponse",
+    "CaptainInfo",
+    "MatchHistoryItem",
+    "TeamStatsSummary",
     # User
     "User",
     "UserCreate",
