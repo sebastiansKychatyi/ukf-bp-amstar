@@ -9,6 +9,7 @@ from app.models.rating import Rating
 from app.models.team_member import TeamMember, TeamMemberRole
 from app.models.join_request import JoinRequest, JoinRequestStatus
 from app.models.player_statistics import PlayerStatistics, MatchPlayerStatistics
+from app.models.team_availability import TeamAvailability
 
 __all__ = [
     "User",
@@ -22,4 +23,5 @@ __all__ = [
     "JoinRequestStatus",
     "PlayerStatistics",
     "MatchPlayerStatistics",
+    "TeamAvailability",
 ]

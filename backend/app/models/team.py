@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.base_class import Base
@@ -10,6 +10,8 @@ class Team(Base):
     description = Column(Text)
     captain_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     city = Column(String)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
     founded_date = Column(DateTime)
     logo_url = Column(String)
     rating = Column(Integer, default=1000)
@@ -20,6 +22,7 @@ class Team(Base):
     captain = relationship("User", back_populates="captained_team", foreign_keys=[captain_id])
     challenges_sent = relationship("Challenge", foreign_keys="Challenge.challenger_id", back_populates="challenger", lazy="select")
     challenges_received = relationship("Challenge", foreign_keys="Challenge.opponent_id", back_populates="opponent", lazy="select")
+    availability_slots = relationship("TeamAvailability", back_populates="team", cascade="all, delete-orphan")
 
     # Team members (many-to-many via TeamMember)
     members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")

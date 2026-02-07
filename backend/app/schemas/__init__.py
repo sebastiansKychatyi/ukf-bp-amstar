@@ -30,6 +30,25 @@ from .player_statistics import (
     PlayerProfileWithStats,
     TeamStatisticsResponse,
 )
+from .challenge import (
+    ChallengeCreate,
+    ChallengeResponse,
+    ChallengeListResponse,
+    ChallengeResultSubmit,
+    ChallengeCompleteResponse,
+    EloUpdateResult,
+    TeamBrief,
+)
+from .matchmaking import (
+    AvailabilitySlotCreate,
+    AvailabilitySlotResponse,
+    TeamAvailabilityUpdate,
+    TeamAvailabilityResponse,
+    MatchmakingSuggestion,
+    MatchmakingScoreBreakdown,
+    MatchmakingResponse,
+    MatchmakingConfig,
+)
 
 __all__ = [
     # Team
@@ -71,4 +90,21 @@ __all__ = [
     "MatchPlayerStatisticsResponse",
     "PlayerProfileWithStats",
     "TeamStatisticsResponse",
+    # Challenge
+    "ChallengeCreate",
+    "ChallengeResponse",
+    "ChallengeListResponse",
+    "ChallengeResultSubmit",
+    "ChallengeCompleteResponse",
+    "EloUpdateResult",
+    "TeamBrief",
+    # Matchmaking
+    "AvailabilitySlotCreate",
+    "AvailabilitySlotResponse",
+    "TeamAvailabilityUpdate",
+    "TeamAvailabilityResponse",
+    "MatchmakingSuggestion",
+    "MatchmakingScoreBreakdown",
+    "MatchmakingResponse",
+    "MatchmakingConfig",
 ]

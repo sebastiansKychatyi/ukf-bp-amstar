@@ -14,6 +14,8 @@ class TeamCreate(TeamBase):
     """Schema for creating a new team"""
     description: Optional[str] = Field(None, description="Team description")
     founded_year: Optional[int] = Field(None, ge=1800, le=2100, description="Year the team was founded")
+    latitude: Optional[float] = Field(None, ge=-90, le=90, description="Team location latitude")
+    longitude: Optional[float] = Field(None, ge=-180, le=180, description="Team location longitude")
 
 
 class TeamUpdate(BaseModel):
@@ -22,6 +24,8 @@ class TeamUpdate(BaseModel):
     city: Optional[str] = Field(None, max_length=100)
     description: Optional[str] = None
     rating_score: Optional[int] = Field(None, ge=0, le=5000)
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
 
 
 class CaptainInfo(BaseModel):
@@ -41,6 +45,8 @@ class TeamResponse(TeamBase):
     description: Optional[str] = None
     founded_year: Optional[int] = None
     logo_url: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     member_count: int = 0
     created_at: datetime
     updated_at: datetime

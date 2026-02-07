@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.api.v1.endpoints import auth, teams, challenges, ratings, users
-from app.api.v1.endpoints import team_members, join_requests
+from app.api.v1.endpoints import team_members, join_requests, matchmaking, statistics
 
 api_router = APIRouter()
 
@@ -18,3 +18,9 @@ api_router.include_router(join_requests.router, prefix="/join-requests", tags=["
 
 api_router.include_router(challenges.router, prefix="/challenges", tags=["challenges"])
 api_router.include_router(ratings.router, prefix="/ratings", tags=["ratings"])
+
+# Player statistics and leaderboards
+api_router.include_router(statistics.router, prefix="/statistics", tags=["statistics"])
+
+# Smart Matchmaking Algorithm
+api_router.include_router(matchmaking.router, prefix="/matchmaking", tags=["matchmaking"])
