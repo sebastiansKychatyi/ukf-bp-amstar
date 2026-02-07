@@ -15,10 +15,21 @@
         </div>
 
         <!-- Navigation Links -->
+        <div class="hidden md:flex items-center space-x-1">
+          <NuxtLink
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition"
+          >
+            {{ link.label }}
+          </NuxtLink>
+        </div>
+
+        <!-- User Section -->
         <div class="flex items-center space-x-4">
           <!-- Authenticated User -->
           <div v-if="isAuthenticated && user" class="flex items-center space-x-4">
-            <!-- User Info -->
             <div class="hidden md:flex items-center space-x-3">
               <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
                 <span class="text-sm font-medium text-white">
@@ -30,12 +41,11 @@
                   {{ user.full_name || user.username }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ user.email }}
+                  {{ user.role }}
                 </p>
               </div>
             </div>
 
-            <!-- Navigation Menu -->
             <NuxtLink
               to="/profile"
               class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition"
@@ -43,7 +53,6 @@
               Profile
             </NuxtLink>
 
-            <!-- Logout Button -->
             <button
               @click="handleLogout"
               class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
@@ -74,7 +83,20 @@
 </template>
 
 <script setup lang="ts">
-const { user, isAuthenticated, logout } = useAuth()
+const { user, isAuthenticated, isCaptain, logout } = useAuth()
+
+const navLinks = computed(() => {
+  const links = [
+    { label: 'Teams', to: '/teams' },
+    { label: 'Players', to: '/players' },
+    { label: 'Challenges', to: '/challenges' },
+    { label: 'Leaderboard', to: '/leaderboard' },
+  ]
+  if (isCaptain.value) {
+    links.push({ label: 'Find Opponent', to: '/matchmaking' })
+  }
+  return links
+})
 
 const userInitials = computed(() => {
   if (user.value?.full_name) {
@@ -92,7 +114,6 @@ const handleLogout = () => {
   logout()
 }
 
-// Initialize auth when component mounts
 onMounted(() => {
   const { initAuth } = useAuth()
   initAuth()

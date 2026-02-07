@@ -44,10 +44,20 @@
             color="secondary"
             size="large"
             variant="outlined"
-            to="/players"
+            to="/challenges"
           >
-            <v-icon start>mdi-account-group</v-icon>
-            View Players
+            <v-icon start>mdi-sword-cross</v-icon>
+            Challenges
+          </v-btn>
+
+          <v-btn
+            color="success"
+            size="large"
+            variant="outlined"
+            to="/leaderboard"
+          >
+            <v-icon start>mdi-trophy</v-icon>
+            Leaderboard
           </v-btn>
         </div>
       </v-col>
