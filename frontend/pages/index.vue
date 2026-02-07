@@ -166,13 +166,15 @@
 /**
  * Home Page Logic
  * ===============
- * This page is primarily static content with no complex state management
- * Statistics are hardcoded for now - replace with API calls in production
+ * Landing page for guests. Authenticated users are redirected to dashboard.
  */
+const { isAuthenticated } = useAuth()
 
-// TODO: Fetch real-time statistics from backend API
-// Example:
-// const stats = await $fetch('/api/v1/statistics')
+onMounted(() => {
+  if (isAuthenticated.value) {
+    navigateTo('/dashboard')
+  }
+})
 </script>
 
 <style scoped>

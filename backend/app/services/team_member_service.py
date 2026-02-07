@@ -15,7 +15,9 @@ from sqlalchemy import and_
 from app import models
 from app.models.team_member import TeamMemberRole
 from app.models.join_request import JoinRequestStatus
+from app.models.notification import NotificationType
 from app.services.base import BaseService
+from app.services.notification_service import NotificationService
 from app.core.exceptions import (
     TeamNotFoundError,
     UserNotFoundError,
@@ -43,6 +45,7 @@ class TeamMemberService(BaseService[models.TeamMember]):
 
     def __init__(self, db: Session):
         super().__init__(db)
+        self._notifier = NotificationService(db)
 
     # =========================================================================
     # JOIN REQUEST OPERATIONS
@@ -110,6 +113,18 @@ class TeamMemberService(BaseService[models.TeamMember]):
         )
 
         self.db.add(join_request)
+
+        # Notify team captain about the new join request
+        user = self.db.query(models.User).filter(models.User.id == user_id).first()
+        player_name = user.full_name or user.username if user else "A player"
+        self._notifier.notify(
+            user_id=team.captain_id,
+            type=NotificationType.JOIN_REQUEST_RECEIVED,
+            title="New Join Request",
+            message=f"{player_name} wants to join {team.name}",
+            related_id=join_request.id,
+        )
+
         self.db.commit()
         self.db.refresh(join_request)
 
@@ -278,6 +293,24 @@ class TeamMemberService(BaseService[models.TeamMember]):
                 "Player joined team",
                 user_id=request.user_id,
                 team_id=request.team_id
+            )
+
+        # Notify the requesting player
+        if status == JoinRequestStatus.ACCEPTED:
+            self._notifier.notify(
+                user_id=request.user_id,
+                type=NotificationType.JOIN_REQUEST_ACCEPTED,
+                title="Request Accepted",
+                message=f"You have been accepted into {request.team.name}!",
+                related_id=request.id,
+            )
+        elif status == JoinRequestStatus.REJECTED:
+            self._notifier.notify(
+                user_id=request.user_id,
+                type=NotificationType.JOIN_REQUEST_REJECTED,
+                title="Request Rejected",
+                message=f"Your request to join {request.team.name} was declined.",
+                related_id=request.id,
             )
 
         self.db.commit()

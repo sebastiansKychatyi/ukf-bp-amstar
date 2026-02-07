@@ -10,6 +10,7 @@ from app.models.team_member import TeamMember, TeamMemberRole
 from app.models.join_request import JoinRequest, JoinRequestStatus
 from app.models.player_statistics import PlayerStatistics, MatchPlayerStatistics
 from app.models.team_availability import TeamAvailability
+from app.models.notification import Notification, NotificationType
 
 __all__ = [
     "User",
@@ -24,4 +25,6 @@ __all__ = [
     "PlayerStatistics",
     "MatchPlayerStatistics",
     "TeamAvailability",
+    "Notification",
+    "NotificationType",
 ]

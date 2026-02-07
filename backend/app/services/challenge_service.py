@@ -30,7 +30,9 @@ from sqlalchemy import func, or_
 from app.models.team import Team
 from app.models.challenge import Challenge, ChallengeStatus
 from app.models.team_member import TeamMember
+from app.models.notification import NotificationType
 from app.services.base import BaseService
+from app.services.notification_service import NotificationService
 from app.core.exceptions import (
     ChallengeNotFoundError,
     TeamNotFoundError,
@@ -71,6 +73,7 @@ class ChallengeService(BaseService[Challenge]):
 
     def __init__(self, db: Session):
         super().__init__(db)
+        self._notifier = NotificationService(db)
 
     # =====================================================================
     # RETRIEVAL
@@ -205,6 +208,16 @@ class ChallengeService(BaseService[Challenge]):
         self.db.commit()
         self.db.refresh(challenge)
 
+        # Notify opponent captain
+        self._notifier.notify(
+            user_id=opponent_team.captain_id,
+            type=NotificationType.CHALLENGE_RECEIVED,
+            title="New Challenge",
+            message=f"{challenger_team.name} challenged your team!",
+            related_id=challenge.id,
+        )
+        self.db.commit()
+
         self._log_operation(
             "Challenge created",
             challenge_id=challenge.id,
@@ -225,6 +238,16 @@ class ChallengeService(BaseService[Challenge]):
         challenge = self.get_challenge(challenge_id)
         self._assert_opponent_captain(challenge, captain_id)
         self._transition(challenge, ChallengeStatus.ACCEPTED)
+
+        self._notifier.notify(
+            user_id=challenge.challenger.captain_id,
+            type=NotificationType.CHALLENGE_ACCEPTED,
+            title="Challenge Accepted",
+            message=f"{challenge.opponent.name} accepted your challenge!",
+            related_id=challenge.id,
+        )
+        self.db.commit()
+
         return self.get_challenge(challenge_id)
 
     def reject_challenge(
@@ -238,6 +261,16 @@ class ChallengeService(BaseService[Challenge]):
         challenge = self.get_challenge(challenge_id)
         self._assert_opponent_captain(challenge, captain_id)
         self._transition(challenge, ChallengeStatus.REJECTED)
+
+        self._notifier.notify(
+            user_id=challenge.challenger.captain_id,
+            type=NotificationType.CHALLENGE_REJECTED,
+            title="Challenge Rejected",
+            message=f"{challenge.opponent.name} rejected your challenge.",
+            related_id=challenge.id,
+        )
+        self.db.commit()
+
         return self.get_challenge(challenge_id)
 
     def cancel_challenge(
@@ -286,10 +319,25 @@ class ChallengeService(BaseService[Challenge]):
         self.db.commit()
         self.db.refresh(challenge)
 
+        # Notify both captains
+        score_text = f"{challenger_score}-{opponent_score}"
+        for cap_id, team_name in [
+            (challenge.challenger.captain_id, challenge.opponent.name),
+            (challenge.opponent.captain_id, challenge.challenger.name),
+        ]:
+            self._notifier.notify(
+                user_id=cap_id,
+                type=NotificationType.CHALLENGE_COMPLETED,
+                title="Match Completed",
+                message=f"Result vs {team_name}: {score_text}",
+                related_id=challenge.id,
+            )
+        self.db.commit()
+
         self._log_operation(
             "Match result submitted",
             challenge_id=challenge_id,
-            score=f"{challenger_score}-{opponent_score}",
+            score=score_text,
         )
         return self.get_challenge(challenge_id)
 
