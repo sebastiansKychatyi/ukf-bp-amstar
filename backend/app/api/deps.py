@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, Sequence
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -52,23 +52,56 @@ def get_current_active_user(
     return current_user
 
 
+class RoleChecker:
+    """
+    Callable dependency class implementing Role-Based Access Control (RBAC).
+
+    Follows the Dependency Injection pattern recommended by FastAPI.
+    Each instance is configured with a set of allowed roles and acts as
+    a reusable security gate for endpoint authorization.
+
+    Usage:
+        allow_captain = RoleChecker(UserRole.CAPTAIN)
+        allow_captain_or_referee = RoleChecker(UserRole.CAPTAIN, UserRole.REFEREE)
+
+        @router.post("/create")
+        def create(user: User = Depends(allow_captain)):
+            ...
+    """
+
+    def __init__(self, *allowed_roles: UserRole):
+        self.allowed_roles: Sequence[UserRole] = allowed_roles
+
+    def __call__(self, current_user: User = Depends(get_current_active_user)) -> User:
+        if current_user.role not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required role: {', '.join(r.value for r in self.allowed_roles)}",
+            )
+        return current_user
+
+    def __repr__(self) -> str:
+        roles = ", ".join(r.value for r in self.allowed_roles)
+        return f"RoleChecker({roles})"
+
+
+# ── Pre-built role checkers (reusable across all endpoints) ──
+allow_any_authenticated = RoleChecker(UserRole.PLAYER, UserRole.CAPTAIN, UserRole.REFEREE)
+allow_captain = RoleChecker(UserRole.CAPTAIN)
+allow_referee = RoleChecker(UserRole.REFEREE)
+allow_captain_or_referee = RoleChecker(UserRole.CAPTAIN, UserRole.REFEREE)
+
+
 def require_role(*allowed_roles: UserRole):
     """
-    Dependency factory to require specific user roles
+    Functional dependency factory (backwards-compatible wrapper).
 
     Usage:
         @router.get("/captain-only")
         def captain_route(user: User = Depends(require_role(UserRole.CAPTAIN))):
             ...
     """
-    def role_checker(current_user: User = Depends(get_current_active_user)) -> User:
-        if current_user.role not in allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access denied. Required role: {', '.join([r.value for r in allowed_roles])}"
-            )
-        return current_user
-    return role_checker
+    return RoleChecker(*allowed_roles)
 
 
 # Convenience dependencies for specific roles

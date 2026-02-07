@@ -254,6 +254,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 
+definePageMeta({
+  middleware: ['auth'],
+})
+
 const { user, isAuthenticated, isCaptain } = useAuth()
 const config = useRuntimeConfig()
 const apiBase = computed(() => config.public.apiBaseUrl || 'http://localhost:8000/api/v1')

@@ -185,6 +185,10 @@
 <script setup lang="ts">
 import { UserRole } from '@/types/auth'
 
+definePageMeta({
+  middleware: ['guest'],
+})
+
 const { register } = useAuth()
 const router = useRouter()
 

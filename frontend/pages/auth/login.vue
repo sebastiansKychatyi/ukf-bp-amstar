@@ -107,6 +107,10 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  middleware: ['guest'],
+})
+
 const { login } = useAuth()
 const router = useRouter()
 

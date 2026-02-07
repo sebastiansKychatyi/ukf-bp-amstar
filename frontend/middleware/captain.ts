@@ -1,17 +1,22 @@
 /**
- * Middleware to restrict access to CAPTAIN role only
+ * Captain Middleware — requires CAPTAIN role.
+ * First checks authentication, then verifies the user role.
  */
 export default defineNuxtRouteMiddleware((to, from) => {
   const { user, isAuthenticated } = useAuth()
+  const token = useCookie('auth_token')
 
-  if (!isAuthenticated.value) {
-    return navigateTo('/auth/login')
+  if (!isAuthenticated.value && !token.value) {
+    return navigateTo({
+      path: '/auth/login',
+      query: { redirect: to.fullPath },
+    })
   }
 
-  if (user.value?.role !== 'CAPTAIN') {
+  if (user.value && user.value.role !== 'CAPTAIN') {
     return navigateTo({
       path: '/',
-      query: { error: 'captain_required' }
+      query: { error: 'captain_required' },
     })
   }
 })

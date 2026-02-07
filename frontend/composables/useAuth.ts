@@ -23,6 +23,11 @@ export const useAuth = () => {
   const isCaptain = computed(() => user.value?.role === 'CAPTAIN')
   const isReferee = computed(() => user.value?.role === 'REFEREE')
 
+  /** General-purpose role check for RBAC middleware and components */
+  const hasRole = (...roles: string[]) => {
+    return computed(() => !!user.value && roles.includes(user.value.role))
+  }
+
   const initAuth = async () => {
     if (token.value) {
       await fetchCurrentUser()
@@ -130,6 +135,7 @@ export const useAuth = () => {
     isPlayer,
     isCaptain,
     isReferee,
+    hasRole,
     initAuth,
     login,
     register,

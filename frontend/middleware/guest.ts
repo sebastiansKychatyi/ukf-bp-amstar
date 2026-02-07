@@ -1,9 +1,12 @@
+/**
+ * Guest Middleware — only allows unauthenticated users.
+ * Redirects logged-in users away from login/register pages.
+ */
 export default defineNuxtRouteMiddleware((to, from) => {
   const { isAuthenticated } = useAuth()
+  const token = useCookie('auth_token')
 
-  // If user is authenticated and trying to access auth pages (login/register)
-  // redirect them to the home page
-  if (isAuthenticated.value) {
+  if (isAuthenticated.value || token.value) {
     return navigateTo('/')
   }
 })

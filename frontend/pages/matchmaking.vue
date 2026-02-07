@@ -286,6 +286,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+definePageMeta({
+  middleware: ['captain'],
+})
+
 const { isCaptain } = useAuth()
 const runtimeConfig = useRuntimeConfig()
 const apiBase = computed(() => runtimeConfig.public.apiBaseUrl || 'http://localhost:8000/api/v1')
