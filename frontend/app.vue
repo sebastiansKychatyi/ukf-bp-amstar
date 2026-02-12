@@ -42,6 +42,13 @@
         />
 
         <v-list-item
+          prepend-icon="mdi-tournament"
+          title="Tournaments"
+          to="/tournaments"
+          @click="drawer = false"
+        />
+
+        <v-list-item
           prepend-icon="mdi-account-circle"
           title="Profile"
           to="/profile"
@@ -97,6 +104,11 @@
         <v-btn variant="text" to="/players">
           <v-icon start>mdi-account-group</v-icon>
           Players
+        </v-btn>
+
+        <v-btn variant="text" to="/tournaments">
+          <v-icon start>mdi-tournament</v-icon>
+          Tournaments
         </v-btn>
 
         <v-btn variant="text" to="/profile">

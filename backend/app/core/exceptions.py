@@ -278,6 +278,72 @@ class CannotRemoveCaptainError(BusinessRuleViolationError):
 
 
 # ============================================================================
+# TOURNAMENT EXCEPTIONS
+# ============================================================================
+
+
+class TournamentNotFoundError(ResourceNotFoundError):
+    """Raised when tournament doesn't exist"""
+
+    def __init__(self, tournament_id: Any):
+        super().__init__(resource_type="Tournament", identifier=tournament_id)
+
+
+class TournamentNameAlreadyExistsError(DuplicateResourceError):
+    """Raised when tournament name is already taken"""
+
+    def __init__(self, name: str):
+        super().__init__(resource_type="Tournament", field="name", value=name)
+
+
+class TournamentFullError(BusinessRuleViolationError):
+    """Raised when tournament has reached max_teams"""
+
+    def __init__(self, tournament_id: Any):
+        super().__init__(
+            message="Tournament is full — maximum number of teams reached",
+            error_code="TOURNAMENT_FULL",
+            tournament_id=str(tournament_id),
+        )
+
+
+class TeamAlreadyInTournamentError(BusinessRuleViolationError):
+    """Raised when team is already registered in this tournament"""
+
+    def __init__(self, team_id: Any, tournament_id: Any):
+        super().__init__(
+            message="Team is already registered in this tournament",
+            error_code="TEAM_ALREADY_IN_TOURNAMENT",
+            team_id=str(team_id),
+            tournament_id=str(tournament_id),
+        )
+
+
+class InvalidTournamentStatusError(BusinessRuleViolationError):
+    """Raised when tournament status transition is invalid"""
+
+    def __init__(self, current_status: str, attempted_action: str):
+        super().__init__(
+            message=f"Cannot {attempted_action} — tournament is in '{current_status}' status",
+            error_code="INVALID_TOURNAMENT_STATUS",
+            current_status=current_status,
+            attempted_action=attempted_action,
+        )
+
+
+class TournamentNotEnoughTeamsError(BusinessRuleViolationError):
+    """Raised when not enough teams to start the tournament"""
+
+    def __init__(self, registered: int, minimum: int = 2):
+        super().__init__(
+            message=f"Need at least {minimum} teams to start (currently {registered})",
+            error_code="NOT_ENOUGH_TEAMS",
+            registered=registered,
+            minimum=minimum,
+        )
+
+
+# ============================================================================
 # VALIDATION EXCEPTIONS
 # ============================================================================
 

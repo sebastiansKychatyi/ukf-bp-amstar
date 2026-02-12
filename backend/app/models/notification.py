@@ -5,6 +5,7 @@ Stores in-app notifications for users triggered by system events:
 - Challenge received / accepted / rejected / completed
 - Join request received / accepted / rejected
 - ELO rating change after match
+- Tournament events (started, match scheduled, completed)
 """
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum as SQLEnum
@@ -30,6 +31,11 @@ class NotificationType(str, enum.Enum):
 
     # Rating events
     RATING_CHANGED = "rating_changed"
+
+    # Tournament events
+    TOURNAMENT_STARTED = "tournament_started"
+    TOURNAMENT_MATCH_SCHEDULED = "tournament_match_scheduled"
+    TOURNAMENT_COMPLETED = "tournament_completed"
 
 
 class Notification(Base):

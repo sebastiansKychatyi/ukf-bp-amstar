@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.api.v1.endpoints import auth, teams, challenges, ratings, users
-from app.api.v1.endpoints import team_members, join_requests, matchmaking, statistics, notifications
+from app.api.v1.endpoints import team_members, join_requests, matchmaking, statistics, notifications, tournaments
 
 api_router = APIRouter()
 
@@ -27,3 +27,6 @@ api_router.include_router(matchmaking.router, prefix="/matchmaking", tags=["matc
 
 # In-app notifications
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+
+# Tournaments (League & Knockout)
+api_router.include_router(tournaments.router, prefix="/tournaments", tags=["tournaments"])

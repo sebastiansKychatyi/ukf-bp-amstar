@@ -177,6 +177,7 @@ const navLinks = computed(() => {
     { label: 'Teams', to: '/teams' },
     { label: 'Players', to: '/players' },
     { label: 'Challenges', to: '/challenges' },
+    { label: 'Tournaments', to: '/tournaments' },
     { label: 'Leaderboard', to: '/leaderboard' },
   ]
   if (isCaptain.value) {
@@ -255,6 +256,9 @@ const getEmoji = (type: string) => {
     join_request_accepted: '\uD83C\uDF89',
     join_request_rejected: '\uD83D\uDEAB',
     rating_changed: '\uD83D\uDCC8',
+    tournament_started: '\uD83C\uDFC5',
+    tournament_match_scheduled: '\uD83D\uDCC5',
+    tournament_completed: '\uD83C\uDFC6',
   }
   return emojis[type] || '\uD83D\uDD14'
 }
