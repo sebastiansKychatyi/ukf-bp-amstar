@@ -463,7 +463,37 @@
               :rules="[v => !!v || 'Required', v => v.length >= 2 || 'Min 2 characters']"
               class="mb-3"
             />
-            <v-text-field v-model="editData.city" label="City" class="mb-3" />
+            <v-text-field v-model="editData.city" label="City" class="mb-2" />
+
+            <!-- Geocoding controls -->
+            <div class="d-flex align-center flex-wrap ga-2 mb-3">
+              <v-btn
+                variant="outlined"
+                size="small"
+                :loading="editGeocoding"
+                :disabled="!editData.city.trim()"
+                prepend-icon="mdi-crosshairs-gps"
+                @click="geocodeCityForEdit"
+              >
+                Locate City
+              </v-btn>
+              <v-chip
+                v-if="editGeocodeResult"
+                size="small"
+                color="success"
+                variant="tonal"
+                closable
+                @click:close="clearEditGeocode"
+              >
+                <v-icon start size="small">mdi-map-marker-check</v-icon>
+                {{ editGeocodeResult }}
+              </v-chip>
+              <v-chip v-if="editGeocodeError" size="small" color="error" variant="tonal">
+                <v-icon start size="small">mdi-alert-circle</v-icon>
+                {{ editGeocodeError }}
+              </v-chip>
+            </div>
+
             <v-textarea v-model="editData.description" label="Description" rows="3" class="mb-3" />
           </v-form>
         </v-card-text>
@@ -572,9 +602,20 @@ const showRemoveMemberDialog = ref(false)
 const joinForm = ref({ message: '', position: null as string | null })
 const deleteConfirmation = ref('')
 const editFormValid = ref(false)
-const editData = ref({ name: '', city: '', description: '' })
+const editData = ref({
+  name: '',
+  city: '',
+  description: '',
+  latitude: null as number | null,
+  longitude: null as number | null,
+})
 const editMemberData = ref({ position: null as string | null, jersey_number: null as number | null })
 const selectedMember = ref<any>(null)
+
+// Geocoding state (Edit dialog)
+const editGeocoding = ref(false)
+const editGeocodeResult = ref<string | null>(null)
+const editGeocodeError = ref<string | null>(null)
 
 // Snackbar
 const showSnackbar = ref(false)
@@ -776,6 +817,37 @@ const deleteTeam = async () => {
   }
 }
 
+const geocodeCityForEdit = async () => {
+  const city = editData.value.city.trim()
+  if (!city) return
+  editGeocoding.value = true
+  editGeocodeResult.value = null
+  editGeocodeError.value = null
+  try {
+    const results = await $fetch<any[]>(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`,
+    )
+    if (results?.length > 0) {
+      editData.value.latitude = parseFloat(results[0].lat)
+      editData.value.longitude = parseFloat(results[0].lon)
+      editGeocodeResult.value = results[0].display_name?.split(',').slice(0, 2).join(',') || city
+    } else {
+      editGeocodeError.value = `"${city}" not found`
+    }
+  } catch {
+    editGeocodeError.value = 'Geocoding service unavailable'
+  } finally {
+    editGeocoding.value = false
+  }
+}
+
+const clearEditGeocode = () => {
+  editData.value.latitude = null
+  editData.value.longitude = null
+  editGeocodeResult.value = null
+  editGeocodeError.value = null
+}
+
 const updateTeam = async () => {
   submitting.value = true
   try {
@@ -786,6 +858,8 @@ const updateTeam = async () => {
         name: editData.value.name,
         city: editData.value.city || undefined,
         description: editData.value.description || undefined,
+        latitude: editData.value.latitude !== null ? editData.value.latitude : undefined,
+        longitude: editData.value.longitude !== null ? editData.value.longitude : undefined,
       },
     })
     team.value = { ...team.value, ...updated }
@@ -875,7 +949,12 @@ watch(showEditDialog, (val) => {
       name: team.value.name,
       city: team.value.city || '',
       description: team.value.description || '',
+      latitude: team.value.latitude ?? null,
+      longitude: team.value.longitude ?? null,
     }
+    // Show coordinates are already set when the team has them
+    editGeocodeResult.value = team.value.latitude != null ? (team.value.city || 'Location set') : null
+    editGeocodeError.value = null
   }
 })
 

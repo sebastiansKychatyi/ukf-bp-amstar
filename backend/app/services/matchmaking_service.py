@@ -159,6 +159,22 @@ class MatchmakingService(BaseService[Team]):
             # Clamp and scale to 0-100
             total = max(0.0, min(1.0, total)) * 100
 
+            # Compute actual Haversine distance when both teams have coordinates
+            distance_km: Optional[float] = None
+            if (
+                team.latitude is not None
+                and team.longitude is not None
+                and candidate.latitude is not None
+                and candidate.longitude is not None
+            ):
+                distance_km = round(
+                    _haversine(
+                        team.latitude, team.longitude,
+                        candidate.latitude, candidate.longitude,
+                    ),
+                    1,
+                )
+
             suggestion = MatchmakingSuggestion(
                 team_id=candidate.id,
                 team_name=candidate.name,
@@ -175,6 +191,7 @@ class MatchmakingService(BaseService[Team]):
                     activity_bonus=round(activity_score, 4),
                 ),
                 overlapping_slots=overlap_count,
+                distance_km=distance_km,
             )
             scored.append((total, suggestion))
 

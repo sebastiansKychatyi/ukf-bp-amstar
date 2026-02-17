@@ -23,6 +23,18 @@
       </v-col>
     </v-row>
 
+    <!-- No-location warning (captain has a team but no coordinates set) -->
+    <v-row v-if="isCaptain && myTeamId && !hasCoordinates">
+      <v-col cols="12">
+        <v-alert type="warning" variant="tonal" prepend-icon="mdi-map-marker-off" class="mb-2">
+          <strong>Team location not set.</strong>
+          The proximity component of matchmaking cannot rank teams by distance.
+          <NuxtLink :to="`/teams/${myTeamId}`" class="ml-1">Edit your team</NuxtLink>
+          to geocode your city and activate distance-based matching.
+        </v-alert>
+      </v-col>
+    </v-row>
+
     <!-- Matchmaking Controls -->
     <v-row v-if="isCaptain">
       <v-col cols="12" md="8">
@@ -162,10 +174,21 @@
             <div class="d-flex justify-space-between align-center mb-3">
               <div>
                 <h3 class="text-subtitle-1 font-weight-bold">{{ suggestion.team_name }}</h3>
-                <v-chip v-if="suggestion.city" size="small" variant="outlined" class="mt-1">
-                  <v-icon start size="small">mdi-map-marker</v-icon>
-                  {{ suggestion.city }}
-                </v-chip>
+                <div class="d-flex align-center flex-wrap ga-1 mt-1">
+                  <v-chip v-if="suggestion.city" size="small" variant="outlined">
+                    <v-icon start size="small">mdi-map-marker</v-icon>
+                    {{ suggestion.city }}
+                  </v-chip>
+                  <v-chip
+                    v-if="suggestion.distance_km !== null && suggestion.distance_km !== undefined"
+                    size="small"
+                    variant="tonal"
+                    color="info"
+                  >
+                    <v-icon start size="small">mdi-map-marker-distance</v-icon>
+                    {{ suggestion.distance_km }} km
+                  </v-chip>
+                </div>
               </div>
               <div class="text-right">
                 <div class="text-h4 font-weight-bold text-primary">{{ suggestion.total_score }}</div>
@@ -284,7 +307,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 definePageMeta({
   middleware: ['captain'],
@@ -326,11 +349,17 @@ const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const dayOptions = dayNames.map((d, i) => ({ title: d, value: i }))
 
 const myTeamId = ref<number | null>(null)
+const myTeam = ref<any>(null)
+
+const hasCoordinates = computed(
+  () => myTeam.value?.latitude !== null && myTeam.value?.latitude !== undefined,
+)
 
 // Find my team
 const findMyTeam = async () => {
   try {
     const data = await $fetch<any>(`${apiBase.value}/teams/my/team`, { headers: getAuthHeaders() })
+    myTeam.value = data
     myTeamId.value = data.id
     // Load existing availability
     try {

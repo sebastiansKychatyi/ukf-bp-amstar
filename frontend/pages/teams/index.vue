@@ -155,8 +155,38 @@
             <v-text-field
               v-model="newTeam.city"
               label="City"
-              class="mb-3"
+              class="mb-2"
             />
+
+            <!-- Geocoding controls -->
+            <div class="d-flex align-center flex-wrap ga-2 mb-3">
+              <v-btn
+                variant="outlined"
+                size="small"
+                :loading="geocoding"
+                :disabled="!newTeam.city.trim()"
+                prepend-icon="mdi-crosshairs-gps"
+                @click="geocodeCity"
+              >
+                Locate City
+              </v-btn>
+              <v-chip
+                v-if="geocodeResult"
+                size="small"
+                color="success"
+                variant="tonal"
+                closable
+                @click:close="clearGeocode"
+              >
+                <v-icon start size="small">mdi-map-marker-check</v-icon>
+                {{ geocodeResult }}
+              </v-chip>
+              <v-chip v-if="geocodeError" size="small" color="error" variant="tonal">
+                <v-icon start size="small">mdi-alert-circle</v-icon>
+                {{ geocodeError }}
+              </v-chip>
+            </div>
+
             <v-textarea
               v-model="newTeam.description"
               label="Description"
@@ -258,7 +288,14 @@ const newTeam = ref({
   city: '',
   description: '',
   founded_year: null as number | null,
+  latitude: null as number | null,
+  longitude: null as number | null,
 })
+
+// Geocoding state (Create dialog)
+const geocoding = ref(false)
+const geocodeResult = ref<string | null>(null)
+const geocodeError = ref<string | null>(null)
 
 const joinRequest = ref({
   message: '',
@@ -346,9 +383,42 @@ const openJoinDialog = (team: any) => {
   showJoinDialog.value = true
 }
 
+const geocodeCity = async () => {
+  const city = newTeam.value.city.trim()
+  if (!city) return
+  geocoding.value = true
+  geocodeResult.value = null
+  geocodeError.value = null
+  try {
+    const results = await $fetch<any[]>(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`,
+    )
+    if (results?.length > 0) {
+      newTeam.value.latitude = parseFloat(results[0].lat)
+      newTeam.value.longitude = parseFloat(results[0].lon)
+      geocodeResult.value = results[0].display_name?.split(',').slice(0, 2).join(',') || city
+    } else {
+      geocodeError.value = `"${city}" not found`
+    }
+  } catch {
+    geocodeError.value = 'Geocoding service unavailable'
+  } finally {
+    geocoding.value = false
+  }
+}
+
+const clearGeocode = () => {
+  newTeam.value.latitude = null
+  newTeam.value.longitude = null
+  geocodeResult.value = null
+  geocodeError.value = null
+}
+
 const closeCreateDialog = () => {
   showCreateDialog.value = false
-  newTeam.value = { name: '', city: '', description: '', founded_year: null }
+  newTeam.value = { name: '', city: '', description: '', founded_year: null, latitude: null, longitude: null }
+  geocodeResult.value = null
+  geocodeError.value = null
 }
 
 const createTeam = async () => {
@@ -364,6 +434,8 @@ const createTeam = async () => {
         city: newTeam.value.city || undefined,
         description: newTeam.value.description || undefined,
         founded_year: newTeam.value.founded_year || undefined,
+        latitude: newTeam.value.latitude !== null ? newTeam.value.latitude : undefined,
+        longitude: newTeam.value.longitude !== null ? newTeam.value.longitude : undefined,
       },
     })
 

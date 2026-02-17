@@ -65,6 +65,10 @@ class MatchmakingSuggestion(BaseModel):
     total_score: float = Field(..., description="Composite matchmaking score (0-100)")
     breakdown: MatchmakingScoreBreakdown
     overlapping_slots: int = Field(0, description="Number of matching time windows")
+    distance_km: Optional[float] = Field(
+        None,
+        description="Great-circle distance in km (only present when both teams have coordinates)",
+    )
 
 
 class MatchmakingResponse(BaseModel):

@@ -195,48 +195,334 @@
       </v-card>
     </v-dialog>
 
-    <!-- Submit Result Dialog -->
-    <v-dialog v-model="showResultDialog" max-width="400" persistent>
+
+    <v-dialog v-model="showResultDialog" max-width="680" persistent scrollable>
       <v-card>
-        <v-card-title>
-          <v-icon class="mr-2">mdi-scoreboard</v-icon>
+
+        <v-card-title class="d-flex align-center ga-2 py-3 px-4">
+          <v-icon class="mr-1">mdi-scoreboard</v-icon>
           Submit Match Result
+          <v-spacer />
+          <div class="d-flex align-center ga-1">
+            <v-chip
+              size="small"
+              :color="resultStep === 1 ? 'primary' : 'grey-lighten-1'"
+              :variant="resultStep === 1 ? 'flat' : 'tonal'"
+            >
+              1 Score
+            </v-chip>
+            <v-icon size="small" color="grey">mdi-chevron-right</v-icon>
+            <v-chip
+              size="small"
+              :color="resultStep === 2 ? 'primary' : 'grey-lighten-1'"
+              :variant="resultStep === 2 ? 'flat' : 'tonal'"
+            >
+              2 Player Stats
+            </v-chip>
+          </div>
         </v-card-title>
-        <v-card-text>
-          <v-row>
-            <v-col cols="6">
+
+        <v-divider />
+
+        <!-- ── Step 1: Final Score ────────────────────────────────────────── -->
+        <v-card-text v-if="resultStep === 1" class="pa-6">
+          <p class="text-body-2 text-medium-emphasis mb-5">
+            Enter the final score. If goals were scored you will be able to assign
+            them to individual players in the next step.
+          </p>
+
+          <v-row align="center" justify="center">
+            <!-- Challenger score -->
+            <v-col cols="5" class="text-center">
+              <div class="text-caption text-primary font-weight-bold text-uppercase mb-2">
+                <v-icon size="small" color="primary" class="mr-1">mdi-shield</v-icon>
+                {{ resultChallenge?.challenger?.name || 'Challenger' }}
+              </div>
               <v-text-field
                 v-model.number="matchResult.challenger_score"
-                :label="resultChallenge?.challenger?.name || 'Challenger'"
                 type="number"
                 min="0"
                 max="99"
                 variant="outlined"
+                hide-details
+                density="comfortable"
+                style="font-size: 1.5rem;"
+                class="text-center-input"
               />
             </v-col>
-            <v-col cols="6">
+
+            <!-- Divider -->
+            <v-col cols="2" class="text-center text-h5 font-weight-bold text-medium-emphasis">
+              —
+            </v-col>
+
+            <!-- Opponent score -->
+            <v-col cols="5" class="text-center">
+              <div class="text-caption text-error font-weight-bold text-uppercase mb-2">
+                <v-icon size="small" color="error" class="mr-1">mdi-shield</v-icon>
+                {{ resultChallenge?.opponent?.name || 'Opponent' }}
+              </div>
               <v-text-field
                 v-model.number="matchResult.opponent_score"
-                :label="resultChallenge?.opponent?.name || 'Opponent'"
                 type="number"
                 min="0"
                 max="99"
                 variant="outlined"
+                hide-details
+                density="comfortable"
+                class="text-center-input"
               />
             </v-col>
           </v-row>
         </v-card-text>
-        <v-card-actions>
+
+        <!-- ── Step 2: Player Stats ───────────────────────────────────────── -->
+        <v-card-text v-else-if="resultStep === 2" class="pa-4">
+          <!-- Loading rosters -->
+          <div v-if="rosterLoading" class="text-center py-6">
+            <v-progress-circular indeterminate color="primary" class="mb-3" />
+            <p class="text-medium-emphasis">Loading rosters…</p>
+          </div>
+
+          <template v-else>
+            <!-- Validation banner -->
+            <v-alert
+              :type="goalsMatchScore ? 'success' : 'warning'"
+              variant="tonal"
+              density="compact"
+              class="mb-4"
+            >
+              <template v-if="goalsMatchScore">
+                All goals are assigned correctly — ready to submit!
+              </template>
+              <template v-else>
+                Distribute goals to match the score:
+                <strong>{{ resultChallenge?.challenger?.name }}</strong>
+                {{ challengerGoalSum }} / {{ matchResult.challenger_score }}
+                &nbsp;·&nbsp;
+                <strong>{{ resultChallenge?.opponent?.name }}</strong>
+                {{ opponentGoalSum }} / {{ matchResult.opponent_score }}
+              </template>
+            </v-alert>
+
+            <!-- No-roster fallback -->
+            <v-alert
+              v-if="challengerRoster.length === 0 && opponentRoster.length === 0"
+              type="info"
+              variant="tonal"
+              density="compact"
+              class="mb-4"
+            >
+              No roster data available. You can still submit the final score.
+            </v-alert>
+
+            <!-- ── Challenger team ── -->
+            <template v-if="challengerRoster.length > 0">
+              <div class="d-flex align-center mb-2">
+                <v-icon color="primary" size="small" class="mr-1">mdi-shield</v-icon>
+                <span class="text-subtitle-2 text-primary font-weight-bold">
+                  {{ resultChallenge?.challenger?.name }}
+                </span>
+                <v-chip size="x-small" class="ml-2" :color="challengerGoalSum === matchResult.challenger_score ? 'success' : 'warning'">
+                  {{ challengerGoalSum }} / {{ matchResult.challenger_score }} goals
+                </v-chip>
+              </div>
+
+              <v-table density="compact" class="mb-5 rounded border">
+                <thead>
+                  <tr>
+                    <th class="text-left">#</th>
+                    <th class="text-left">Player</th>
+                    <th class="text-center" style="width:80px">Goals</th>
+                    <th class="text-center" style="width:80px">Assists</th>
+                    <th class="text-center" style="width:56px">
+                      <v-icon size="small" color="yellow-darken-3" title="Yellow card">mdi-card</v-icon>
+                    </th>
+                    <th class="text-center" style="width:56px">
+                      <v-icon size="small" color="error" title="Red card">mdi-card</v-icon>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in challengerRoster" :key="p.user_id">
+                    <td class="text-caption text-medium-emphasis">{{ p.jersey_number || '–' }}</td>
+                    <td>
+                      <span class="text-body-2">{{ p.user?.full_name || p.user?.username }}</span>
+                      <v-chip v-if="p.position" size="x-small" class="ml-1" variant="tonal">
+                        {{ p.position }}
+                      </v-chip>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="playerStats[p.user_id].goals"
+                        type="number"
+                        min="0"
+                        max="20"
+                        variant="plain"
+                        hide-details
+                        density="compact"
+                        style="max-width:60px; margin:auto;"
+                      />
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="playerStats[p.user_id].assists"
+                        type="number"
+                        min="0"
+                        max="20"
+                        variant="plain"
+                        hide-details
+                        density="compact"
+                        style="max-width:60px; margin:auto;"
+                      />
+                    </td>
+                    <td class="text-center">
+                      <v-btn
+                        :color="playerStats[p.user_id].yellow_cards > 0 ? 'yellow-darken-3' : 'grey-lighten-2'"
+                        icon="mdi-card"
+                        size="x-small"
+                        variant="flat"
+                        :title="playerStats[p.user_id].yellow_cards > 0 ? 'Yellow card given (click to remove)' : 'Give yellow card'"
+                        @click="toggleCard(p.user_id, 'yellow_cards')"
+                      />
+                    </td>
+                    <td class="text-center">
+                      <v-btn
+                        :color="playerStats[p.user_id].red_cards > 0 ? 'error' : 'grey-lighten-2'"
+                        icon="mdi-card"
+                        size="x-small"
+                        variant="flat"
+                        :title="playerStats[p.user_id].red_cards > 0 ? 'Red card given (click to remove)' : 'Give red card'"
+                        @click="toggleCard(p.user_id, 'red_cards')"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
+            </template>
+
+            <!-- ── Opponent team ── -->
+            <template v-if="opponentRoster.length > 0">
+              <div class="d-flex align-center mb-2">
+                <v-icon color="error" size="small" class="mr-1">mdi-shield</v-icon>
+                <span class="text-subtitle-2 text-error font-weight-bold">
+                  {{ resultChallenge?.opponent?.name }}
+                </span>
+                <v-chip size="x-small" class="ml-2" :color="opponentGoalSum === matchResult.opponent_score ? 'success' : 'warning'">
+                  {{ opponentGoalSum }} / {{ matchResult.opponent_score }} goals
+                </v-chip>
+              </div>
+
+              <v-table density="compact" class="rounded border">
+                <thead>
+                  <tr>
+                    <th class="text-left">#</th>
+                    <th class="text-left">Player</th>
+                    <th class="text-center" style="width:80px">Goals</th>
+                    <th class="text-center" style="width:80px">Assists</th>
+                    <th class="text-center" style="width:56px">
+                      <v-icon size="small" color="yellow-darken-3">mdi-card</v-icon>
+                    </th>
+                    <th class="text-center" style="width:56px">
+                      <v-icon size="small" color="error">mdi-card</v-icon>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in opponentRoster" :key="p.user_id">
+                    <td class="text-caption text-medium-emphasis">{{ p.jersey_number || '–' }}</td>
+                    <td>
+                      <span class="text-body-2">{{ p.user?.full_name || p.user?.username }}</span>
+                      <v-chip v-if="p.position" size="x-small" class="ml-1" variant="tonal">
+                        {{ p.position }}
+                      </v-chip>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="playerStats[p.user_id].goals"
+                        type="number"
+                        min="0"
+                        max="20"
+                        variant="plain"
+                        hide-details
+                        density="compact"
+                        style="max-width:60px; margin:auto;"
+                      />
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="playerStats[p.user_id].assists"
+                        type="number"
+                        min="0"
+                        max="20"
+                        variant="plain"
+                        hide-details
+                        density="compact"
+                        style="max-width:60px; margin:auto;"
+                      />
+                    </td>
+                    <td class="text-center">
+                      <v-btn
+                        :color="playerStats[p.user_id].yellow_cards > 0 ? 'yellow-darken-3' : 'grey-lighten-2'"
+                        icon="mdi-card"
+                        size="x-small"
+                        variant="flat"
+                        @click="toggleCard(p.user_id, 'yellow_cards')"
+                      />
+                    </td>
+                    <td class="text-center">
+                      <v-btn
+                        :color="playerStats[p.user_id].red_cards > 0 ? 'error' : 'grey-lighten-2'"
+                        icon="mdi-card"
+                        size="x-small"
+                        variant="flat"
+                        @click="toggleCard(p.user_id, 'red_cards')"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
+            </template>
+          </template>
+        </v-card-text>
+
+        <v-divider />
+
+        <!-- Actions -->
+        <v-card-actions class="pa-4">
+          <v-btn variant="text" @click="closeResultDialog">Cancel</v-btn>
           <v-spacer />
-          <v-btn variant="text" @click="showResultDialog = false">Cancel</v-btn>
-          <v-btn
-            color="success"
-            :loading="submitting"
-            :disabled="matchResult.challenger_score < 0 || matchResult.opponent_score < 0"
-            @click="submitResult"
-          >
-            Submit Result
-          </v-btn>
+
+          <!-- Step 1 actions -->
+          <template v-if="resultStep === 1">
+            <v-btn
+              color="primary"
+              variant="flat"
+              :disabled="matchResult.challenger_score < 0 || matchResult.opponent_score < 0"
+              @click="advanceToStep2"
+            >
+              {{ totalGoals === 0 ? 'Submit 0–0' : 'Next: Player Stats' }}
+              <v-icon end>mdi-chevron-right</v-icon>
+            </v-btn>
+          </template>
+
+          <!-- Step 2 actions -->
+          <template v-else>
+            <v-btn variant="text" class="mr-1" :disabled="submitting" @click="resultStep = 1">
+              <v-icon start>mdi-chevron-left</v-icon>
+              Back
+            </v-btn>
+            <v-btn
+              color="success"
+              variant="flat"
+              :loading="submitting"
+              :disabled="rosterLoading || !goalsMatchScore"
+              @click="submitResult"
+            >
+              <v-icon start>mdi-check</v-icon>
+              Submit Result
+            </v-btn>
+          </template>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -285,6 +571,42 @@ const resultChallenge = ref<any>(null)
 // Forms
 const newChallenge = ref({ opponent_id: null as number | null, match_date: '', location: '' })
 const matchResult = ref({ challenger_score: 0, opponent_score: 0 })
+
+// ── Result wizard state ──────────────────────────────────────────────────────
+const resultStep = ref(1)
+const rosterLoading = ref(false)
+const challengerRoster = ref<any[]>([])
+const opponentRoster = ref<any[]>([])
+
+interface PlayerStatEntry {
+  user_id: number
+  team_id: number
+  goals: number
+  assists: number
+  yellow_cards: number
+  red_cards: number
+}
+const playerStats = ref<Record<number, PlayerStatEntry>>({})
+
+// Computed: running goal totals per team
+const totalGoals = computed(() =>
+  (matchResult.value.challenger_score || 0) + (matchResult.value.opponent_score || 0),
+)
+const challengerGoalSum = computed(() =>
+  challengerRoster.value.reduce((s, p) => s + (playerStats.value[p.user_id]?.goals || 0), 0),
+)
+const opponentGoalSum = computed(() =>
+  opponentRoster.value.reduce((s, p) => s + (playerStats.value[p.user_id]?.goals || 0), 0),
+)
+// Allow submission when all goals are distributed; fall back to true when no
+// rosters could be loaded (empty teams edge-case).
+const goalsMatchScore = computed(() => {
+  if (challengerRoster.value.length === 0 && opponentRoster.value.length === 0) return true
+  return (
+    challengerGoalSum.value === (matchResult.value.challenger_score || 0) &&
+    opponentGoalSum.value === (matchResult.value.opponent_score || 0)
+  )
+})
 
 // Snackbar
 const showSnackbar = ref(false)
@@ -369,11 +691,72 @@ const getCaptainId = (team: any) => {
   return fullTeam?.captain_id
 }
 
+// ── Roster helpers ───────────────────────────────────────────────────────────
+
+const fetchRosters = async (challenge: any) => {
+  rosterLoading.value = true
+  playerStats.value = {}
+  try {
+    const [cData, oData] = await Promise.all([
+      $fetch<any[]>(`${apiBase.value}/teams/${challenge.challenger.id}/roster-stats`, {
+        headers: getAuthHeaders(),
+      }),
+      $fetch<any[]>(`${apiBase.value}/teams/${challenge.opponent.id}/roster-stats`, {
+        headers: getAuthHeaders(),
+      }),
+    ])
+    challengerRoster.value = cData || []
+    opponentRoster.value = oData || []
+    // Pre-initialise a zero-stat entry for every player
+    for (const p of [...challengerRoster.value, ...opponentRoster.value]) {
+      playerStats.value[p.user_id] = {
+        user_id: p.user_id,
+        team_id: p.team_id,
+        goals: 0,
+        assists: 0,
+        yellow_cards: 0,
+        red_cards: 0,
+      }
+    }
+  } catch {
+    // Silently swallow roster fetch errors; the wizard degrades gracefully
+  } finally {
+    rosterLoading.value = false
+  }
+}
+
+const toggleCard = (userId: number, field: 'yellow_cards' | 'red_cards') => {
+  if (playerStats.value[userId]) {
+    playerStats.value[userId][field] = playerStats.value[userId][field] > 0 ? 0 : 1
+  }
+}
+
+const closeResultDialog = () => {
+  showResultDialog.value = false
+  resultStep.value = 1
+  playerStats.value = {}
+  challengerRoster.value = []
+  opponentRoster.value = []
+}
+
+// Advance from Step 1. For 0-0 matches we skip Step 2 and submit immediately.
+const advanceToStep2 = () => {
+  if (totalGoals.value === 0) {
+    submitResult()
+    return
+  }
+  resultStep.value = 2
+}
+
 const handleAction = async (challenge: any, action: string) => {
   if (action === 'result') {
     resultChallenge.value = challenge
     matchResult.value = { challenger_score: 0, opponent_score: 0 }
+    resultStep.value = 1
     showResultDialog.value = true
+    // Fire roster fetch in background so data is ready by the time the user
+    // reaches Step 2.
+    fetchRosters(challenge)
     return
   }
 
@@ -419,21 +802,59 @@ const submitResult = async () => {
   if (!resultChallenge.value) return
   submitting.value = true
   try {
-    const data = await $fetch<any>(`${apiBase.value}/challenges/${resultChallenge.value.id}/result`, {
-      method: 'PUT',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: matchResult.value,
-    })
-    showResultDialog.value = false
-    // Show ELO changes
+    // ── Step A: record the final score and trigger ELO update ────────────────
+    const data = await $fetch<any>(
+      `${apiBase.value}/challenges/${resultChallenge.value.id}/result`,
+      {
+        method: 'PUT',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: matchResult.value,
+      },
+    )
+
+    // ── Step B: submit per-player statistics (non-critical) ──────────────────
+    // Only attempt when we have roster data (Step 2 was shown or rosters loaded).
+    const statsPayload = Object.values(playerStats.value).map((s) => ({
+      user_id: s.user_id,
+      challenge_id: resultChallenge.value!.id,
+      team_id: s.team_id,
+      goals: s.goals || 0,
+      assists: s.assists || 0,
+      yellow_cards: s.yellow_cards || 0,
+      red_cards: s.red_cards || 0,
+      minutes_played: 0,
+      shots_on_target: 0,
+      saves: 0,
+    }))
+
+    if (statsPayload.length > 0) {
+      await $fetch(`${apiBase.value}/statistics/match/${resultChallenge.value.id}`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: statsPayload,
+      }).catch((err: any) => {
+        // Stats failure is non-critical — score is already saved.  Surface a
+        // soft warning so the captain knows to re-enter stats if needed.
+        console.warn('Player stats submission failed:', err?.data?.detail)
+        showMessage('Score saved! Player stats could not be recorded — try again later.', 'warning')
+      })
+    }
+
+    closeResultDialog()
+
+    // Show ELO delta in snackbar
     if (data.elo_updates?.length) {
-      const updates = data.elo_updates.map((u: any) =>
-        `${u.team_name}: ${u.old_rating} → ${u.new_rating} (${u.rating_change > 0 ? '+' : ''}${u.rating_change})`
-      ).join(' | ')
+      const updates = data.elo_updates
+        .map(
+          (u: any) =>
+            `${u.team_name}: ${u.old_rating} → ${u.new_rating} (${u.rating_change > 0 ? '+' : ''}${u.rating_change})`,
+        )
+        .join(' | ')
       showMessage(`Result submitted! ELO: ${updates}`, 'success')
     } else {
-      showMessage('Result submitted!', 'success')
+      showMessage('Result submitted successfully!', 'success')
     }
+
     await fetchChallenges()
   } catch (err: any) {
     showMessage(err.data?.detail || 'Failed to submit result', 'error')
