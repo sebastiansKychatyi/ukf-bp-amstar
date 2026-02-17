@@ -49,9 +49,17 @@
         />
 
         <v-list-item
+          v-if="isAuthenticated"
           prepend-icon="mdi-account-circle"
           title="Profile"
           to="/profile"
+          @click="drawer = false"
+        />
+        <v-list-item
+          v-else
+          prepend-icon="mdi-login"
+          title="Login"
+          to="/auth/login"
           @click="drawer = false"
         />
       </v-list>
@@ -124,9 +132,13 @@
           Tournaments
         </v-btn>
 
-        <v-btn variant="text" to="/profile">
+        <v-btn v-if="isAuthenticated" variant="text" to="/profile">
           <v-icon start>mdi-account-circle</v-icon>
           Profile
+        </v-btn>
+        <v-btn v-else variant="outlined" to="/auth/login" color="white">
+          <v-icon start>mdi-login</v-icon>
+          Login
         </v-btn>
 
         <!-- Admin Panel (superusers only) -->
@@ -196,7 +208,7 @@ import { useTheme } from 'vuetify'
 import { ref, computed, onMounted } from 'vue'
 
 const theme = useTheme()
-const { user } = useAuth()
+const { user, isAuthenticated } = useAuth()
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBaseUrl || 'http://localhost:8000/api/v1'
 
