@@ -174,3 +174,28 @@ class BracketResponse(BaseModel):
     tournament_name: str
     total_rounds: int
     rounds: List[BracketRound]
+
+
+# ---------------------------------------------------------------------------
+# Match result submission response (includes ELO updates)
+# ---------------------------------------------------------------------------
+
+class EloUpdateInfo(BaseModel):
+    """ELO rating change for one team after a tournament match."""
+    team_id: int
+    team_name: str
+    old_rating: int
+    new_rating: int
+    rating_change: int
+
+
+class MatchResultResponse(TournamentMatchResponse):
+    """
+    Response from submitting a tournament match result.
+
+    Extends the standard match response with optional ELO rating changes
+    so the frontend can display "Home: +12 ELO · Away: -8 ELO" immediately
+    after a result is submitted.
+    """
+    elo_home: Optional[EloUpdateInfo] = None
+    elo_away: Optional[EloUpdateInfo] = None

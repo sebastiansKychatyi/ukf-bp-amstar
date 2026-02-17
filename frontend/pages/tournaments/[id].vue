@@ -268,6 +268,44 @@
             <p class="text-medium-emphasis">Matches will appear once the tournament starts.</p>
           </div>
 
+          <!-- ELO update banner (shown after result submission) -->
+          <v-alert
+            v-if="lastEloUpdates"
+            type="success"
+            variant="tonal"
+            density="compact"
+            class="mb-4"
+            closable
+            @click:close="lastEloUpdates = null"
+          >
+            <strong>Global ELO updated:</strong>
+            <span class="ml-2">
+              {{ lastEloUpdates.home.team_name }}
+              <v-chip
+                size="x-small"
+                :color="lastEloUpdates.home.rating_change >= 0 ? 'success' : 'error'"
+                variant="flat"
+                class="mx-1"
+              >
+                {{ lastEloUpdates.home.rating_change >= 0 ? '+' : '' }}{{ lastEloUpdates.home.rating_change }}
+              </v-chip>
+              {{ lastEloUpdates.home.old_rating }} → {{ lastEloUpdates.home.new_rating }}
+            </span>
+            <span class="mx-2">·</span>
+            <span>
+              {{ lastEloUpdates.away.team_name }}
+              <v-chip
+                size="x-small"
+                :color="lastEloUpdates.away.rating_change >= 0 ? 'success' : 'error'"
+                variant="flat"
+                class="mx-1"
+              >
+                {{ lastEloUpdates.away.rating_change >= 0 ? '+' : '' }}{{ lastEloUpdates.away.rating_change }}
+              </v-chip>
+              {{ lastEloUpdates.away.old_rating }} → {{ lastEloUpdates.away.new_rating }}
+            </span>
+          </v-alert>
+
           <div v-for="round in matchesByRound" :key="round.round_number" class="mb-4">
             <h3 class="text-h6 font-weight-medium mb-2">
               <v-icon class="mr-1" size="small">mdi-calendar</v-icon>
@@ -309,6 +347,17 @@
                     </template>
                     <template v-else>
                       <div class="text-h5 font-weight-bold text-medium-emphasis">VS</div>
+                      <!-- ELO indicator -->
+                      <v-chip
+                        v-if="tournament?.status === 'active'"
+                        size="x-small"
+                        color="amber-darken-2"
+                        variant="tonal"
+                        prepend-icon="mdi-trending-up"
+                        class="mt-1"
+                      >
+                        Affects ELO
+                      </v-chip>
                       <!-- Submit result button -->
                       <v-btn
                         v-if="canSubmitResult(match)"
@@ -500,6 +549,7 @@ const activeTab = ref('standings')
 const showResultDialog = ref(false)
 const resultMatch = ref<any>(null)
 const matchResult = ref({ home_score: 0, away_score: 0 })
+const lastEloUpdates = ref<{ home: any; away: any } | null>(null)
 
 // Snackbar
 const showSnackbar = ref(false)
@@ -744,7 +794,7 @@ const submitResult = async () => {
   if (!resultMatch.value) return
   submitting.value = true
   try {
-    await $fetch(
+    const response = await $fetch<any>(
       `${apiBase.value}/tournaments/${tournamentId.value}/matches/${resultMatch.value.id}/result`,
       {
         method: 'POST',
@@ -753,7 +803,20 @@ const submitResult = async () => {
       }
     )
     showResultDialog.value = false
-    showMessage('Result submitted! Standings updated.', 'success')
+    lastEloUpdates.value = response?.elo_home && response?.elo_away
+      ? { home: response.elo_home, away: response.elo_away }
+      : null
+
+    // Build a message that includes ELO changes when available
+    let msg = 'Result submitted! Standings updated.'
+    if (lastEloUpdates.value) {
+      const fmtElo = (elo: any) => {
+        const sign = elo.rating_change >= 0 ? '+' : ''
+        return `${elo.team_name}: ${sign}${elo.rating_change} ELO`
+      }
+      msg = `Result submitted! ${fmtElo(lastEloUpdates.value.home)} · ${fmtElo(lastEloUpdates.value.away)}`
+    }
+    showMessage(msg, 'success')
     await refreshAll()
   } catch (err: any) {
     showMessage(err.data?.detail || 'Failed to submit result', 'error')

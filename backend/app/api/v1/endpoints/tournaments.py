@@ -15,6 +15,7 @@ from app.api.deps import get_current_active_user, get_current_captain, allow_cap
 from app.models.user import User
 from app.models.tournament import TournamentStatus, TournamentType
 from app.services.tournament_service import TournamentService
+from app.services.elo_service import EloService
 from app.schemas.tournament import (
     TournamentCreate,
     TournamentUpdate,
@@ -28,6 +29,8 @@ from app.schemas.tournament import (
     StandingsResponse,
     BracketResponse,
     BracketRound,
+    EloUpdateInfo,
+    MatchResultResponse,
 )
 from app.core.exceptions import (
     TournamentNotFoundError,
@@ -441,7 +444,7 @@ def cancel_tournament(
 
 @router.post(
     "/{tournament_id}/matches/{match_id}/result",
-    response_model=TournamentMatchResponse,
+    response_model=MatchResultResponse,
     summary="Submit match result",
 )
 def submit_match_result(
@@ -458,6 +461,7 @@ def submit_match_result(
     - Automatically recalculates standings.
     - In knockout mode, advances the winner to the next round.
     - If all matches are done, auto-completes the tournament.
+    - Triggers global ELO rating update for both teams.
     """
     svc = TournamentService(db)
     try:
@@ -472,9 +476,37 @@ def submit_match_result(
             InsufficientPermissionsError) as e:
         _handle(e)
 
+    # Build the match response dict before any further DB commits
+    match_data = _match_response(t_match)
+
     # Advance winner in knockout
     tournament = svc.get_tournament(tournament_id)
     if tournament.type == TournamentType.KNOCKOUT:
         svc.advance_knockout_winner(tournament_id, match_id)
 
-    return TournamentMatchResponse.model_validate(_match_response(t_match))
+    # Update global ELO ratings — non-fatal if it fails
+    elo_home: EloUpdateInfo | None = None
+    elo_away: EloUpdateInfo | None = None
+    if t_match.challenge_id:
+        try:
+            home_elo, away_elo = EloService(db).update_ratings(t_match.challenge_id)
+            elo_home = EloUpdateInfo(
+                team_id=home_elo.team_id,
+                team_name=home_elo.team_name,
+                old_rating=home_elo.old_rating,
+                new_rating=home_elo.new_rating,
+                rating_change=home_elo.rating_change,
+            )
+            elo_away = EloUpdateInfo(
+                team_id=away_elo.team_id,
+                team_name=away_elo.team_name,
+                old_rating=away_elo.old_rating,
+                new_rating=away_elo.new_rating,
+                rating_change=away_elo.rating_change,
+            )
+        except Exception:
+            pass  # ELO update failure must not block the result submission
+
+    match_data["elo_home"] = elo_home.model_dump() if elo_home else None
+    match_data["elo_away"] = elo_away.model_dump() if elo_away else None
+    return MatchResultResponse.model_validate(match_data)
