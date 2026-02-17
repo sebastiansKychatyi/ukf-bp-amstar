@@ -63,9 +63,9 @@
                   hide-details
                   color="primary"
                 />
-                <a href="#" class="text-primary text-decoration-none text-body-2">
+                <NuxtLink to="/auth/forgot-password" class="text-primary text-decoration-none text-body-2">
                   Forgot password?
-                </a>
+                </NuxtLink>
               </div>
 
               <!-- Submit Button -->

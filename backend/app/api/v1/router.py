@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, teams, challenges, ratings, users, stats
+from app.api.v1.endpoints import auth, teams, challenges, ratings, users, stats, admin
 from app.api.v1.endpoints import team_members, join_requests, matchmaking, statistics, notifications, tournaments
 
 api_router = APIRouter()
@@ -33,3 +33,6 @@ api_router.include_router(notifications.router, prefix="/notifications", tags=["
 
 # Tournaments (League & Knockout)
 api_router.include_router(tournaments.router, prefix="/tournaments", tags=["tournaments"])
+
+# Admin panel (superuser only — announcement GET is public)
+api_router.include_router(admin.router, prefix="/admin", tags=["admin"])

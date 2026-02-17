@@ -1,16 +1,20 @@
+import secrets
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.api.deps import get_db, get_current_active_user, oauth2_scheme
-from app.core.security import create_access_token, verify_password
+from app.core.security import create_access_token, verify_password, get_password_hash
 from app.core.config import settings
 from app.core.redis import redis_client
 from app.crud.user import user as crud_user
 from app.schemas.token import Token
 from app.schemas.user import User, UserCreate
 from app.models.user import User as UserModel
+from app.models.password_reset import PasswordResetToken
 
 router = APIRouter()
 
@@ -93,3 +97,85 @@ def logout(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token"
         )
+
+
+# ── Password Reset ────────────────────────────────────────────────────────────
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+@router.post("/forgot-password", status_code=status.HTTP_200_OK)
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Request a password reset token.
+
+    Always returns 200 to avoid revealing whether the email is registered.
+    In development the token is printed to the server console; in production
+    this would trigger an email via an SMTP service.
+    """
+    user = crud_user.get_by_email(db, email=payload.email)
+    if user:
+        token = secrets.token_urlsafe(32)
+        expires = datetime.utcnow() + timedelta(hours=1)
+        db_token = PasswordResetToken(
+            user_id=user.id,
+            token=token,
+            expires_at=expires,
+        )
+        db.add(db_token)
+        db.commit()
+        # In production: send an email. For now, log to console.
+        print(f"\n[PASSWORD RESET] Token for '{user.email}': {token}\n", flush=True)
+
+    return {"message": "If that email is registered, a reset token has been generated. Check server logs."}
+
+
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
+def reset_password(
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Consume a password reset token and set a new password.
+
+    Returns 400 if the token is invalid, already used, or expired.
+    """
+    if len(payload.new_password) < 8:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="New password must be at least 8 characters",
+        )
+
+    record = (
+        db.query(PasswordResetToken)
+        .filter(
+            PasswordResetToken.token == payload.token,
+            PasswordResetToken.used == False,  # noqa: E712
+            PasswordResetToken.expires_at > datetime.utcnow(),
+        )
+        .first()
+    )
+    if not record:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token",
+        )
+
+    user = db.query(UserModel).filter(UserModel.id == record.user_id).first()
+    if not user:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="User not found")
+
+    user.hashed_password = get_password_hash(payload.new_password)
+    record.used = True
+    db.commit()
+
+    return {"message": "Password has been reset successfully. You can now log in with your new password."}

@@ -11,6 +11,7 @@ from app.models.join_request import JoinRequest, JoinRequestStatus
 from app.models.player_statistics import PlayerStatistics, MatchPlayerStatistics
 from app.models.team_availability import TeamAvailability
 from app.models.notification import Notification, NotificationType
+from app.models.password_reset import PasswordResetToken
 
 __all__ = [
     "User",
@@ -27,4 +28,5 @@ __all__ = [
     "TeamAvailability",
     "Notification",
     "NotificationType",
+    "PasswordResetToken",
 ]

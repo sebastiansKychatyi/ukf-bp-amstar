@@ -58,8 +58,21 @@
 
       <v-divider />
 
+      <!-- Admin Panel link (superusers only) -->
+      <v-list v-if="isSuperuser" density="compact">
+        <v-divider />
+        <v-list-item
+          prepend-icon="mdi-shield-crown"
+          title="Admin Panel"
+          to="/admin"
+          @click="drawer = false"
+          base-color="warning"
+        />
+      </v-list>
+
       <!-- Theme Toggle in Drawer -->
       <v-list density="compact">
+        <v-divider />
         <v-list-item
           :prepend-icon="isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'"
           :title="isDark ? 'Light Mode' : 'Dark Mode'"
@@ -116,6 +129,12 @@
           Profile
         </v-btn>
 
+        <!-- Admin Panel (superusers only) -->
+        <v-btn v-if="isSuperuser" variant="text" to="/admin" color="warning">
+          <v-icon start>mdi-shield-crown</v-icon>
+          Admin
+        </v-btn>
+
         <!-- Theme Toggle Button (Desktop) -->
         <v-btn
           icon
@@ -138,6 +157,19 @@
 
     <!-- Main Content Area -->
     <v-main>
+      <!-- Global Announcement Banner -->
+      <v-alert
+        v-if="announcement && !announcementDismissed"
+        type="info"
+        variant="tonal"
+        closable
+        rounded="0"
+        class="announcement-banner"
+        prepend-icon="mdi-bullhorn"
+        @click:close="announcementDismissed = true"
+      >
+        {{ announcement }}
+      </v-alert>
 
       <NuxtPage />
     </v-main>
@@ -160,37 +192,50 @@
 </template>
 
 <script setup lang="ts">
-import { useTheme, useDisplay } from 'vuetify'
-import { ref, computed } from 'vue'
-
+import { useTheme } from 'vuetify'
+import { ref, computed, onMounted } from 'vue'
 
 const theme = useTheme()
+const { user } = useAuth()
+const config = useRuntimeConfig()
+const apiBase = config.public.apiBaseUrl || 'http://localhost:8000/api/v1'
 
-// Computed property to check if dark mode is active
 const isDark = computed(() => theme.global.current.value.dark)
-
-// Toggle between light and dark themes
 const toggleTheme = () => {
   theme.global.name.value = isDark.value ? 'light' : 'dark'
 }
 
-
 const drawer = ref(false)
-
 const currentYear = new Date().getFullYear()
+
+const isSuperuser = computed(() => user.value?.is_superuser === true)
+
+// ── Global announcement banner ────────────────────────────────────────────────
+const announcement = ref<string | null>(null)
+const announcementDismissed = ref(false)
+
+const fetchAnnouncement = async () => {
+  try {
+    const data = await $fetch<{ message: string | null }>(`${apiBase}/admin/announcement`)
+    announcement.value = data.message ?? null
+    announcementDismissed.value = false
+  } catch { /* silently ignore */ }
+}
+
+onMounted(fetchAnnouncement)
 </script>
 
 <style>
-
 html {
   scroll-behavior: smooth;
 }
 
-/* Remove default margins from body */
 body {
   margin: 0;
   padding: 0;
 }
 
-
+.announcement-banner {
+  border-radius: 0 !important;
+}
 </style>
