@@ -1,15 +1,4 @@
 <template>
-  <!--
-    Home Page
-    =========
-    Landing page for the AmStar Football Platform
-
-    Features:
-    - Clean, minimalist hero section
-    - Quick stats overview
-    - Call-to-action buttons
-    - System status indicator
-  -->
   <v-container class="py-12">
     <!-- Hero Section -->
     <v-row justify="center" class="mb-12">
@@ -31,31 +20,17 @@
 
         <!-- Call-to-Action Buttons -->
         <div class="d-flex justify-center gap-4 flex-wrap">
-          <v-btn
-            color="primary"
-            size="large"
-            to="/teams"
-          >
+          <v-btn color="primary" size="large" to="/teams">
             <v-icon start>mdi-shield-account</v-icon>
             Browse Teams
           </v-btn>
 
-          <v-btn
-            color="secondary"
-            size="large"
-            variant="outlined"
-            to="/challenges"
-          >
+          <v-btn color="secondary" size="large" variant="outlined" to="/challenges">
             <v-icon start>mdi-sword-cross</v-icon>
             Challenges
           </v-btn>
 
-          <v-btn
-            color="success"
-            size="large"
-            variant="outlined"
-            to="/leaderboard"
-          >
+          <v-btn color="success" size="large" variant="outlined" to="/leaderboard">
             <v-icon start>mdi-trophy</v-icon>
             Leaderboard
           </v-btn>
@@ -71,35 +46,50 @@
         </h2>
       </v-col>
 
-      <!-- Stat Cards -->
+      <!-- Players -->
       <v-col cols="12" sm="6" md="3">
         <v-card class="text-center pa-6" color="primary" dark>
           <v-icon icon="mdi-account-group" size="48" class="mb-3" />
-          <div class="text-h4 font-weight-bold mb-1">1,234</div>
+          <div class="text-h4 font-weight-bold mb-1">
+            <v-skeleton-loader v-if="statsLoading" type="text" color="primary" class="mx-auto" width="80" />
+            <span v-else>{{ globalStats.total_users.toLocaleString() }}</span>
+          </div>
           <div class="text-body-1">Players</div>
         </v-card>
       </v-col>
 
+      <!-- Teams -->
       <v-col cols="12" sm="6" md="3">
         <v-card class="text-center pa-6" color="secondary" dark>
           <v-icon icon="mdi-shield-account" size="48" class="mb-3" />
-          <div class="text-h4 font-weight-bold mb-1">456</div>
+          <div class="text-h4 font-weight-bold mb-1">
+            <v-skeleton-loader v-if="statsLoading" type="text" color="secondary" class="mx-auto" width="80" />
+            <span v-else>{{ globalStats.total_teams.toLocaleString() }}</span>
+          </div>
           <div class="text-body-1">Teams</div>
         </v-card>
       </v-col>
 
+      <!-- Matches -->
       <v-col cols="12" sm="6" md="3">
         <v-card class="text-center pa-6" color="success" dark>
           <v-icon icon="mdi-trophy" size="48" class="mb-3" />
-          <div class="text-h4 font-weight-bold mb-1">789</div>
-          <div class="text-body-1">Matches</div>
+          <div class="text-h4 font-weight-bold mb-1">
+            <v-skeleton-loader v-if="statsLoading" type="text" color="success" class="mx-auto" width="80" />
+            <span v-else>{{ globalStats.completed_matches.toLocaleString() }}</span>
+          </div>
+          <div class="text-body-1">Matches Played</div>
         </v-card>
       </v-col>
 
+      <!-- Challenges -->
       <v-col cols="12" sm="6" md="3">
         <v-card class="text-center pa-6" color="info" dark>
           <v-icon icon="mdi-calendar-check" size="48" class="mb-3" />
-          <div class="text-h4 font-weight-bold mb-1">321</div>
+          <div class="text-h4 font-weight-bold mb-1">
+            <v-skeleton-loader v-if="statsLoading" type="text" color="info" class="mx-auto" width="80" />
+            <span v-else>{{ globalStats.total_challenges.toLocaleString() }}</span>
+          </div>
           <div class="text-body-1">Challenges</div>
         </v-card>
       </v-col>
@@ -116,7 +106,6 @@
 
           <v-card-text>
             <div class="d-flex flex-column gap-3">
-              <!-- Frontend Status -->
               <div class="d-flex align-center justify-space-between">
                 <span class="text-body-1">Frontend</span>
                 <v-chip color="success" size="small">
@@ -125,21 +114,19 @@
                 </v-chip>
               </div>
 
-              <!-- Backend Status -->
               <div class="d-flex align-center justify-space-between">
                 <span class="text-body-1">Backend API</span>
-                <v-chip color="success" size="small">
-                  <v-icon start>mdi-check-circle</v-icon>
-                  Connected
+                <v-chip :color="apiStatus" size="small">
+                  <v-icon start>{{ apiStatus === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle' }}</v-icon>
+                  {{ apiStatus === 'success' ? 'Connected' : 'Unreachable' }}
                 </v-chip>
               </div>
 
-              <!-- Database Status -->
               <div class="d-flex align-center justify-space-between">
                 <span class="text-body-1">Database</span>
-                <v-chip color="success" size="small">
-                  <v-icon start>mdi-check-circle</v-icon>
-                  Active
+                <v-chip :color="apiStatus" size="small">
+                  <v-icon start>{{ apiStatus === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle' }}</v-icon>
+                  {{ apiStatus === 'success' ? 'Active' : 'Unknown' }}
                 </v-chip>
               </div>
             </div>
@@ -163,33 +150,48 @@
 </template>
 
 <script setup lang="ts">
-/**
- * Home Page Logic
- * ===============
- * Landing page for guests. Authenticated users are redirected to dashboard.
- */
+import { ref, onMounted } from 'vue'
+
 const { isAuthenticated } = useAuth()
+const runtimeConfig = useRuntimeConfig()
+const apiBase = runtimeConfig.public.apiBaseUrl || 'http://localhost:8000/api/v1'
+
+const statsLoading = ref(true)
+const apiStatus = ref<'success' | 'error'>('success')
+
+const globalStats = ref({
+  total_users: 0,
+  total_teams: 0,
+  completed_matches: 0,
+  total_challenges: 0,
+})
+
+const fetchGlobalStats = async () => {
+  try {
+    const data = await $fetch<typeof globalStats.value>(`${apiBase}/stats/global`)
+    globalStats.value = data
+    apiStatus.value = 'success'
+  } catch {
+    // Backend unreachable — keep zeros and show warning chip
+    apiStatus.value = 'error'
+  } finally {
+    statsLoading.value = false
+  }
+}
 
 onMounted(() => {
   if (isAuthenticated.value) {
     navigateTo('/dashboard')
+    return
   }
+  fetchGlobalStats()
 })
 </script>
 
 <style scoped>
-/**
- * Page-Specific Styles
- * ====================
- * Minimal styles - Vuetify utility classes handle most layout
- */
-
-/* Add spacing between buttons in the CTA section */
 .gap-4 {
   gap: 1rem;
 }
-
-/* Ensure gap utility works in flex containers */
 .gap-3 {
   gap: 0.75rem;
 }

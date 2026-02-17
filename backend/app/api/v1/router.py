@@ -1,11 +1,14 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, teams, challenges, ratings, users
+from app.api.v1.endpoints import auth, teams, challenges, ratings, users, stats
 from app.api.v1.endpoints import team_members, join_requests, matchmaking, statistics, notifications, tournaments
 
 api_router = APIRouter()
 
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
+
+# Public platform statistics (landing page counters)
+api_router.include_router(stats.router, prefix="/stats", tags=["stats"])
 
 # Team endpoints (CRUD + stats + match history)
 api_router.include_router(teams.router, prefix="/teams", tags=["teams"])
