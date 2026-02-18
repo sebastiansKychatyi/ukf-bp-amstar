@@ -41,7 +41,10 @@ class NotificationType(str, enum.Enum):
 class Notification(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
-    type = Column(SQLEnum(NotificationType), nullable=False)
+    type = Column(
+        SQLEnum(NotificationType, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+    )
     title = Column(String(200), nullable=False)
     message = Column(String(500), nullable=False)
     is_read = Column(Boolean, default=False, nullable=False)

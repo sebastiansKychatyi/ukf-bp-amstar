@@ -113,6 +113,8 @@ class TeamMemberService(BaseService[models.TeamMember]):
         )
 
         self.db.add(join_request)
+        # Flush so the DB assigns an id before we pass it to notify()
+        self.db.flush()
 
         # Notify team captain about the new join request
         user = self.db.query(models.User).filter(models.User.id == user_id).first()
@@ -126,7 +128,18 @@ class TeamMemberService(BaseService[models.TeamMember]):
         )
 
         self.db.commit()
-        self.db.refresh(join_request)
+
+        # Re-query with eager loading so the response serializer never
+        # triggers lazy loads on a potentially expired session state.
+        join_request = (
+            self.db.query(models.JoinRequest)
+            .options(
+                joinedload(models.JoinRequest.user),
+                joinedload(models.JoinRequest.team),
+            )
+            .filter(models.JoinRequest.id == join_request.id)
+            .first()
+        )
 
         self._log_operation(
             "Created join request",

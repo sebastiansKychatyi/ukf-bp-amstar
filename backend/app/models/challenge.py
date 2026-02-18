@@ -17,7 +17,10 @@ class Challenge(Base):
     id = Column(Integer, primary_key=True, index=True)
     challenger_id = Column(Integer, ForeignKey("team.id"), nullable=False)
     opponent_id = Column(Integer, ForeignKey("team.id"), nullable=False)
-    status = Column(SQLEnum(ChallengeStatus), default=ChallengeStatus.PENDING)
+    status = Column(
+        SQLEnum(ChallengeStatus, values_callable=lambda x: [e.value for e in x]),
+        default=ChallengeStatus.PENDING,
+    )
     match_date = Column(DateTime)
     location = Column(String)
     challenger_score = Column(Integer)

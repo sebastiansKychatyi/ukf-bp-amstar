@@ -51,8 +51,16 @@ class Tournament(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
-    type = Column(SQLEnum(TournamentType), nullable=False, default=TournamentType.LEAGUE)
-    status = Column(SQLEnum(TournamentStatus), nullable=False, default=TournamentStatus.DRAFT)
+    type = Column(
+        SQLEnum(TournamentType, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=TournamentType.LEAGUE,
+    )
+    status = Column(
+        SQLEnum(TournamentStatus, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=TournamentStatus.DRAFT,
+    )
     max_teams = Column(Integer, nullable=False, default=8)
     current_round = Column(Integer, nullable=False, default=0)
 

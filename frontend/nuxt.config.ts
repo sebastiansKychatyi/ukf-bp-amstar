@@ -13,6 +13,10 @@
  */
 
 export default defineNuxtConfig({
+  // Disable SSR — this is an authenticated SPA dashboard; SSR adds no value
+  // and causes Vuetify ID-counter hydration mismatches on v-data-table etc.
+  ssr: false,
+
   // Enable Nuxt DevTools for development
   devtools: { enabled: true },
 

@@ -9,6 +9,10 @@ from app.core.exception_handlers import register_exception_handlers
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 
+# Import Base + all models so create_all() sees every table
+from app.db.base import Base  # noqa: F401 — side-effect import
+from app.db.session import engine
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
@@ -47,7 +51,9 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 # Startup event
 @app.on_event("startup")
 async def startup_event():
-    """Initialize Redis connection on startup"""
+    """Create any missing DB tables, then connect to Redis."""
+    # create_all is a no-op for tables that already exist — safe to call every startup
+    Base.metadata.create_all(bind=engine)
     redis_client.connect()
 
 
