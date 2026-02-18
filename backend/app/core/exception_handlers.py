@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 import logging
 
+from app.core.config import settings
 from app.core.exceptions import (
     AmStarException,
     AuthenticationError,
@@ -30,6 +31,21 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # STANDARD ERROR RESPONSE FORMAT
 # ============================================================================
+
+
+def _inject_cors_headers(response: JSONResponse, request: Request) -> JSONResponse:
+    """
+    Manually add CORS headers to error responses.
+
+    Needed because ServerErrorMiddleware (which handles bare Exception handlers)
+    sits above CORSMiddleware in the Starlette stack, so its responses never
+    pass through CORSMiddleware's header injection.
+    """
+    origin = request.headers.get("origin")
+    if origin and origin in settings.BACKEND_CORS_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 
 def create_error_response(
@@ -164,11 +180,12 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError) -
         exc_info=True
     )
 
-    return create_error_response(
+    response = create_error_response(
         error_code="DATABASE_ERROR",
         message="A database error occurred. Please try again later.",
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     )
+    return _inject_cors_headers(response, request)
 
 
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -187,11 +204,12 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
         exc_info=True
     )
 
-    return create_error_response(
+    response = create_error_response(
         error_code="INTERNAL_SERVER_ERROR",
         message="An unexpected error occurred. Please try again later.",
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     )
+    return _inject_cors_headers(response, request)
 
 
 # ============================================================================

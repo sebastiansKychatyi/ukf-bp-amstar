@@ -106,24 +106,28 @@ class ChallengeService(BaseService[Challenge]):
 
         Returns (items, total_count) for pagination.
         """
-        query = self.db.query(Challenge).options(
-            joinedload(Challenge.challenger),
-            joinedload(Challenge.opponent),
-        )
+        # Base filter query (no joinedload — avoids COUNT over JOIN giving inflated totals)
+        filter_query = self.db.query(Challenge)
 
         if status:
-            query = query.filter(Challenge.status == status)
+            filter_query = filter_query.filter(Challenge.status == status)
         if team_id:
-            query = query.filter(
+            filter_query = filter_query.filter(
                 or_(
                     Challenge.challenger_id == team_id,
                     Challenge.opponent_id == team_id,
                 )
             )
 
-        total = query.count()
+        total = filter_query.count()
+
+        # Separate fetch query with eager loading
         items = (
-            query
+            filter_query
+            .options(
+                joinedload(Challenge.challenger),
+                joinedload(Challenge.opponent),
+            )
             .order_by(Challenge.created_at.desc())
             .offset(skip)
             .limit(limit)

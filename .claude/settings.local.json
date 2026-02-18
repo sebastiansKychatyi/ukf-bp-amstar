@@ -12,7 +12,16 @@
       "Bash(curl:*)",
       "Bash(cat:*)",
       "Bash(alembic revision:*)",
-      "Bash(alembic upgrade:*)"
+      "Bash(alembic upgrade:*)",
+      "Bash(cmd /c \"dir C:\\\\Users\\\\ninja\\\\Desktop\\\\AmStar\\\\AmStars\")",
+      "Bash(cmd /c \"dir /a C:\\\\Users\\\\ninja\\\\Desktop\\\\AmStar\\\\AmStars\")",
+      "Bash(cmd /c \"cd C:\\\\Users\\\\ninja\\\\Desktop\\\\AmStar\\\\AmStars && dir /a\")",
+      "Bash(cmd /c \"dir /a /b C:\\\\Users\\\\ninja\\\\Desktop\\\\AmStar\\\\AmStars 2>&1\")",
+      "Bash(cmd /c \"dir /a /b /s C:\\\\Users\\\\ninja\\\\Desktop\\\\AmStar\\\\AmStars\\\\*.env 2>&1 & dir /a /b /s C:\\\\Users\\\\ninja\\\\Desktop\\\\AmStar\\\\AmStars\\\\docker-compose* 2>&1\")",
+      "Bash(git -C \"C:/Users/ninja/Desktop/AmStar/AmStars\" ls-files --others --cached --exclude-standard)",
+      "Bash(git -C \"C:/Users/ninja/Desktop/AmStar/AmStars\" ls-files)",
+      "Bash(cmd /c \"git ls-files\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ninja\\\\Desktop\\\\AmStar\\\\AmStars && git ls-files\")"
     ]
   }
 }

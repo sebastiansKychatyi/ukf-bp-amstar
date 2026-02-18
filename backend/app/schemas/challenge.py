@@ -28,7 +28,7 @@ class TeamBrief(BaseModel):
     id: int
     name: str
     city: Optional[str] = None
-    rating: int = 1000
+    rating: Optional[int] = 1000
 
     class Config:
         from_attributes = True
