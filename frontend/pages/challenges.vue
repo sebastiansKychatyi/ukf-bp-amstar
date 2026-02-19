@@ -538,7 +538,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onErrorCaptured, watch } from 'vue'
 
 definePageMeta({
   middleware: ['auth'],
@@ -639,7 +639,9 @@ const fetchChallenges = async () => {
     const data = await $fetch<any>(url, { headers: getAuthHeaders() })
     challenges.value = data.items || []
   } catch (err: any) {
-    error.value = err.data?.detail || 'Failed to load challenges'
+    // Backend returns { error: { message } } from our custom handler,
+    // or { detail } from FastAPI's default HTTPException format.
+    error.value = err.data?.error?.message || err.data?.detail || 'Failed to load challenges'
   } finally {
     loading.value = false
   }
@@ -649,7 +651,10 @@ const fetchTeams = async () => {
   try {
     const data = await $fetch<any[]>(`${apiBase.value}/teams`, { headers: getAuthHeaders() })
     availableTeams.value = data
-  } catch { /* ignore */ }
+  } catch (err: any) {
+    // Non-critical — captain can still view challenges, just can't create new ones.
+    console.warn('Could not load teams for challenge creation:', err?.data?.error?.message || err?.message)
+  }
 }
 
 // Actions
@@ -890,6 +895,15 @@ const showMessage = (message: string, color: string) => {
   snackbarColor.value = color
   showSnackbar.value = true
 }
+
+// Catch any unexpected component-level throw and surface it as a UI error
+// instead of letting it propagate to Nuxt's module loader (which produces the
+// confusing "Failed to fetch dynamically imported module" error in the console).
+onErrorCaptured((err: unknown) => {
+  console.error('[challenges] uncaught component error:', err)
+  error.value = err instanceof Error ? err.message : 'An unexpected error occurred'
+  return false // prevent further propagation
+})
 
 watch([statusFilter, viewMode], () => fetchChallenges())
 
