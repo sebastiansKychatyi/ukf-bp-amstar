@@ -18,8 +18,18 @@ class Challenge(Base):
     challenger_id = Column(Integer, ForeignKey("team.id"), nullable=False)
     opponent_id = Column(Integer, ForeignKey("team.id"), nullable=False)
     status = Column(
-        SQLEnum(ChallengeStatus, values_callable=lambda x: [e.value for e in x]),
+        # name="challengestatus" — явно привязываем к существующему PG-типу.
+        # Без name= SQLAlchemy деривирует имя из класса, но лучше быть явным:
+        # так autogenerate не создаст дублирующий тип с другим именем.
+        # values_callable гарантирует, что в БД уходят .value (строчные строки),
+        # а не имена членов enum (UPPERCASE) — что и стало причиной DataError.
+        SQLEnum(
+            ChallengeStatus,
+            name="challengestatus",
+            values_callable=lambda x: [e.value for e in x],
+        ),
         default=ChallengeStatus.PENDING,
+        nullable=True,
     )
     match_date = Column(DateTime)
     location = Column(String)

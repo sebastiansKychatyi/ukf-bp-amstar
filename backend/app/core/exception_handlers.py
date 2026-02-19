@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from sqlalchemy.exc import (
+    DataError,
     InterfaceError,
     OperationalError,
     SQLAlchemyError,
@@ -168,6 +169,64 @@ async def validation_exception_handler(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         details={"errors": errors}
     )
+
+
+async def data_error_handler(request: Request, exc: DataError) -> JSONResponse:
+    """
+    Handle SQLAlchemy DataError → HTTP 400 Bad Request.
+
+    DataError покрывает ошибки несоответствия типов данных на стороне PostgreSQL:
+      - invalid input value for enum (неверное значение ENUM)
+      - numeric field overflow (число вне диапазона колонки)
+      - invalid input syntax for type integer (строка вместо числа)
+      - value too long for type character varying(N)
+
+    Все они вызваны некорректными входными данными (клиентская ошибка),
+    а не проблемой инфраструктуры, поэтому правильный статус — 400, не 503.
+
+    Starlette ищет хендлер по MRO исключения:
+      DataError → DatabaseError → SQLAlchemyError
+    Поэтому этот хендлер сработает РАНЬШЕ общего sqlalchemy_exception_handler
+    для любого DataError, независимо от порядка регистрации.
+    """
+    request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
+
+    # Извлекаем pgcode из psycopg2-оригинала для точного логирования.
+    # Никогда не отдаём pgcode клиенту — это внутренняя деталь реализации.
+    orig = getattr(exc, "orig", None)
+    pgcode = getattr(orig, "pgcode", "unknown")
+
+    # Карта pgcode → читаемое описание для лога дежурного инженера
+    _pgcode_hints = {
+        "22P02": "Invalid text representation (enum/type mismatch). Check Python enum values vs DB enum.",
+        "22003": "Numeric value out of range. Check column size constraints.",
+        "22001": "String too long for column. Check VARCHAR(N) limits.",
+        "22007": "Invalid datetime format.",
+        "22008": "Datetime field overflow.",
+    }
+    hint = _pgcode_hints.get(pgcode, f"PostgreSQL DataError pgcode={pgcode}.")
+
+    logger.warning(
+        "DataError: invalid data sent to PostgreSQL [pgcode=%s]",
+        pgcode,
+        extra={
+            "request_id": request_id,
+            "path": request.url.path,
+            "method": request.method,
+            "pgcode": pgcode,
+            "hint": hint,
+            "db_orig": str(orig)[:300],
+        },
+        exc_info=True,
+    )
+
+    response = create_error_response(
+        error_code="INVALID_DATA_FORMAT",
+        message="The request contains a value that is not accepted by the database.",
+        status_code=status.HTTP_400_BAD_REQUEST,
+        details={"hint": hint} if settings.ENVIRONMENT == "development" else None,
+    )
+    return _inject_cors_headers(response, request)
 
 
 def _classify_db_error(exc: SQLAlchemyError) -> dict:
@@ -411,7 +470,11 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(ValidationError, validation_exception_handler)
 
-    # Database exceptions
+    # Database exceptions — порядок важен для подклассов:
+    # Starlette ищет по MRO, поэтому DataError (подкласс SQLAlchemyError)
+    # будет найден раньше общего обработчика вне зависимости от порядка.
+    # Тем не менее регистрируем от частного к общему — явнее читается.
+    app.add_exception_handler(DataError, data_error_handler)
     app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
 
     # Catch-all for unexpected exceptions
