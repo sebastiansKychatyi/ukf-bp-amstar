@@ -774,7 +774,8 @@ const handleAction = async (challenge: any, action: string) => {
     showMessage(`Challenge ${action}ed successfully!`, 'success')
     await fetchChallenges()
   } catch (err: any) {
-    showMessage(err.data?.detail || `Failed to ${action} challenge`, 'error')
+    // Наш handler: { error: { message } } | FastAPI HTTPException: { detail }
+    showMessage(err.data?.error?.message || err.data?.detail || `Failed to ${action} challenge`, 'error')
   } finally {
     actionLoading.value = null
   }
@@ -797,7 +798,13 @@ const createChallenge = async () => {
     showMessage('Challenge sent!', 'success')
     await fetchChallenges()
   } catch (err: any) {
-    showMessage(err.data?.detail || 'Failed to create challenge', 'error')
+    // Наш ValidationError handler: { error: { message, details.errors[] } }
+    // Извлекаем первую ошибку поля, если есть — удобно для дебага
+    const validationErrors: any[] = err.data?.error?.details?.errors ?? []
+    const firstFieldError = validationErrors.length
+      ? `${validationErrors[0].field}: ${validationErrors[0].message}`
+      : null
+    showMessage(firstFieldError || err.data?.error?.message || err.data?.detail || 'Failed to create challenge', 'error')
   } finally {
     submitting.value = false
   }
@@ -862,7 +869,7 @@ const submitResult = async () => {
 
     await fetchChallenges()
   } catch (err: any) {
-    showMessage(err.data?.detail || 'Failed to submit result', 'error')
+    showMessage(err.data?.error?.message || err.data?.detail || 'Failed to submit result', 'error')
   } finally {
     submitting.value = false
   }

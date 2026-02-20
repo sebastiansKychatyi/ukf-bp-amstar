@@ -66,31 +66,28 @@ def _handle(exc: Exception):
 def list_challenges(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    status_filter: Optional[str] = Query(None, alias="status"),
-    team_id: Optional[int] = Query(None),
+    # Тип Optional[ChallengeStatus] вместо Optional[str] даёт три преимущества:
+    # 1. FastAPI автоматически валидирует значение и возвращает 422 (не 400)
+    #    с полным контекстом ошибки через наш validation_exception_handler
+    # 2. В OpenAPI schema появляется enum с допустимыми значениями
+    # 3. Убирает ручной try/except ValueError — меньше кода, меньше ошибок
+    # Пример ошибки при ?status=invalid:
+    #   {"error": {"code": "VALIDATION_ERROR", "details": {"errors": [{
+    #     "field": "status", "message": "Input should be 'pending', 'accepted', ..."}]}}}
+    status_filter: Optional[ChallengeStatus] = Query(None, alias="status"),
+    team_id: Optional[int] = Query(None, ge=1),
     db: Session = Depends(get_db),
 ):
     """
     Get paginated list of challenges.
 
     Optional filters:
-    - **status**: pending | accepted | rejected | completed | cancelled
-    - **team_id**: show only challenges involving this team
+    - **status**: `pending` | `accepted` | `rejected` | `completed` | `cancelled`
+    - **team_id**: show only challenges involving this team (integer ID)
     """
     svc = ChallengeService(db)
-
-    parsed_status = None
-    if status_filter:
-        try:
-            parsed_status = ChallengeStatus(status_filter)
-        except ValueError:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid status: {status_filter}",
-            )
-
     items, total = svc.get_challenges(
-        skip=skip, limit=limit, status=parsed_status, team_id=team_id
+        skip=skip, limit=limit, status=status_filter, team_id=team_id
     )
     return ChallengeListResponse(
         items=[ChallengeResponse.model_validate(c) for c in items],

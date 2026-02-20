@@ -12,20 +12,41 @@ class ChallengeStatus(str, enum.Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
+    @classmethod
+    def _missing_(cls, value: object) -> "ChallengeStatus | None":
+        """
+        Fallback для значений, не найденных в _value2member_map_.
+
+        Python вызывает _missing_ автоматически из Enum.__new__, когда
+        ChallengeStatus('COMPLETED') не находит 'COMPLETED' в карте значений.
+
+        Нормализуем к lowercase и ищем снова — это позволяет SQLAlchemy
+        прочитать любые legacy-записи с UPPERCASE статусами без LookupError.
+
+        Почему нужно даже после миграции:
+        - Защита от ручного INSERT/UPDATE в обход приложения
+        - Защита от data migration из внешних источников
+        - Страховка при будущих изменениях схемы
+        """
+        if isinstance(value, str):
+            normalized = value.lower()
+            for member in cls:
+                if member.value == normalized:
+                    return member
+        return None
+
 
 class Challenge(Base):
     id = Column(Integer, primary_key=True, index=True)
     challenger_id = Column(Integer, ForeignKey("team.id"), nullable=False)
     opponent_id = Column(Integer, ForeignKey("team.id"), nullable=False)
     status = Column(
-        # name="challengestatus" — явно привязываем к существующему PG-типу.
-        # Без name= SQLAlchemy деривирует имя из класса, но лучше быть явным:
-        # так autogenerate не создаст дублирующий тип с другим именем.
-        # values_callable гарантирует, что в БД уходят .value (строчные строки),
-        # а не имена членов enum (UPPERCASE) — что и стало причиной DataError.
         SQLEnum(
             ChallengeStatus,
             name="challengestatus",
+            native_enum=False,      # Store as VARCHAR(20) — no PostgreSQL ENUM type
+            create_constraint=False,  # Python enum already validates; skip DB CHECK
+            length=20,
             values_callable=lambda x: [e.value for e in x],
         ),
         default=ChallengeStatus.PENDING,
