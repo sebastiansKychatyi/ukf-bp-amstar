@@ -778,7 +778,15 @@ const submitJoinRequest = async () => {
     showJoinDialog.value = false
     showMessage('Join request sent successfully!', 'success')
   } catch (err: any) {
-    showMessage(err.data?.detail || 'Failed to send join request', 'error')
+    const errorCode = err.data?.error?.code
+    const errorMsg = err.data?.error?.message || err.data?.detail || 'Failed to send join request'
+
+    if (errorCode === 'JOIN_REQUEST_ALREADY_EXISTS') {
+      showJoinDialog.value = false
+      showMessage('You already have a pending request for this team.', 'warning')
+    } else {
+      showMessage(errorMsg, 'error')
+    }
   } finally {
     submitting.value = false
   }

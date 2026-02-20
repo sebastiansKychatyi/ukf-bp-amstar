@@ -371,7 +371,7 @@ const fetchTeams = async () => {
     })
     teams.value = data
   } catch (err: any) {
-    error.value = err.data?.detail || 'Failed to load teams'
+    error.value = err.data?.error?.message || err.data?.detail || 'Failed to load teams'
   } finally {
     loading.value = false
   }
@@ -468,7 +468,15 @@ const submitJoinRequest = async () => {
     showJoinDialog.value = false
     showMessage('Join request sent!', 'success')
   } catch (err: any) {
-    showMessage(err.data?.detail || 'Failed to send request', 'error')
+    const errorCode = err.data?.error?.code
+    const errorMsg = err.data?.error?.message || err.data?.detail || 'Failed to send request'
+
+    if (errorCode === 'JOIN_REQUEST_ALREADY_EXISTS') {
+      showJoinDialog.value = false
+      showMessage('You already have a pending request for this team.', 'warning')
+    } else {
+      showMessage(errorMsg, 'error')
+    }
   } finally {
     submitting.value = false
   }

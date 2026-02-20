@@ -93,9 +93,14 @@ export default defineNuxtConfig({
         usePolling: true,  // Required for file watching in Docker/WSL
         interval: 1000,
       },
+      // Explicit HMR config prevents WebSocket connection failures on Windows/WSL2.
+      // Port 24678 is the Vite HMR fallback port; clientPort tells the browser
+      // where to connect. Both must match for hot-reload to work reliably.
       hmr: {
         protocol: 'ws',
         host: 'localhost',
+        port: 24678,
+        clientPort: 24678,
       },
     },
 

@@ -22,20 +22,32 @@ app = FastAPI(
 # Register exception handlers (must be done before middleware)
 register_exception_handlers(app)
 
-# Add security headers middleware
+# Middleware registration order — IMPORTANT:
+# Starlette processes middlewares in LIFO order (last added = outermost wrapper).
+# To handle CORS preflight (OPTIONS) before any rate-limiting or security checks,
+# CORS must be the LAST add_middleware call so it wraps everything else.
+#
+# Effective request pipeline:
+#   Request → CORSMiddleware → RateLimitMiddleware → SecurityHeadersMiddleware → App
+#
+# When re-enabling the commented middlewares, keep them ABOVE the CORS block.
+
+# Security headers — innermost; applied after routing
 #app.add_middleware(
     #SecurityHeadersMiddleware,
     #enable_hsts=settings.ENVIRONMENT == "production",
 #)
 
-# Add rate limiting middleware
+# Rate limiting — middle layer; OPTIONS preflight never reaches here (CORS short-circuits)
 #app.add_middleware(
     #RateLimitMiddleware,
     #requests_per_minute=getattr(settings, 'RATE_LIMIT_REQUESTS', 100),
     #auth_requests_per_minute=getattr(settings, 'AUTH_RATE_LIMIT_REQUESTS', 5),
 #)
 
-# CORS middleware (should be last)
+# CORS — outermost; must be added last so it executes first on every request.
+# This ensures preflight OPTIONS responses always carry Access-Control-* headers,
+# preventing net::ERR_EMPTY_RESPONSE on cross-origin requests.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
