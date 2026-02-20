@@ -23,17 +23,17 @@ app = FastAPI(
 register_exception_handlers(app)
 
 # Add security headers middleware
-app.add_middleware(
-    SecurityHeadersMiddleware,
-    enable_hsts=settings.ENVIRONMENT == "production",
-)
+#app.add_middleware(
+    #SecurityHeadersMiddleware,
+    #enable_hsts=settings.ENVIRONMENT == "production",
+#)
 
 # Add rate limiting middleware
-app.add_middleware(
-    RateLimitMiddleware,
-    requests_per_minute=getattr(settings, 'RATE_LIMIT_REQUESTS', 100),
-    auth_requests_per_minute=getattr(settings, 'AUTH_RATE_LIMIT_REQUESTS', 5),
-)
+#app.add_middleware(
+    #RateLimitMiddleware,
+    #requests_per_minute=getattr(settings, 'RATE_LIMIT_REQUESTS', 100),
+    #auth_requests_per_minute=getattr(settings, 'AUTH_RATE_LIMIT_REQUESTS', 5),
+#)
 
 # CORS middleware (should be last)
 app.add_middleware(
