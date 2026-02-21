@@ -57,82 +57,112 @@
     <!-- Challenges List -->
     <v-row>
       <v-col cols="12">
-        <v-card v-if="loading" class="pa-8 text-center">
-          <v-progress-circular indeterminate color="primary" />
-          <p class="mt-4 text-medium-emphasis">Loading challenges...</p>
-        </v-card>
+        <!-- Loading skeletons -->
+        <template v-if="loading">
+          <v-skeleton-loader v-for="n in 3" :key="n" type="card" class="mb-3" height="120" />
+        </template>
 
-        <div v-else-if="challenges.length === 0" class="text-center pa-12">
-          <v-icon icon="mdi-sword-cross" size="64" color="grey-lighten-1" class="mb-4" />
-          <h3 class="text-h5 mb-2">No challenges found</h3>
+        <!-- Empty state -->
+        <div v-else-if="challenges.length === 0" class="text-center py-16">
+          <div class="challenge-empty-icon mb-5 mx-auto">
+            <v-icon icon="mdi-sword-cross" size="48" color="primary" />
+          </div>
+          <h3 class="text-h5 font-weight-bold mb-2">No challenges found</h3>
           <p class="text-medium-emphasis">
             {{ isCaptain ? 'Create the first challenge to get started!' : 'No challenges yet.' }}
           </p>
         </div>
 
-        <v-card v-for="challenge in challenges" :key="challenge.id" class="mb-3" elevation="2">
-          <v-card-text class="pa-4">
-            <v-row align="center">
-              <!-- Challenger -->
-              <v-col cols="12" sm="4" class="text-center">
-                <v-chip color="primary" variant="flat" class="mb-1">
-                  <v-icon start>mdi-shield</v-icon>
-                  {{ challenge.challenger?.name || 'Team' }}
-                </v-chip>
-                <div class="text-caption text-medium-emphasis">
-                  ELO: {{ challenge.challenger?.rating || 1000 }}
-                </div>
-              </v-col>
+        <!-- Challenge cards -->
+        <div
+          v-for="challenge in challenges"
+          :key="challenge.id"
+          class="challenge-card mb-3"
+          :class="`challenge-card--${challenge.status}`"
+        >
+          <v-card elevation="0" border class="overflow-hidden">
+            <div class="challenge-status-bar" :class="`status-${challenge.status}`" />
 
-              <!-- VS / Status -->
-              <v-col cols="12" sm="4" class="text-center">
-                <v-chip :color="getStatusColor(challenge.status)" variant="flat" class="mb-2">
-                  {{ challenge.status.toUpperCase() }}
-                </v-chip>
-                <div v-if="challenge.status === 'completed'" class="text-h5 font-weight-bold">
-                  {{ challenge.challenger_score }} - {{ challenge.opponent_score }}
-                </div>
-                <div v-else class="text-h5 font-weight-bold text-medium-emphasis">VS</div>
-                <div v-if="challenge.match_date" class="text-caption mt-1">
-                  <v-icon size="small">mdi-calendar</v-icon>
-                  {{ formatDate(challenge.match_date) }}
-                </div>
-                <div v-if="challenge.location" class="text-caption">
-                  <v-icon size="small">mdi-map-marker</v-icon>
-                  {{ challenge.location }}
-                </div>
-              </v-col>
+            <v-card-text class="pa-4">
+              <v-row align="center" no-gutters>
+                <!-- Challenger team -->
+                <v-col cols="5" class="text-center">
+                  <v-avatar size="44" color="primary" class="mb-2">
+                    <span class="text-subtitle-2 font-weight-black text-white">
+                      {{ getTeamInitials(challenge.challenger?.name) }}
+                    </span>
+                  </v-avatar>
+                  <div class="text-subtitle-2 font-weight-bold text-truncate px-1">
+                    {{ challenge.challenger?.name || 'Team' }}
+                  </div>
+                  <div class="text-caption text-medium-emphasis">
+                    ELO {{ challenge.challenger?.rating || 1000 }}
+                  </div>
+                </v-col>
 
-              <!-- Opponent -->
-              <v-col cols="12" sm="4" class="text-center">
-                <v-chip color="error" variant="flat" class="mb-1">
-                  <v-icon start>mdi-shield</v-icon>
-                  {{ challenge.opponent?.name || 'Team' }}
-                </v-chip>
-                <div class="text-caption text-medium-emphasis">
-                  ELO: {{ challenge.opponent?.rating || 1000 }}
-                </div>
-              </v-col>
-            </v-row>
-          </v-card-text>
+                <!-- Centre: status + score/VS + meta -->
+                <v-col cols="2" class="text-center">
+                  <v-chip
+                    :color="getStatusColor(challenge.status)"
+                    variant="tonal"
+                    size="x-small"
+                    class="mb-2 font-weight-bold"
+                  >
+                    {{ challenge.status.toUpperCase() }}
+                  </v-chip>
 
-          <!-- Actions -->
-          <v-card-actions v-if="getActions(challenge).length > 0">
-            <v-spacer />
-            <v-btn
-              v-for="action in getActions(challenge)"
-              :key="action.label"
-              :color="action.color"
-              :variant="action.variant || 'text'"
-              size="small"
-              :prepend-icon="action.icon"
-              :loading="actionLoading === `${challenge.id}-${action.action}`"
-              @click="handleAction(challenge, action.action)"
-            >
-              {{ action.label }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+                  <div v-if="challenge.status === 'completed'" class="text-h5 font-weight-black">
+                    {{ challenge.challenger_score }}<span class="text-medium-emphasis mx-1">–</span>{{ challenge.opponent_score }}
+                  </div>
+                  <div v-else class="text-h6 font-weight-black text-medium-emphasis">VS</div>
+
+                  <div v-if="challenge.match_date" class="text-caption text-medium-emphasis mt-1">
+                    <v-icon size="x-small">mdi-calendar</v-icon>
+                    {{ formatDate(challenge.match_date) }}
+                  </div>
+                  <div v-if="challenge.location" class="text-caption text-medium-emphasis">
+                    <v-icon size="x-small">mdi-map-marker</v-icon>
+                    {{ challenge.location }}
+                  </div>
+                </v-col>
+
+                <!-- Opponent team -->
+                <v-col cols="5" class="text-center">
+                  <v-avatar size="44" color="error" class="mb-2">
+                    <span class="text-subtitle-2 font-weight-black text-white">
+                      {{ getTeamInitials(challenge.opponent?.name) }}
+                    </span>
+                  </v-avatar>
+                  <div class="text-subtitle-2 font-weight-bold text-truncate px-1">
+                    {{ challenge.opponent?.name || 'Team' }}
+                  </div>
+                  <div class="text-caption text-medium-emphasis">
+                    ELO {{ challenge.opponent?.rating || 1000 }}
+                  </div>
+                </v-col>
+              </v-row>
+            </v-card-text>
+
+            <!-- Actions -->
+            <v-divider v-if="getActions(challenge).length > 0" />
+            <v-card-actions v-if="getActions(challenge).length > 0" class="pa-3">
+              <v-spacer />
+              <v-btn
+                v-for="action in getActions(challenge)"
+                :key="action.label"
+                :color="action.color"
+                :variant="action.variant || 'text'"
+                size="small"
+                rounded="lg"
+                :prepend-icon="action.icon"
+                :loading="actionLoading === `${challenge.id}-${action.action}`"
+                @click="handleAction(challenge, action.action)"
+              >
+                {{ action.label }}
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </div>
       </v-col>
     </v-row>
 
@@ -903,6 +933,11 @@ const showMessage = (message: string, color: string) => {
   showSnackbar.value = true
 }
 
+const getTeamInitials = (name?: string) => {
+  if (!name) return '?'
+  return name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+}
+
 // Catch any unexpected component-level throw and surface it as a UI error
 // instead of letting it propagate to Nuxt's module loader (which produces the
 // confusing "Failed to fetch dynamically imported module" error in the console).
@@ -919,3 +954,28 @@ onMounted(() => {
   fetchTeams()
 })
 </script>
+
+<style scoped>
+/* ── Challenge card status stripe ── */
+.challenge-status-bar {
+  height: 4px;
+  width: 100%;
+}
+
+.status-pending    { background: rgb(var(--v-theme-warning)); }
+.status-accepted   { background: rgb(var(--v-theme-info)); }
+.status-completed  { background: rgb(var(--v-theme-success)); }
+.status-rejected   { background: rgb(var(--v-theme-error)); }
+.status-cancelled  { background: #9e9e9e; }
+
+/* ── Empty state icon ── */
+.challenge-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgb(var(--v-theme-surface-variant));
+}
+</style>

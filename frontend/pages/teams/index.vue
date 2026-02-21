@@ -5,7 +5,7 @@
       <v-col cols="12">
         <div class="d-flex justify-space-between align-center flex-wrap ga-2">
           <div>
-            <h1 :class="$vuetify.display.xs ? 'text-h4' : 'text-h3'" class="font-weight-bold mb-2">
+            <h1 :class="$vuetify.display.xs ? 'text-h4' : 'text-h3'" class="font-weight-bold mb-1">
               <v-icon icon="mdi-shield-account" :size="$vuetify.display.xs ? 'default' : 'large'" class="mr-2" />
               Teams
             </h1>
@@ -14,12 +14,19 @@
             </p>
           </div>
 
-          <div class="d-flex ga-2">
+          <div class="d-flex ga-2 align-center">
+            <!-- View Toggle -->
+            <v-btn-toggle v-model="viewMode" mandatory density="comfortable" variant="outlined" rounded="lg">
+              <v-btn value="table" icon="mdi-format-list-bulleted" title="Table view" />
+              <v-btn value="grid" icon="mdi-view-grid" title="Grid view" />
+            </v-btn-toggle>
+
             <!-- My Team Button -->
             <v-btn
               v-if="isAuthenticated"
               color="secondary"
               variant="outlined"
+              rounded="lg"
               prepend-icon="mdi-shield-home"
               @click="goToMyTeam"
             >
@@ -30,6 +37,7 @@
             <v-btn
               v-if="canCreateTeam"
               color="primary"
+              rounded="lg"
               prepend-icon="mdi-plus"
               @click="showCreateDialog = true"
             >
@@ -49,27 +57,28 @@
       </v-col>
     </v-row>
 
-    <!-- Teams Table -->
-    <v-row>
-      <v-col cols="12">
-        <v-card elevation="2">
-          <v-card-title>
-            <v-text-field
-              v-model="search"
-              prepend-inner-icon="mdi-magnify"
-              label="Search teams"
-              single-line
-              hide-details
-              variant="outlined"
-              density="comfortable"
-              class="mb-4"
-            />
-          </v-card-title>
+    <!-- Search bar (shared) -->
+    <v-row class="mt-2">
+      <v-col cols="12" sm="6" md="4">
+        <v-text-field
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          label="Search teams"
+          single-line
+          hide-details
+          clearable
+          rounded="lg"
+        />
+      </v-col>
+    </v-row>
 
+    <!-- ── TABLE VIEW ── -->
+    <v-row v-if="viewMode === 'table'" class="mt-2">
+      <v-col cols="12">
+        <v-card elevation="0" border>
           <v-data-table
             :headers="headers"
-            :items="teams"
-            :search="search"
+            :items="filteredTeams"
             :items-per-page="10"
             :loading="loading"
             class="elevation-0"
@@ -81,7 +90,9 @@
               <div class="d-flex align-center cursor-pointer">
                 <v-avatar size="32" class="mr-2" color="primary">
                   <v-img v-if="item.logo_url" :src="item.logo_url" />
-                  <v-icon v-else icon="mdi-shield" size="20" />
+                  <span v-else class="text-caption font-weight-bold text-white">
+                    {{ getInitials(item.name) }}
+                  </span>
                 </v-avatar>
                 <span class="font-weight-medium text-primary">{{ item.name }}</span>
               </div>
@@ -135,10 +146,95 @@
       </v-col>
     </v-row>
 
+    <!-- ── GRID VIEW ── -->
+    <template v-else>
+      <!-- Loading grid skeletons -->
+      <v-row v-if="loading" class="mt-2">
+        <v-col v-for="n in 8" :key="n" cols="12" sm="6" md="4" lg="3">
+          <v-skeleton-loader type="card" height="220" />
+        </v-col>
+      </v-row>
+
+      <!-- Empty grid state -->
+      <v-row v-else-if="filteredTeams.length === 0" class="mt-4">
+        <v-col cols="12" class="text-center py-12">
+          <v-icon icon="mdi-shield-off" size="64" color="medium-emphasis" class="mb-4" />
+          <h3 class="text-h5 mb-2">No teams found</h3>
+          <p class="text-medium-emphasis">Try a different search term</p>
+        </v-col>
+      </v-row>
+
+      <!-- Team cards grid -->
+      <v-row v-else class="mt-2">
+        <v-col
+          v-for="team in filteredTeams"
+          :key="team.id"
+          cols="12" sm="6" md="4" lg="3"
+        >
+          <v-card
+            class="team-grid-card h-100 cursor-pointer"
+            elevation="0"
+            border
+            @click="navigateToTeam(team)"
+          >
+            <!-- Card header with gradient -->
+            <div class="team-grid-header d-flex align-center justify-center">
+              <v-avatar size="56" color="white" class="team-grid-avatar">
+                <v-img v-if="team.logo_url" :src="team.logo_url" />
+                <span v-else class="text-h6 font-weight-black text-primary">{{ getInitials(team.name) }}</span>
+              </v-avatar>
+            </div>
+
+            <v-card-text class="text-center pt-3 pb-2">
+              <div class="text-subtitle-1 font-weight-bold mb-1 text-truncate">{{ team.name }}</div>
+              <div class="d-flex justify-center align-center ga-1 mb-3">
+                <v-chip v-if="team.city" size="x-small" variant="outlined">
+                  <v-icon start size="x-small">mdi-map-marker</v-icon>
+                  {{ team.city }}
+                </v-chip>
+                <v-chip size="x-small" :color="getRatingColor(team.rating_score)">
+                  <v-icon start size="x-small">mdi-star</v-icon>
+                  {{ team.rating_score || 1000 }}
+                </v-chip>
+              </div>
+              <div class="d-flex justify-center ga-2 text-caption text-medium-emphasis">
+                <span>
+                  <v-icon size="x-small">mdi-account-group</v-icon>
+                  {{ team.member_count || 0 }} members
+                </span>
+              </div>
+            </v-card-text>
+
+            <v-card-actions class="justify-center pa-3 pt-0 ga-1">
+              <v-btn
+                size="small"
+                color="primary"
+                variant="tonal"
+                rounded="lg"
+                @click.stop="navigateToTeam(team)"
+              >
+                View
+              </v-btn>
+              <v-btn
+                v-if="canJoinTeam(team)"
+                size="small"
+                color="success"
+                variant="outlined"
+                rounded="lg"
+                @click.stop="openJoinDialog(team)"
+              >
+                Join
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </template>
+
     <!-- Create Team Dialog -->
     <v-dialog v-model="showCreateDialog" max-width="600" persistent>
       <v-card>
-        <v-card-title class="d-flex align-center">
+        <v-card-title class="d-flex align-center pa-4">
           <v-icon class="mr-2">mdi-plus</v-icon>
           Create New Team
         </v-card-title>
@@ -203,11 +299,12 @@
           </v-form>
         </v-card-text>
 
-        <v-card-actions>
+        <v-card-actions class="pa-4">
           <v-spacer />
           <v-btn variant="text" @click="closeCreateDialog">Cancel</v-btn>
           <v-btn
             color="primary"
+            rounded="lg"
             :loading="submitting"
             :disabled="!createFormValid"
             @click="createTeam"
@@ -221,7 +318,7 @@
     <!-- Join Team Dialog -->
     <v-dialog v-model="showJoinDialog" max-width="500" persistent>
       <v-card>
-        <v-card-title class="d-flex align-center">
+        <v-card-title class="d-flex align-center pa-4">
           <v-icon class="mr-2">mdi-account-plus</v-icon>
           Join {{ selectedTeam?.name }}
         </v-card-title>
@@ -242,10 +339,10 @@
           />
         </v-card-text>
 
-        <v-card-actions>
+        <v-card-actions class="pa-4">
           <v-spacer />
           <v-btn variant="text" @click="showJoinDialog = false">Cancel</v-btn>
-          <v-btn color="success" :loading="submitting" @click="submitJoinRequest">
+          <v-btn color="success" rounded="lg" :loading="submitting" @click="submitJoinRequest">
             Send Request
           </v-btn>
         </v-card-actions>
@@ -276,6 +373,16 @@ const submitting = ref(false)
 const error = ref<string | null>(null)
 const search = ref('')
 
+// View mode persisted in localStorage
+const viewMode = ref<'table' | 'grid'>(
+  (typeof localStorage !== 'undefined' && localStorage.getItem('teams-view') as 'table' | 'grid') || 'table'
+)
+
+// Watch and persist view mode changes
+watch(viewMode, (val) => {
+  if (typeof localStorage !== 'undefined') localStorage.setItem('teams-view', val)
+})
+
 // Dialog states
 const showCreateDialog = ref(false)
 const showJoinDialog = ref(false)
@@ -292,7 +399,7 @@ const newTeam = ref({
   longitude: null as number | null,
 })
 
-// Geocoding state (Create dialog)
+// Geocoding state
 const geocoding = ref(false)
 const geocodeResult = ref<string | null>(null)
 const geocodeError = ref<string | null>(null)
@@ -319,11 +426,22 @@ const headers = [
 ]
 
 // Computed
-const canCreateTeam = computed(() => {
-  return isAuthenticated.value && isCaptain.value
+const canCreateTeam = computed(() => isAuthenticated.value && isCaptain.value)
+
+const filteredTeams = computed(() => {
+  if (!search.value) return teams.value
+  const q = search.value.toLowerCase()
+  return teams.value.filter(t =>
+    t.name?.toLowerCase().includes(q) || t.city?.toLowerCase().includes(q)
+  )
 })
 
 // Methods
+const getInitials = (name: string) => {
+  if (!name) return '?'
+  return name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+}
+
 const canJoinTeam = (team: any) => {
   if (!isAuthenticated.value || !user.value) return false
   if (team.captain_id === user.value.id) return false
@@ -441,7 +559,6 @@ const createTeam = async () => {
 
     closeCreateDialog()
     showMessage('Team created successfully!', 'success')
-    // Navigate to the new team's page
     router.push(`/teams/${data.id}`)
   } catch (err: any) {
     showMessage(err.data?.detail || 'Failed to create team', 'error')
@@ -488,6 +605,8 @@ const showMessage = (message: string, color: string) => {
   showSnackbar.value = true
 }
 
+import { watch } from 'vue'
+
 onMounted(() => {
   fetchTeams()
 })
@@ -499,5 +618,26 @@ onMounted(() => {
 }
 .cursor-pointer {
   cursor: pointer;
+}
+
+/* ── Team grid cards ── */
+.team-grid-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 16px !important;
+}
+
+.team-grid-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.team-grid-header {
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
+  min-height: 88px;
+}
+
+.team-grid-avatar {
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
 }
 </style>

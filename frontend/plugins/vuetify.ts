@@ -85,8 +85,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     // Global component defaults (consistent UI across app)
     defaults: {
       VCard: {
-        elevation: 2,
-        rounded: 'lg',
+        elevation: 0,
+        rounded: 'xl',
       },
       VBtn: {
         elevation: 0,
@@ -97,21 +97,33 @@ export default defineNuxtPlugin((nuxtApp) => {
         variant: 'outlined',
         color: 'primary',
         density: 'comfortable',
+        rounded: 'lg',
       },
       VSelect: {
         variant: 'outlined',
         color: 'primary',
         density: 'comfortable',
+        rounded: 'lg',
       },
       VTextarea: {
         variant: 'outlined',
         color: 'primary',
+        rounded: 'lg',
+      },
+      VChip: {
+        rounded: 'lg',
+      },
+      VAlert: {
+        rounded: 'lg',
       },
       VDataTable: {
         hover: true,
       },
       VAppBar: {
         elevation: 0,
+      },
+      VNavigationDrawer: {
+        rounded: 'e-xl',
       },
     },
 
