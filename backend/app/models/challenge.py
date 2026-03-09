@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 import enum
 from app.db.base_class import Base
 
@@ -14,20 +14,7 @@ class ChallengeStatus(str, enum.Enum):
 
     @classmethod
     def _missing_(cls, value: object) -> "ChallengeStatus | None":
-        """
-        Fallback для значений, не найденных в _value2member_map_.
-
-        Python вызывает _missing_ автоматически из Enum.__new__, когда
-        ChallengeStatus('COMPLETED') не находит 'COMPLETED' в карте значений.
-
-        Нормализуем к lowercase и ищем снова — это позволяет SQLAlchemy
-        прочитать любые legacy-записи с UPPERCASE статусами без LookupError.
-
-        Почему нужно даже после миграции:
-        - Защита от ручного INSERT/UPDATE в обход приложения
-        - Защита от data migration из внешних источников
-        - Страховка при будущих изменениях схемы
-        """
+        """Normalise legacy uppercase values stored in the database."""
         if isinstance(value, str):
             normalized = value.lower()
             for member in cls:
@@ -44,8 +31,8 @@ class Challenge(Base):
         SQLEnum(
             ChallengeStatus,
             name="challengestatus",
-            native_enum=False,      # Store as VARCHAR(20) — no PostgreSQL ENUM type
-            create_constraint=False,  # Python enum already validates; skip DB CHECK
+            native_enum=False,
+            create_constraint=False,
             length=20,
             values_callable=lambda x: [e.value for e in x],
         ),
@@ -56,9 +43,8 @@ class Challenge(Base):
     location = Column(String)
     challenger_score = Column(Integer)
     opponent_score = Column(Integer)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
-    # Relationships
     challenger = relationship("Team", foreign_keys=[challenger_id], back_populates="challenges_sent")
     opponent = relationship("Team", foreign_keys=[opponent_id], back_populates="challenges_received")

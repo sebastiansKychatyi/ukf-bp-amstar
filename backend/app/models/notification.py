@@ -10,7 +10,7 @@ Stores in-app notifications for users triggered by system events:
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 import enum
 
 from app.db.base_class import Base
@@ -49,7 +49,7 @@ class Notification(Base):
     message = Column(String(500), nullable=False)
     is_read = Column(Boolean, default=False, nullable=False)
     related_id = Column(Integer, nullable=True)  # challenge_id, join_request_id, etc.
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     user = relationship("User", backref="notifications")

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 from datetime import datetime
 
@@ -34,8 +34,7 @@ class CaptainInfo(BaseModel):
     username: str
     full_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TeamResponse(TeamBase):
@@ -51,16 +50,14 @@ class TeamResponse(TeamBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TeamWithCaptain(TeamResponse):
     """Team response including captain details"""
     captain: Optional[CaptainInfo] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Team(TeamResponse):
@@ -72,8 +69,7 @@ class TeamDetailResponse(TeamResponse):
     """Detailed team response with captain info for team detail page"""
     captain: Optional[CaptainInfo] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MatchHistoryItem(BaseModel):
@@ -88,8 +84,7 @@ class MatchHistoryItem(BaseModel):
     result: Optional[str] = None  # "W", "L", "D"
     status: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TeamStatsSummary(BaseModel):

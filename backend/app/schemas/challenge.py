@@ -1,31 +1,22 @@
-"""
-Challenge Schemas
+"""Pydantic schemas for the Challenge system."""
 
-Pydantic schemas for the Challenge / Battle system.
-"""
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 from datetime import datetime
 
-# Импортируем Python-enum отсюда, чтобы:
-# 1. ChallengeResponse.status имел правильный тип (не просто str)
-# 2. FastAPI мог автоматически валидировать значения query-параметра ?status=
-# 3. OpenAPI schema показывала допустимые значения
 from app.models.challenge import ChallengeStatus
 
 
 class ChallengeCreate(BaseModel):
-    """Schema for creating a new challenge (Captain → Opponent)."""
+    """Schema for creating a new challenge."""
     opponent_id: int = Field(..., gt=0, description="ID of the team being challenged")
     match_date: Optional[datetime] = Field(None, description="Proposed match date/time (ISO 8601)")
     location: Optional[str] = Field(None, max_length=200, description="Proposed match venue")
-    # message хранится в схеме для будущего использования (сейчас ignored в сервисе)
     message: Optional[str] = Field(None, max_length=500, description="Optional message to opponent")
 
 
 class ChallengeResultSubmit(BaseModel):
-    """Schema for recording match result after the game."""
+    """Schema for recording match result."""
     challenger_score: int = Field(..., ge=0, le=99, description="Goals scored by challenger")
     opponent_score: int = Field(..., ge=0, le=99, description="Goals scored by opponent")
 
@@ -37,8 +28,7 @@ class TeamBrief(BaseModel):
     city: Optional[str] = None
     rating: Optional[int] = 1000
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ChallengeResponse(BaseModel):
@@ -46,11 +36,6 @@ class ChallengeResponse(BaseModel):
     id: int
     challenger_id: int
     opponent_id: int
-    # ChallengeStatus вместо str — три преимущества:
-    # 1. Pydantic валидирует при создании response (отловит несоответствие DB↔enum)
-    # 2. OpenAPI schema показывает enum values в Swagger UI
-    # 3. use_enum_values=True гарантирует, что клиент получает строку 'pending',
-    #    а не Python repr 'ChallengeStatus.PENDING'
     status: ChallengeStatus
     match_date: Optional[datetime] = None
     location: Optional[str] = None
@@ -58,17 +43,10 @@ class ChallengeResponse(BaseModel):
     opponent_score: Optional[int] = None
     created_at: datetime
     updated_at: datetime
-
-    # Nested team info (populated via joinedload)
     challenger: Optional[TeamBrief] = None
     opponent: Optional[TeamBrief] = None
 
-    class Config:
-        from_attributes = True
-        # Сериализуем enum как его .value ('pending'), не как Python объект.
-        # Без этого Pydantic v1 мог бы вернуть строку 'ChallengeStatus.PENDING'.
-        # В Pydantic v2 + str-enum это лишний страховочный пояс.
-        use_enum_values = True
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
 
 class ChallengeListResponse(BaseModel):
@@ -80,7 +58,7 @@ class ChallengeListResponse(BaseModel):
 
 
 class EloUpdateResult(BaseModel):
-    """Result of ELO recalculation after a match."""
+    """ELO rating change for one team after a match."""
     team_id: int
     team_name: str
     old_rating: int

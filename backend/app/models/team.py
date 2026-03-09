@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.db.base_class import Base
 
 
@@ -15,8 +15,8 @@ class Team(Base):
     founded_date = Column(DateTime)
     logo_url = Column(String)
     rating = Column(Integer, default=1000)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships (lazy loading to avoid circular import issues)
     captain = relationship("User", back_populates="captained_team", foreign_keys=[captain_id])

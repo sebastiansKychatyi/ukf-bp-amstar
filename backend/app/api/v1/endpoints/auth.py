@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.api.deps import get_db, get_current_active_user, oauth2_scheme
 from app.core.security import create_access_token, verify_password, get_password_hash
 from app.core.config import settings
@@ -83,7 +83,7 @@ def logout(
 
         if exp:
             # Calculate remaining TTL for the token
-            current_time = datetime.utcnow().timestamp()
+            current_time = datetime.now(timezone.utc).timestamp()
             ttl = int(exp - current_time)
 
             if ttl > 0:
@@ -125,7 +125,7 @@ def forgot_password(
     user = crud_user.get_by_email(db, email=payload.email)
     if user:
         token = secrets.token_urlsafe(32)
-        expires = datetime.utcnow() + timedelta(hours=1)
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)
         db_token = PasswordResetToken(
             user_id=user.id,
             token=token,
@@ -160,7 +160,7 @@ def reset_password(
         .filter(
             PasswordResetToken.token == payload.token,
             PasswordResetToken.used == False,  # noqa: E712
-            PasswordResetToken.expires_at > datetime.utcnow(),
+            PasswordResetToken.expires_at > datetime.now(timezone.utc),
         )
         .first()
     )

@@ -22,7 +22,7 @@ Valid state transitions:
 """
 
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_
@@ -363,7 +363,7 @@ class ChallengeService(BaseService[Challenge]):
             )
 
         challenge.status = target
-        challenge.updated_at = datetime.utcnow()
+        challenge.updated_at = datetime.now(timezone.utc)
         self.db.commit()
 
         self._log_operation(

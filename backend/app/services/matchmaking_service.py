@@ -22,7 +22,7 @@ The final score is scaled to [0, 100] for readability.
 """
 
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Dict, Tuple
 
 from sqlalchemy.orm import Session, joinedload
@@ -417,7 +417,7 @@ class MatchmakingService(BaseService[Team]):
         Return {opponent_team_id: match_count} for matches within the
         recency window involving *team_id*.
         """
-        cutoff = datetime.utcnow() - timedelta(days=_RECENCY_WINDOW_DAYS)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=_RECENCY_WINDOW_DAYS)
 
         rows = (
             self.db.query(
@@ -449,7 +449,7 @@ class MatchmakingService(BaseService[Team]):
         if not team_ids:
             return {}
 
-        cutoff = datetime.utcnow() - timedelta(days=_ACTIVITY_WINDOW_DAYS)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=_ACTIVITY_WINDOW_DAYS)
 
         # Count matches where team was challenger
         challenger_counts = (

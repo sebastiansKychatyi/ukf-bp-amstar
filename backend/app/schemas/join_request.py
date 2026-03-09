@@ -4,7 +4,7 @@ Join Request Schemas
 Pydantic schemas for team join request operations.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -39,8 +39,7 @@ class JoinRequestUserInfo(BaseModel):
     full_name: Optional[str] = None
     email: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class JoinRequestTeamInfo(BaseModel):
@@ -50,8 +49,7 @@ class JoinRequestTeamInfo(BaseModel):
     city: Optional[str] = None
     logo_url: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class JoinRequestResponse(BaseModel):
@@ -69,8 +67,7 @@ class JoinRequestResponse(BaseModel):
     user: JoinRequestUserInfo
     team: JoinRequestTeamInfo
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class JoinRequestListResponse(BaseModel):
@@ -93,5 +90,4 @@ class MyJoinRequestResponse(BaseModel):
     created_at: datetime
     team: JoinRequestTeamInfo
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

@@ -7,7 +7,7 @@ with additional metadata like role, position, and join date.
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, UniqueConstraint
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum as PyEnum
 from app.db.base_class import Base
 
@@ -40,9 +40,9 @@ class TeamMember(Base):
     role = Column(Enum(TeamMemberRole), nullable=False, default=TeamMemberRole.PLAYER)
     position = Column(String(50))  # GK, DEF, MID, FWD, etc.
     jersey_number = Column(Integer)
-    joined_at = Column(DateTime, default=datetime.utcnow)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    joined_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Unique constraint: user can only be in one team
     __table_args__ = (

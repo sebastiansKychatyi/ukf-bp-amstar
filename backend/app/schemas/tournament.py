@@ -4,7 +4,7 @@ Tournament Schemas
 Pydantic schemas for tournament creation, management, standings, and responses.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 from datetime import datetime
 
@@ -54,8 +54,7 @@ class TeamBrief(BaseModel):
     city: Optional[str] = None
     rating: int = 1000
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ParticipantResponse(BaseModel):
@@ -75,8 +74,7 @@ class ParticipantResponse(BaseModel):
     points: int = 0
     team: Optional[TeamBrief] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TournamentMatchResponse(BaseModel):
@@ -98,8 +96,7 @@ class TournamentMatchResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ---------------------------------------------------------------------------
@@ -112,8 +109,7 @@ class CreatorBrief(BaseModel):
     username: str
     full_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TournamentResponse(BaseModel):
@@ -133,8 +129,7 @@ class TournamentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TournamentListResponse(BaseModel):
@@ -150,8 +145,7 @@ class TournamentDetailResponse(TournamentResponse):
     participants: List[ParticipantResponse] = []
     matches: List[TournamentMatchResponse] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class StandingsResponse(BaseModel):

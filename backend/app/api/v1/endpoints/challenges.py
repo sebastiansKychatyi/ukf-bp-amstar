@@ -1,8 +1,4 @@
-"""
-Challenge API Endpoints
-
-Full CRUD + state machine transitions for the Challenge / Battle system.
-"""
+"""Challenge API endpoints — full CRUD and state machine transitions."""
 
 from typing import Optional
 
@@ -34,10 +30,6 @@ from app.core.exceptions import (
 router = APIRouter()
 
 
-# =========================================================================
-# EXCEPTION → HTTP MAPPING
-# =========================================================================
-
 def _handle(exc: Exception):
     """Map domain exceptions to HTTP responses."""
     if isinstance(exc, ChallengeNotFoundError):
@@ -53,42 +45,23 @@ def _handle(exc: Exception):
     raise exc
 
 
-# =========================================================================
-# ENDPOINTS
-# =========================================================================
-
-
-@router.get(
-    "/",
-    response_model=ChallengeListResponse,
-    summary="List challenges with optional filters",
-)
+@router.get("/", response_model=ChallengeListResponse, summary="List challenges with optional filters")
 def list_challenges(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    # Тип Optional[ChallengeStatus] вместо Optional[str] даёт три преимущества:
-    # 1. FastAPI автоматически валидирует значение и возвращает 422 (не 400)
-    #    с полным контекстом ошибки через наш validation_exception_handler
-    # 2. В OpenAPI schema появляется enum с допустимыми значениями
-    # 3. Убирает ручной try/except ValueError — меньше кода, меньше ошибок
-    # Пример ошибки при ?status=invalid:
-    #   {"error": {"code": "VALIDATION_ERROR", "details": {"errors": [{
-    #     "field": "status", "message": "Input should be 'pending', 'accepted', ..."}]}}}
     status_filter: Optional[ChallengeStatus] = Query(None, alias="status"),
     team_id: Optional[int] = Query(None, ge=1),
     db: Session = Depends(get_db),
 ):
     """
-    Get paginated list of challenges.
+    Return a paginated list of challenges.
 
-    Optional filters:
+    Filters:
     - **status**: `pending` | `accepted` | `rejected` | `completed` | `cancelled`
-    - **team_id**: show only challenges involving this team (integer ID)
+    - **team_id**: only challenges involving this team
     """
     svc = ChallengeService(db)
-    items, total = svc.get_challenges(
-        skip=skip, limit=limit, status=status_filter, team_id=team_id
-    )
+    items, total = svc.get_challenges(skip=skip, limit=limit, status=status_filter, team_id=team_id)
     return ChallengeListResponse(
         items=[ChallengeResponse.model_validate(c) for c in items],
         total=total,
@@ -97,31 +70,21 @@ def list_challenges(
     )
 
 
-@router.get(
-    "/my",
-    response_model=ChallengeListResponse,
-    summary="Get challenges for the current user's team",
-)
+@router.get("/my", response_model=ChallengeListResponse, summary="Get challenges for the current user's team")
 def my_challenges(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """Get all challenges involving the current user's team (as captain)."""
+    """Get all challenges involving the current user's team."""
     from app.models.team import Team
     team = db.query(Team).filter(Team.captain_id == current_user.id).first()
     if not team:
-        # Also check membership
         from app.models.team_member import TeamMember
-        membership = db.query(TeamMember).filter(
-            TeamMember.user_id == current_user.id
-        ).first()
+        membership = db.query(TeamMember).filter(TeamMember.user_id == current_user.id).first()
         if not membership:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                detail="You are not part of any team",
-            )
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="You are not part of any team")
         team_id = membership.team_id
     else:
         team_id = team.id
@@ -136,16 +99,9 @@ def my_challenges(
     )
 
 
-@router.get(
-    "/{challenge_id}",
-    response_model=ChallengeResponse,
-    summary="Get challenge details",
-)
-def get_challenge(
-    challenge_id: int,
-    db: Session = Depends(get_db),
-):
-    """Get full details of a specific challenge."""
+@router.get("/{challenge_id}", response_model=ChallengeResponse, summary="Get challenge details")
+def get_challenge(challenge_id: int, db: Session = Depends(get_db)):
+    """Return full details of a specific challenge."""
     svc = ChallengeService(db)
     try:
         challenge = svc.get_challenge(challenge_id)
@@ -169,7 +125,7 @@ def create_challenge(
     Captain creates a challenge targeting another team.
 
     - Cannot challenge your own team
-    - Cannot have duplicate pending challenges between same teams
+    - Cannot have duplicate pending challenges between the same teams
     """
     svc = ChallengeService(db)
     try:
@@ -184,17 +140,13 @@ def create_challenge(
     return ChallengeResponse.model_validate(challenge)
 
 
-@router.put(
-    "/{challenge_id}/accept",
-    response_model=ChallengeResponse,
-    summary="Accept a challenge (opponent captain only)",
-)
+@router.put("/{challenge_id}/accept", response_model=ChallengeResponse, summary="Accept a challenge (opponent captain only)")
 def accept_challenge(
     challenge_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_captain),
 ):
-    """Opponent captain accepts the challenge. Transition: PENDING → ACCEPTED."""
+    """Transition: PENDING → ACCEPTED."""
     svc = ChallengeService(db)
     try:
         challenge = svc.accept_challenge(challenge_id, current_user.id)
@@ -203,17 +155,13 @@ def accept_challenge(
     return ChallengeResponse.model_validate(challenge)
 
 
-@router.put(
-    "/{challenge_id}/reject",
-    response_model=ChallengeResponse,
-    summary="Reject a challenge (opponent captain only)",
-)
+@router.put("/{challenge_id}/reject", response_model=ChallengeResponse, summary="Reject a challenge (opponent captain only)")
 def reject_challenge(
     challenge_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_captain),
 ):
-    """Opponent captain rejects the challenge. Transition: PENDING → REJECTED."""
+    """Transition: PENDING → REJECTED."""
     svc = ChallengeService(db)
     try:
         challenge = svc.reject_challenge(challenge_id, current_user.id)
@@ -222,17 +170,13 @@ def reject_challenge(
     return ChallengeResponse.model_validate(challenge)
 
 
-@router.put(
-    "/{challenge_id}/cancel",
-    response_model=ChallengeResponse,
-    summary="Cancel a challenge (challenger captain only)",
-)
+@router.put("/{challenge_id}/cancel", response_model=ChallengeResponse, summary="Cancel a challenge (challenger captain only)")
 def cancel_challenge(
     challenge_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_captain),
 ):
-    """Challenger captain cancels. Transition: PENDING|ACCEPTED → CANCELLED."""
+    """Transition: PENDING | ACCEPTED → CANCELLED."""
     svc = ChallengeService(db)
     try:
         challenge = svc.cancel_challenge(challenge_id, current_user.id)
@@ -241,11 +185,7 @@ def cancel_challenge(
     return ChallengeResponse.model_validate(challenge)
 
 
-@router.put(
-    "/{challenge_id}/result",
-    response_model=ChallengeCompleteResponse,
-    summary="Submit match result and trigger ELO update",
-)
+@router.put("/{challenge_id}/result", response_model=ChallengeCompleteResponse, summary="Submit match result and trigger ELO update")
 def submit_result(
     challenge_id: int,
     payload: ChallengeResultSubmit,
@@ -253,12 +193,10 @@ def submit_result(
     current_user: User = Depends(get_current_active_user),
 ):
     """
-    Record match scores and complete the challenge.
+    Record scores and complete the challenge (ACCEPTED → COMPLETED).
 
-    Transition: ACCEPTED → COMPLETED.
-    Automatically triggers ELO rating recalculation for both teams.
-
-    Either team's captain can submit.
+    Automatically triggers ELO recalculation for both teams.
+    Either team's captain may submit.
     """
     challenge_svc = ChallengeService(db)
     elo_svc = EloService(db)
@@ -270,14 +208,9 @@ def submit_result(
             challenger_score=payload.challenger_score,
             opponent_score=payload.opponent_score,
         )
-    except (
-        ChallengeNotFoundError,
-        InvalidChallengeStatusError,
-        InsufficientPermissionsError,
-    ) as e:
+    except (ChallengeNotFoundError, InvalidChallengeStatusError, InsufficientPermissionsError) as e:
         _handle(e)
 
-    # Trigger ELO update
     update_a, update_b = elo_svc.update_ratings(challenge_id)
 
     return ChallengeCompleteResponse(

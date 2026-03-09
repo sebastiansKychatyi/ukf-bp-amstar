@@ -14,7 +14,7 @@ from sqlalchemy import (
     Enum as SQLEnum, UniqueConstraint, CheckConstraint,
 )
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 import enum
 
 from app.db.base_class import Base
@@ -71,8 +71,8 @@ class Tournament(Base):
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
     created_by = relationship("User", backref="tournaments_created")
@@ -141,7 +141,7 @@ class TournamentParticipant(Base):
     goals_against = Column(Integer, nullable=False, default=0)
     points = Column(Integer, nullable=False, default=0)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     tournament = relationship("Tournament", back_populates="participants")
@@ -209,8 +209,8 @@ class TournamentMatch(Base):
         nullable=True,
     )
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
     tournament = relationship("Tournament", back_populates="matches")

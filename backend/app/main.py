@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -13,10 +15,22 @@ from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.db.base import Base  # noqa: F401 — side-effect import
 from app.db.session import engine
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Create any missing DB tables and connect to Redis on startup; disconnect on shutdown."""
+    # create_all is a no-op for tables that already exist — safe to call every startup
+    Base.metadata.create_all(bind=engine)
+    redis_client.connect()
+    yield
+    redis_client.disconnect()
+
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan,
 )
 
 # Register exception handlers (must be done before middleware)
@@ -58,22 +72,6 @@ app.add_middleware(
 
 # API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
-
-
-# Startup event
-@app.on_event("startup")
-async def startup_event():
-    """Create any missing DB tables, then connect to Redis."""
-    # create_all is a no-op for tables that already exist — safe to call every startup
-    Base.metadata.create_all(bind=engine)
-    redis_client.connect()
-
-
-# Shutdown event
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Close Redis connection on shutdown"""
-    redis_client.disconnect()
 
 
 @app.get("/")

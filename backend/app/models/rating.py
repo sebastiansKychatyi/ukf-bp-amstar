@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.db.base_class import Base
 
 
@@ -11,7 +11,7 @@ class Rating(Base):
     old_rating = Column(Integer, nullable=False)
     new_rating = Column(Integer, nullable=False)
     rating_change = Column(Integer, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     team = relationship("Team")

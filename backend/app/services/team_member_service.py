@@ -8,7 +8,7 @@ Contains all business logic related to team membership including:
 """
 
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
 
@@ -281,7 +281,7 @@ class TeamMemberService(BaseService[models.TeamMember]):
         # Update request
         request.status = status
         request.reviewed_by_id = captain_id
-        request.reviewed_at = datetime.utcnow()
+        request.reviewed_at = datetime.now(timezone.utc)
         request.review_message = review_message
 
         # If accepted, add player to team

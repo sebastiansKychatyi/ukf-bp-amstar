@@ -4,7 +4,7 @@ Team Member Schemas
 Pydantic schemas for team membership operations.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -43,8 +43,7 @@ class TeamMemberUserInfo(BaseModel):
     full_name: Optional[str] = None
     email: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TeamMemberResponse(TeamMemberBase):
@@ -56,8 +55,7 @@ class TeamMemberResponse(TeamMemberBase):
     joined_at: datetime
     user: TeamMemberUserInfo
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TeamMemberWithStats(TeamMemberResponse):
@@ -77,5 +75,4 @@ class TeamRoster(BaseModel):
     players: list[TeamMemberResponse] = []
     total_members: int = 0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

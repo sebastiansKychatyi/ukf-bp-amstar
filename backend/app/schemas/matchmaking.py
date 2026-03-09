@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 from datetime import time
 
@@ -23,8 +23,7 @@ class AvailabilitySlotResponse(AvailabilitySlotBase):
     id: int
     team_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TeamAvailabilityUpdate(BaseModel):

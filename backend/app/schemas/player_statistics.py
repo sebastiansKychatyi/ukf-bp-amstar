@@ -4,7 +4,7 @@ Player Statistics Schemas
 Pydantic schemas for player statistics operations.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 from datetime import datetime
 
@@ -51,8 +51,7 @@ class PlayerStatisticsResponse(PlayerStatisticsBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MatchPlayerStatisticsCreate(BaseModel):
@@ -74,8 +73,7 @@ class MatchPlayerStatisticsResponse(MatchPlayerStatisticsCreate):
     id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PlayerProfileWithStats(BaseModel):
@@ -90,8 +88,7 @@ class PlayerProfileWithStats(BaseModel):
     jersey_number: Optional[int] = None
     statistics: Optional[PlayerStatisticsResponse] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TeamStatisticsResponse(BaseModel):

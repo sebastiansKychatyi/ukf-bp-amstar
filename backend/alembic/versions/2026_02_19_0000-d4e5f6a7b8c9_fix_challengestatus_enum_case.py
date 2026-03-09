@@ -1,13 +1,12 @@
 """Fix challengestatus enum values: UPPERCASE → lowercase
 
-Проблема: первая миграция (62f47e93a625) создала тип через autogenerate,
-который взял имена членов Python enum ('PENDING', 'ACCEPTED', ...),
-а не их значения. Модель challenge.py использует values_callable и отправляет
-в БД строчные значения ('pending', 'completed', ...) — отсюда DataError.
+The initial migration created the PostgreSQL enum type from Python enum member
+names ('PENDING', 'ACCEPTED', ...) instead of their values. The model uses
+values_callable so the application writes lowercase values ('pending', ...) to
+the DB, causing a DataError on every insert.
 
-Решение: ALTER TYPE ... RENAME VALUE — атомарная операция в PostgreSQL 10+,
-выполняется внутри обычной транзакции (в отличие от ADD VALUE в PG < 12).
-Никакого ручного COMMIT не нужно: Alembic управляет транзакцией сам.
+ALTER TYPE ... RENAME VALUE is transactional in PostgreSQL 10+ and runs inside
+Alembic's managed transaction — no manual COMMIT required.
 
 Revision ID: d4e5f6a7b8c9
 Revises: c3d4e5f6a7b8
@@ -23,9 +22,6 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # ALTER TYPE ... RENAME VALUE транзакционна в PG 10+ (у нас PG 15).
-    # Все пять переименований выполняются в одной транзакции Alembic —
-    # при ошибке на любом шаге весь upgrade откатится автоматически.
     op.execute("ALTER TYPE challengestatus RENAME VALUE 'PENDING'   TO 'pending'")
     op.execute("ALTER TYPE challengestatus RENAME VALUE 'ACCEPTED'  TO 'accepted'")
     op.execute("ALTER TYPE challengestatus RENAME VALUE 'REJECTED'  TO 'rejected'")
