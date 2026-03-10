@@ -1,117 +1,139 @@
-{$DOMAIN:localhost} {
-    # Enable automatic HTTPS
-    # Caddy will automatically obtain and renew SSL certificates
+# =================================================================
+# Unified Caddy gateway — handles ALL domains on this server.
+#
+# Environment variables (set in .env, consumed by docker-compose):
+#   DOMAIN          — AmStar domain,   e.g. amstar.example.com
+#   PROJECT1_DOMAIN — First project's domain, e.g. other.example.com
+#   PROJECT1_UPSTREAM — Container name + port visible on web_network,
+#                       e.g. project1_frontend:3000
+#
+# Networks in play:
+#   amstar_network  — internal; backend + frontend are reachable here
+#   web_network     — shared external; project 1 containers join this
+# =================================================================
 
-    # Logging
+# -----------------------------------------------------------------
+# Global options
+# -----------------------------------------------------------------
+{
+    # Use the ACME staging server during initial setup to avoid
+    # rate-limits; comment out once certificates are confirmed.
+    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# =================================================================
+# PROJECT 1  (replace placeholder values with your real domain/upstream)
+# =================================================================
+{$PROJECT1_DOMAIN} {
+
     log {
-        output file /var/log/caddy/access.log
+        output file /var/log/caddy/project1-access.log
         format json
     }
 
-    # Health check endpoint
+    # All traffic forwarded to project 1's app container.
+    # The container must be attached to web_network.
+    reverse_proxy {$PROJECT1_UPSTREAM} {
+        header_up Host              {host}
+        header_up X-Real-IP         {remote_host}
+        header_up X-Forwarded-For   {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options    "nosniff"
+        X-Frame-Options           "SAMEORIGIN"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    encode gzip zstd
+}
+
+# =================================================================
+# AMSTAR  (amstar_frontend + amstar_backend via amstar_network)
+# =================================================================
+{$DOMAIN} {
+
+    log {
+        output file /var/log/caddy/amstar-access.log
+        format json
+    }
+
+    # Gateway health check — does not hit any upstream
     handle /health {
         respond "OK" 200
     }
 
-    # Media files - serve static media
+    # User-uploaded media files
     handle /media/* {
         root * /var/www/media
         file_server browse
     }
 
-    # API v1 routes - proxy to backend
-    handle /v1* {
-        reverse_proxy backend:8000 {
-            # Health check for backend
-            health_uri /health
-            health_interval 30s
-            health_timeout 10s
-
-            # Headers
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto {scheme}
-        }
-    }
-
-    # API routes - proxy to backend
+    # REST API + OpenAPI schema
     handle /api/* {
-        reverse_proxy backend:8000 {
-            # Health check for backend
-            health_uri /health
+        reverse_proxy amstar_backend:8000 {
+            health_uri      /health
             health_interval 30s
-            health_timeout 10s
-
-            # Headers
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
+            health_timeout  10s
+            header_up Host              {host}
+            header_up X-Real-IP         {remote_host}
+            header_up X-Forwarded-For   {remote_host}
             header_up X-Forwarded-Proto {scheme}
         }
     }
 
-    # OpenAPI docs - proxy to backend
+    # OpenAPI interactive docs
     handle /docs* {
-        reverse_proxy backend:8000 {
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
+        reverse_proxy amstar_backend:8000 {
+            header_up Host              {host}
+            header_up X-Real-IP         {remote_host}
+            header_up X-Forwarded-For   {remote_host}
             header_up X-Forwarded-Proto {scheme}
         }
     }
 
-    # Redoc documentation - proxy to backend
     handle /redoc* {
-        reverse_proxy backend:8000 {
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
+        reverse_proxy amstar_backend:8000 {
+            header_up Host              {host}
+            header_up X-Real-IP         {remote_host}
+            header_up X-Forwarded-For   {remote_host}
             header_up X-Forwarded-Proto {scheme}
         }
     }
 
-    # OpenAPI JSON schema - proxy to backend
     handle /openapi.json {
-        reverse_proxy backend:8000 {
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
+        reverse_proxy amstar_backend:8000 {
+            header_up Host              {host}
+            header_up X-Real-IP         {remote_host}
+            header_up X-Forwarded-For   {remote_host}
             header_up X-Forwarded-Proto {scheme}
         }
     }
 
-    # Frontend - Nuxt.js SSR application (catch-all)
+    # Nuxt.js SSR — catch-all (must be last)
     handle /* {
-        reverse_proxy frontend:3000 {
-            # Headers for Nuxt.js
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
+        reverse_proxy amstar_frontend:3000 {
+            header_up Host              {host}
+            header_up X-Real-IP         {remote_host}
+            header_up X-Forwarded-For   {remote_host}
             header_up X-Forwarded-Proto {scheme}
-
-            # WebSocket support for Nuxt HMR
-            header_up Connection {>Connection}
-            header_up Upgrade {>Upgrade}
+            # WebSocket support (Nuxt SSR)
+            header_up Connection        {>Connection}
+            header_up Upgrade           {>Upgrade}
         }
     }
 
-    # Security headers
     header {
-        # Enable HSTS
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        # Prevent MIME type sniffing
-        X-Content-Type-Options "nosniff"
-        # Enable XSS protection
-        X-XSS-Protection "1; mode=block"
-        # Clickjacking protection
-        X-Frame-Options "SAMEORIGIN"
-        # Referrer policy
-        Referrer-Policy "strict-origin-when-cross-origin"
-        # Remove server header
+        X-Content-Type-Options    "nosniff"
+        X-XSS-Protection          "1; mode=block"
+        X-Frame-Options           "SAMEORIGIN"
+        Referrer-Policy           "strict-origin-when-cross-origin"
         -Server
     }
 
-    # Compression
     encode gzip zstd
 }
