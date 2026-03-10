@@ -21,17 +21,16 @@ RUN npm ci
 # Copy application source code
 COPY . .
 
-# Prepare Nuxt environment (generates .nuxt directory, type definitions)
-# This runs automatically via "postinstall" script, but explicit for clarity
-RUN npm run postinstall
-
 # Build Nuxt application for production
+# nuxi prepare (postinstall) already ran during npm ci above
 # Creates optimized .output directory with SSR server and static assets
 RUN npm run build
 
 # ============ PRODUCTION STAGE ============
-# Minimal runtime image with only production dependencies
-# Using Node.js 20 LTS to match build stage and satisfy runtime requirements
+# Nuxt's .output bundle is fully self-contained — no npm packages are needed
+# at runtime.  Copying .output alone is sufficient; running npm ci here would
+# trigger the postinstall script (nuxi prepare) which fails because nuxi is a
+# devDependency excluded by --only=production.
 FROM node:20-alpine AS production
 
 WORKDIR /app
@@ -42,14 +41,9 @@ RUN apk add --no-cache dumb-init
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && adduser -S nuxtjs -u 1001
 
-# Copy package files for production dependency installation
-COPY package*.json ./
-
-# Install ONLY production dependencies (smaller image size)
-RUN npm ci --only=production
-
-# Copy built application from build stage
-# .output contains the entire server + client bundle
+# Copy built application from build stage.
+# .output contains the entire server + client bundle with all dependencies
+# pre-bundled by Nitro — no node_modules directory is required.
 COPY --from=build --chown=nuxtjs:nodejs /app/.output /app/.output
 
 # Switch to non-root user

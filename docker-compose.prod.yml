@@ -1,5 +1,3 @@
-version: '3.8'
-
 # =================================================================
 # AmStar Platform - Production Environment
 # FastAPI Backend + Nuxt.js Frontend + PostgreSQL 15 + Caddy
