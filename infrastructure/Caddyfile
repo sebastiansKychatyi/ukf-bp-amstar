@@ -1,67 +1,39 @@
 # =================================================================
-# Unified Caddy gateway — handles ALL domains on this server.
+# Unified Caddy gateway
 #
-# Environment variables (set in .env, consumed by docker-compose):
-#   DOMAIN          — AmStar domain,   e.g. amstar.example.com
-#   PROJECT1_DOMAIN — First project's domain, e.g. other.example.com
-#   PROJECT1_UPSTREAM — Container name + port visible on web_network,
-#                       e.g. project1_frontend:3000
+# Environment variables injected by docker-compose:
+#   DOMAIN             — AmStar domain,         e.g. amstar.example.com
+#   PROJECT1_DOMAIN    — First project's domain, e.g. other.example.com
+#   PROJECT1_UPSTREAM  — container:port on web_network, e.g. app:3000
 #
-# Networks in play:
-#   amstar_network  — internal; backend + frontend are reachable here
-#   web_network     — shared external; project 1 containers join this
+# TESTING vs PRODUCTION mode — see the global block below.
 # =================================================================
 
-# -----------------------------------------------------------------
-# Global options
-# -----------------------------------------------------------------
 {
-    # Use the ACME staging server during initial setup to avoid
-    # rate-limits; comment out once certificates are confirmed.
-    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+    # ---------------------------------------------------------------
+    # TESTING MODE  (ports 8080:80 / 8443:443)
+    #
+    # When Caddy is NOT reachable on standard ports 80/443 from the
+    # internet, Let's Encrypt's ACME HTTP-01 challenge cannot succeed.
+    # Caddy will crash-loop trying to obtain a certificate.
+    # `auto_https off` disables ACME — Caddy serves plain HTTP only.
+    #
+    # REMOVE THIS LINE when you move to real ports 80/443 in production.
+    # ---------------------------------------------------------------
+    auto_https off
 }
 
 # =================================================================
-# PROJECT 1  (replace placeholder values with your real domain/upstream)
+# AMSTAR
 # =================================================================
-{$PROJECT1_DOMAIN} {
-
-    log {
-        output file /var/log/caddy/project1-access.log
-        format json
-    }
-
-    # All traffic forwarded to project 1's app container.
-    # The container must be attached to web_network.
-    reverse_proxy {$PROJECT1_UPSTREAM} {
-        header_up Host              {host}
-        header_up X-Real-IP         {remote_host}
-        header_up X-Forwarded-For   {remote_host}
-        header_up X-Forwarded-Proto {scheme}
-    }
-
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-Content-Type-Options    "nosniff"
-        X-Frame-Options           "SAMEORIGIN"
-        Referrer-Policy           "strict-origin-when-cross-origin"
-        -Server
-    }
-
-    encode gzip zstd
-}
-
-# =================================================================
-# AMSTAR  (amstar_frontend + amstar_backend via amstar_network)
-# =================================================================
-{$DOMAIN} {
+{$DOMAIN:localhost} {
 
     log {
         output file /var/log/caddy/amstar-access.log
         format json
     }
 
-    # Gateway health check — does not hit any upstream
+    # Gateway-level health check (answered by Caddy itself, no upstream)
     handle /health {
         respond "OK" 200
     }
@@ -72,7 +44,7 @@
         file_server browse
     }
 
-    # REST API + OpenAPI schema
+    # REST API
     handle /api/* {
         reverse_proxy amstar_backend:8000 {
             health_uri      /health
@@ -120,7 +92,6 @@
             header_up X-Real-IP         {remote_host}
             header_up X-Forwarded-For   {remote_host}
             header_up X-Forwarded-Proto {scheme}
-            # WebSocket support (Nuxt SSR)
             header_up Connection        {>Connection}
             header_up Upgrade           {>Upgrade}
         }
@@ -130,6 +101,34 @@
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options    "nosniff"
         X-XSS-Protection          "1; mode=block"
+        X-Frame-Options           "SAMEORIGIN"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    encode gzip zstd
+}
+
+# =================================================================
+# PROJECT 1  (remove this block entirely if not needed)
+# =================================================================
+{$PROJECT1_DOMAIN:_noop} {
+
+    log {
+        output file /var/log/caddy/project1-access.log
+        format json
+    }
+
+    reverse_proxy {$PROJECT1_UPSTREAM:localhost:9} {
+        header_up Host              {host}
+        header_up X-Real-IP         {remote_host}
+        header_up X-Forwarded-For   {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options    "nosniff"
         X-Frame-Options           "SAMEORIGIN"
         Referrer-Policy           "strict-origin-when-cross-origin"
         -Server

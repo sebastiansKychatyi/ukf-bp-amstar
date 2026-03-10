@@ -1,14 +1,19 @@
 # =================================================================
 # AmStar Platform - Production Environment
-# FastAPI Backend + Nuxt.js Frontend + PostgreSQL 15 + Caddy
+# FastAPI Backend + Nuxt.js Frontend + PostgreSQL 15 + Redis + Caddy
 #
 # Networks:
-#   amstar_network — internal bridge; db/backend/frontend talk here
-#   web_network    — external, pre-created on the host; amstar_caddy
-#                    joins this so it can reach project 1's containers
+#   amstar_network — internal bridge; all amstar services talk here
+#   web_network    — external, pre-created; caddy uses this to reach
+#                    project 1 containers
 #
 # Create the shared network once before first deploy:
 #   docker network create web_network
+#
+# Direct-access ports (test without Caddy):
+#   http://server-ip:8001  → FastAPI  /health  /api/v1/...
+#   http://server-ip:3001  → Nuxt.js frontend
+#   http://server-ip:8080  → Full stack via Caddy (no TLS in testing mode)
 # =================================================================
 
 services:
@@ -31,14 +36,32 @@ services:
     networks:
       - amstar_network
 
+  redis:
+    image: redis:7-alpine
+    container_name: amstar_redis
+    restart: always
+    # Disable persistence — this is a cache / token-blacklist store only
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test:     ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout:  3s
+      retries:  5
+    networks:
+      - amstar_network
+
   backend:
     build:
       context:    ./backend
       dockerfile: docker/Dockerfile
     container_name: amstar_backend
     restart: always
+    # Direct-access port — useful to test the API without going through Caddy
+    ports:
+      - "8001:8000"
     environment:
       DATABASE_URL:                postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      REDIS_URL:                   redis://amstar_redis:6379/0
       SECRET_KEY:                  ${SECRET_KEY}
       ALGORITHM:                   ${ALGORITHM:-HS256}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
@@ -47,15 +70,19 @@ services:
       POSTGRES_USER:               ${POSTGRES_USER}
       SMTP_TLS:                    ${SMTP_TLS:-true}
       SMTP_PORT:                   ${SMTP_PORT:-587}
-      SMTP_HOST:                   ${SMTP_HOST}
-      SMTP_USER:                   ${SMTP_USER}
-      SMTP_PASSWORD:               ${SMTP_PASSWORD}
-      EMAILS_FROM_EMAIL:           ${EMAILS_FROM_EMAIL}
+      # Providing empty-string defaults prevents "variable not set" warnings
+      # when SMTP is intentionally disabled (all SMTP fields are Optional in config.py)
+      SMTP_HOST:                   ${SMTP_HOST:-}
+      SMTP_USER:                   ${SMTP_USER:-}
+      SMTP_PASSWORD:               ${SMTP_PASSWORD:-}
+      EMAILS_FROM_EMAIL:           ${EMAILS_FROM_EMAIL:-}
       EMAILS_FROM_NAME:            ${EMAILS_FROM_NAME:-AmStar Platform}
     volumes:
       - amstar_media:/var/www/media
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test:         ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -72,11 +99,14 @@ services:
       dockerfile: docker/Dockerfile
     container_name: amstar_frontend
     restart: always
+    # Direct-access port — useful to test the UI without going through Caddy
+    ports:
+      - "3001:3000"
     environment:
-      NODE_ENV:                production
+      NODE_ENV:                 production
       NUXT_PUBLIC_API_BASE_URL: ${NUXT_PUBLIC_API_BASE_URL}
-      NUXT_HOST:               0.0.0.0
-      NUXT_PORT:               "3000"
+      NUXT_HOST:                0.0.0.0
+      NUXT_PORT:                "3000"
     healthcheck:
       test:         ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval:     30s
@@ -92,8 +122,6 @@ services:
     image: caddy:2-alpine
     container_name: amstar_caddy
     restart: always
-    # Only this container binds host ports 80/443.
-    # Project 1's reverse proxy must have its port bindings removed first.
     ports:
       - "8080:80"
       - "8443:443"
@@ -104,8 +132,10 @@ services:
       - amstar_media:/var/www/media:ro
     environment:
       DOMAIN:            ${DOMAIN}
-      PROJECT1_DOMAIN:   ${PROJECT1_DOMAIN}
-      PROJECT1_UPSTREAM: ${PROJECT1_UPSTREAM}
+      # Provide safe fallback values so Caddy does not fail when the
+      # PROJECT1 variables are absent from .env
+      PROJECT1_DOMAIN:   ${PROJECT1_DOMAIN:-_noop}
+      PROJECT1_UPSTREAM: ${PROJECT1_UPSTREAM:-localhost:9}
     depends_on:
       - backend
       - frontend
@@ -115,8 +145,8 @@ services:
       timeout:  5s
       retries:  3
     networks:
-      - amstar_network  # reaches amstar_backend / amstar_frontend by container name
-      - web_network     # reaches project 1 containers by container name
+      - amstar_network
+      - web_network
 
 volumes:
   amstar_postgres_data:
