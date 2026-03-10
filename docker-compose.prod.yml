@@ -95,8 +95,8 @@ services:
     # Only this container binds host ports 80/443.
     # Project 1's reverse proxy must have its port bindings removed first.
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     volumes:
       - ./infrastructure/Caddyfile:/etc/caddy/Caddyfile:ro
       - amstar_caddy_data:/data
