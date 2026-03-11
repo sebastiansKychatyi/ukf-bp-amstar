@@ -58,17 +58,8 @@ from app.models.challenge import Challenge, ChallengeStatus
 from app.models.rating import Rating
 from app.schemas.challenge import EloUpdateResult
 from app.services.base import BaseService
+from app.services.team_category import get_team_category
 from app.core.exceptions import TeamNotFoundError, ChallengeNotFoundError
-
-
-# K-factor tiers based on team experience
-_K_PROVISIONAL = 40    # < 10 matches
-_K_DEVELOPING = 30     # 10–29 matches
-_K_ESTABLISHED = 20    # 30+ matches
-
-# Thresholds for K-factor tiers
-_PROVISIONAL_THRESHOLD = 10
-_DEVELOPING_THRESHOLD = 30
 
 
 class EloService(BaseService[Rating]):
@@ -288,13 +279,7 @@ class EloService(BaseService[Rating]):
 
             K_eff = K_base * G(|goal_diff|)
         """
-        if matches_played < _PROVISIONAL_THRESHOLD:
-            base_k = _K_PROVISIONAL
-        elif matches_played < _DEVELOPING_THRESHOLD:
-            base_k = _K_DEVELOPING
-        else:
-            base_k = _K_ESTABLISHED
-
+        base_k = get_team_category(matches_played).k_factor
         return base_k * self._goal_difference_multiplier(goal_diff)
 
     # =====================================================================

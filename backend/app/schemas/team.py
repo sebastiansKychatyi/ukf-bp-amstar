@@ -2,6 +2,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 from datetime import datetime
 
+from app.core.team_category import TeamCategory
+
 
 class TeamBase(BaseModel):
     """Base Team schema with common attributes"""
@@ -97,3 +99,23 @@ class TeamStatsSummary(BaseModel):
     goals_conceded: int = 0
     goal_difference: int = 0
     win_rate: float = 0.0
+
+
+class TeamCategoryResponse(BaseModel):
+    """Team experience category with its Elo K-factor."""
+
+    category: TeamCategory = Field(
+        ...,
+        description="Experience tier identifier (provisional / developing / established)",
+    )
+    label_en: str = Field(..., description="Category label in English")
+    label_sk: str = Field(..., description="Category label in Slovak")
+    k_factor: int = Field(
+        ...,
+        description="Base Elo K-factor applied to this team's rating updates",
+    )
+    matches_played: int = Field(
+        ...,
+        ge=0,
+        description="Number of completed matches used to determine the category",
+    )
