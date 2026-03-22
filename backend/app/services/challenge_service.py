@@ -299,17 +299,18 @@ class ChallengeService(BaseService[Challenge]):
         opponent_score: int,
     ) -> Challenge:
         """
-        Record match result and transition to COMPLETED.
+        Two-step result confirmation: each captain confirms the match result
+        independently.  The challenge transitions to COMPLETED only when
+        *both* captains have confirmed.
 
-        Either captain of the participating teams or a referee can submit.
-        Transition: ACCEPTED → COMPLETED
+        Step 1 — first captain submits scores and sets their flag.
+        Step 2 — second captain confirms; both flags are now True → COMPLETED.
 
-        After completion, the ELO update is handled externally by the
-        caller (endpoint) which invokes EloService.update_ratings().
+        Transition (final): ACCEPTED → COMPLETED
+        ELO update is handled by the caller after COMPLETED status is reached.
         """
         challenge = self.get_challenge(challenge_id)
 
-        # Permission: must be captain of either team or referee
         is_challenger_captain = challenge.challenger.captain_id == user_id
         is_opponent_captain = challenge.opponent.captain_id == user_id
         if not (is_challenger_captain or is_opponent_captain):
@@ -317,32 +318,60 @@ class ChallengeService(BaseService[Challenge]):
                 "Only a captain of one of the participating teams can submit the result"
             )
 
-        self._transition(challenge, ChallengeStatus.COMPLETED)
-        challenge.challenger_score = challenger_score
-        challenge.opponent_score = opponent_score
+        # The challenge must be in ACCEPTED state to accept result submissions
+        if challenge.status != ChallengeStatus.ACCEPTED:
+            raise InvalidChallengeStatusError(
+                challenge.status.value, "accepted — result submission requires an accepted challenge"
+            )
+
+        # Scores can be set by whichever captain calls first; once set they
+        # are not overwritten by the second captain's confirmation call.
+        if challenge.challenger_score is None:
+            challenge.challenger_score = challenger_score
+            challenge.opponent_score = opponent_score
+
+        # Mark the calling captain's confirmation
+        if is_challenger_captain:
+            challenge.result_confirmed_by_challenger = True
+        if is_opponent_captain:
+            challenge.result_confirmed_by_opponent = True
+
+        challenge.updated_at = datetime.now(timezone.utc)
         self.db.commit()
         self.db.refresh(challenge)
 
-        # Notify both captains
-        score_text = f"{challenger_score}-{opponent_score}"
-        for cap_id, team_name in [
-            (challenge.challenger.captain_id, challenge.opponent.name),
-            (challenge.opponent.captain_id, challenge.challenger.name),
-        ]:
-            self._notifier.notify(
-                user_id=cap_id,
-                type=NotificationType.CHALLENGE_COMPLETED,
-                title="Match Completed",
-                message=f"Result vs {team_name}: {score_text}",
-                related_id=challenge.id,
-            )
-        self.db.commit()
-
         self._log_operation(
-            "Match result submitted",
+            "Result confirmation submitted",
             challenge_id=challenge_id,
-            score=score_text,
+            confirmed_by="challenger" if is_challenger_captain else "opponent",
+            confirmed_challenger=challenge.result_confirmed_by_challenger,
+            confirmed_opponent=challenge.result_confirmed_by_opponent,
         )
+
+        # Both captains confirmed → transition to COMPLETED
+        if challenge.result_confirmed_by_challenger and challenge.result_confirmed_by_opponent:
+            self._transition(challenge, ChallengeStatus.COMPLETED)
+
+            score_text = f"{challenge.challenger_score}-{challenge.opponent_score}"
+            for cap_id, team_name in [
+                (challenge.challenger.captain_id, challenge.opponent.name),
+                (challenge.opponent.captain_id, challenge.challenger.name),
+            ]:
+                self._notifier.notify(
+                    user_id=cap_id,
+                    type=NotificationType.CHALLENGE_COMPLETED,
+                    title="Match Completed",
+                    message=f"Result vs {team_name}: {score_text}",
+                    related_id=challenge.id,
+                )
+            self.db.commit()
+
+            self._log_operation(
+                "Match result confirmed by both captains — challenge completed",
+                challenge_id=challenge_id,
+                score=score_text,
+            )
+
         return self.get_challenge(challenge_id)
 
     # =====================================================================

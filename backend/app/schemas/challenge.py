@@ -41,6 +41,8 @@ class ChallengeResponse(BaseModel):
     location: Optional[str] = None
     challenger_score: Optional[int] = None
     opponent_score: Optional[int] = None
+    result_confirmed_by_challenger: bool = False
+    result_confirmed_by_opponent: bool = False
     created_at: datetime
     updated_at: datetime
     challenger: Optional[TeamBrief] = None

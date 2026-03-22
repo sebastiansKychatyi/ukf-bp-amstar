@@ -47,17 +47,17 @@ register_exception_handlers(app)
 # When re-enabling the commented middlewares, keep them ABOVE the CORS block.
 
 # Security headers — innermost; applied after routing
-#app.add_middleware(
-    #SecurityHeadersMiddleware,
-    #enable_hsts=settings.ENVIRONMENT == "production",
-#)
+app.add_middleware(
+    SecurityHeadersMiddleware,
+    enable_hsts=settings.ENVIRONMENT == "production",
+)
 
 # Rate limiting — middle layer; OPTIONS preflight never reaches here (CORS short-circuits)
-#app.add_middleware(
-    #RateLimitMiddleware,
-    #requests_per_minute=getattr(settings, 'RATE_LIMIT_REQUESTS', 100),
-    #auth_requests_per_minute=getattr(settings, 'AUTH_RATE_LIMIT_REQUESTS', 5),
-#)
+app.add_middleware(
+    RateLimitMiddleware,
+    requests_per_minute=settings.RATE_LIMIT_REQUESTS,
+    auth_requests_per_minute=settings.AUTH_RATE_LIMIT_REQUESTS,
+)
 
 # CORS — outermost; must be added last so it executes first on every request.
 # This ensures preflight OPTIONS responses always carry Access-Control-* headers,

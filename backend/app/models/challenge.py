@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import enum
@@ -43,6 +43,8 @@ class Challenge(Base):
     location = Column(String)
     challenger_score = Column(Integer)
     opponent_score = Column(Integer)
+    result_confirmed_by_challenger = Column(Boolean, default=False, nullable=False)
+    result_confirmed_by_opponent = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
