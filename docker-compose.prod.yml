@@ -97,6 +97,8 @@ services:
     build:
       context:    ./frontend
       dockerfile: docker/Dockerfile.static
+      args:
+        NUXT_PUBLIC_API_BASE_URL: ${NUXT_PUBLIC_API_BASE_URL}
     container_name: amstar_frontend
     restart: always
     # Direct-access port — useful to test the UI without going through Caddy
