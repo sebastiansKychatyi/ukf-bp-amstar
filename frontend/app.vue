@@ -238,7 +238,7 @@ const fetchAnnouncement = async () => {
     const data = await $fetch<{ message: string | null }>(`${apiBase}/admin/announcement`)
     announcement.value = data.message ?? null
     announcementDismissed.value = false
-  } catch { /* silently ignore */ }
+  } catch { /* non-critical; failure does not affect core functionality */ }
 }
 
 onMounted(fetchAnnouncement)

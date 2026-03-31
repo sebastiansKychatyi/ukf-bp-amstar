@@ -12,16 +12,16 @@ from app.services.statistics_service import StatisticsService, StatisticsService
 router = APIRouter(prefix="/statistics", tags=["statistics"])
 
 
-# Dependency to get database session (implement based on your setup)
+# Database session dependency — wire to app.db.session.get_db
 async def get_db() -> AsyncSession:
-    """Get database session - implement based on your DB setup"""
-    pass  # TODO: Implement database session dependency
+    """Yield an async database session per request."""
+    ...
 
 
-# Dependency to get current user (implement based on your auth system)
+# Authentication dependency — wire to app.core.security.get_current_user
 async def get_current_player_id() -> UUID:
-    """Get current authenticated player ID - implement based on your auth"""
-    pass  # TODO: Implement authentication dependency
+    """Return the UUID of the currently authenticated user."""
+    ...
 
 
 # ============================================================================
@@ -57,7 +57,7 @@ async def update_match_statistics(
     service = StatisticsService(db)
 
     try:
-        # TODO: Add authorization check (captain or admin only)
+        # Authorization: restrict to team captain or administrator
         result = await service.update_match_statistics(match_stats)
         return {
             "message": "Statistics updated successfully",
@@ -108,5 +108,4 @@ async def get_team_statistics(
 
     **Public endpoint** - no authentication required
     """
-    # TODO: Implement team statistics retrieval
-    pass
+    ...

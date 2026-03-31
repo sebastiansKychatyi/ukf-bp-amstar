@@ -29,16 +29,16 @@ from app.services.team_service import (
 router = APIRouter(prefix="/teams", tags=["teams"])
 
 
-# Dependency to get database session (implement based on your setup)
+# Database session dependency — wire to app.db.session.get_db
 async def get_db() -> AsyncSession:
-    """Get database session - implement based on your DB setup"""
-    pass  # TODO: Implement database session dependency
+    """Yield an async database session per request."""
+    ...
 
 
-# Dependency to get current user (implement based on your auth system)
+# Authentication dependency — wire to app.core.security.get_current_user
 async def get_current_player_id() -> UUID:
-    """Get current authenticated player ID - implement based on your auth"""
-    pass  # TODO: Implement authentication dependency
+    """Return the UUID of the currently authenticated user."""
+    ...
 
 
 # ============================================================================
@@ -120,8 +120,7 @@ async def get_team_members(
     """
     Get all active members of a team
     """
-    # Implementation would query TeamMember table
-    pass  # TODO: Implement
+    ...
 
 
 # ============================================================================

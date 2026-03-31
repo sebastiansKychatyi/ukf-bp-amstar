@@ -490,7 +490,10 @@ class StatisticsService:
         return result.scalar_one_or_none()
 
 
-# Import from database models - placeholder classes
+# Stub model classes — replace with actual SQLAlchemy model imports:
+#   from app.models.team import Team, TeamMember
+#   from app.models.player import Player
+#   from app.models.match import MatchEvent
 from sqlalchemy import func
 
 

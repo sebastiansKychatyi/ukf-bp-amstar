@@ -299,7 +299,7 @@ const loadAnnouncement = async () => {
     const data = await $fetch<{ message: string | null }>(`${apiBase}/admin/announcement`)
     currentAnnouncement.value = data.message ?? null
     announcementText.value = data.message ?? ''
-  } catch { /* silently ignore */ }
+  } catch { /* non-critical; failure does not affect core functionality */ }
 }
 
 // ── User actions ──────────────────────────────────────────────────────────────

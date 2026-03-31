@@ -242,7 +242,7 @@ const markAllRead = async () => {
     })
     unreadCount.value = 0
     notifItems.value = notifItems.value.map(n => ({ ...n, is_read: true }))
-  } catch { /* ignore */ }
+  } catch { /* non-critical; failure does not affect core functionality */ }
 }
 
 const getEmoji = (type: string) => {

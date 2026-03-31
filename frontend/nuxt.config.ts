@@ -13,8 +13,8 @@
  */
 
 export default defineNuxtConfig({
-  // Disable SSR — this is an authenticated SPA dashboard; SSR adds no value
-  // and causes Vuetify ID-counter hydration mismatches on v-data-table etc.
+  // SSR disabled: this is a client-side SPA dashboard.
+  // Enabling SSR causes Vuetify ID-counter hydration mismatches on v-data-table.
   ssr: false,
 
   // Enable Nuxt DevTools for development
@@ -58,10 +58,10 @@ export default defineNuxtConfig({
   /**
    * Global CSS Imports
    * ==================
-   * CRITICAL: These imports ensure Vuetify styles load during SSR
+   * These imports ensure Vuetify styles are bundled at build time.
    */
   css: [
-    'vuetify/styles',  // Vuetify base styles - REQUIRED for styling
+    'vuetify/styles',  // Vuetify base styles
     '@mdi/font/css/materialdesignicons.min.css',  // Material Design Icons
   ],
 
@@ -71,7 +71,7 @@ export default defineNuxtConfig({
    * Transpilation for SSR compatibility
    */
   build: {
-    // CRITICAL: Transpile Vuetify for Node.js (SSR) compatibility
+    // Transpile Vuetify for Node.js compatibility
     transpile: ['vuetify'],
   },
 
@@ -83,14 +83,14 @@ export default defineNuxtConfig({
   vite: {
     // SSR build options
     ssr: {
-      // CRITICAL: Bundle Vuetify with SSR build (prevents module resolution errors)
+      // Bundle Vuetify with the SSR build to prevent module resolution errors
       noExternal: ['vuetify'],
     },
 
     // Development server configuration
     server: {
       watch: {
-        usePolling: true,  // Required for file watching in Docker/WSL
+        usePolling: true,  // Polling required for reliable file watching in Docker/WSL environments
         interval: 1000,
       },
       // Explicit HMR config prevents WebSocket connection failures on Windows/WSL2.

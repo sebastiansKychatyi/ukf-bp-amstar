@@ -461,8 +461,9 @@ class TeamService:
         return result.scalar()
 
 
-# Import these from your database models file
-# For now, using placeholder classes to show structure
+# Stub model classes — replace with actual SQLAlchemy model imports:
+#   from app.models.team import Team, TeamMember, TeamJoinRequest
+#   from app.models.player import Player
 class Team:
     pass
 
