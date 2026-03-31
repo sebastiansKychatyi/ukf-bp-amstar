@@ -1,6 +1,14 @@
-# AmStar - Amateur Football Match Organization Platform
+# AmStar — Webová aplikácia pre organizáciu amatérskych futbalových zápasov
 
-Backend system for managing amateur football teams, players, and match statistics.
+> **Bakalárska práca** | Univerzita Konštantína Filozofa v Nitre  
+> Fakulta prírodných vied a informatiky  
+> Autor: Sebastian Kychatyi  
+> Školiteľ: RNDr. Lívia Kelebercová, PhD.  
+> Študijný program: Aplikovaná informatika | Rok: 2026
+
+---
+
+Platformа AmStar je webová aplikácia určená na zjednodušenie a automatizáciu organizácie amatérskych futbalových zápasov — správu tímov, hráčov, zápasových výziev (Battle systém), turnajov a štatistík.
 
 ## Features
 
@@ -265,11 +273,19 @@ This is a Bachelor's thesis project. For questions or suggestions, please contac
 
 ## License
 
-[Specify your license here]
+Táto práca je súčasťou bakalárskej záverečnej práce na Univerzite Konštantína Filozofa v Nitre.  
+Zdrojový kód je zverejnený výhradne na účely akademického hodnotenia a demonštrácie.
 
-## Author
+© 2026 Sebastian Kychatyi. Všetky práva vyhradené.  
+Komerčné využitie bez súhlasu autora je zakázané.
 
-Developed as part of a Bachelor's thesis on amateur football match organization.
+## Autor
+
+**Sebastian Kychatyi**  
+Bakalárska práca — Aplikovaná informatika  
+Univerzita Konštantína Filozofa v Nitre, Fakulta prírodných vied a informatiky  
+Školiteľ: RNDr. Lívia Kelebercová, PhD.  
+Nitra, 2026
 
 ---
 
