@@ -85,9 +85,9 @@
         }
     }
 
-    # Nuxt.js SSR — catch-all (must be last)
+    # Nuxt.js SPA (nginx) — catch-all (must be last)
     handle /* {
-        reverse_proxy amstar_frontend:3000 {
+        reverse_proxy amstar_frontend:80 {
             header_up Host              {host}
             header_up X-Real-IP         {remote_host}
             header_up X-Forwarded-For   {remote_host}
