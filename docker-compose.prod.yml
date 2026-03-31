@@ -96,19 +96,14 @@ services:
   frontend:
     build:
       context:    ./frontend
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.static
     container_name: amstar_frontend
     restart: always
     # Direct-access port — useful to test the UI without going through Caddy
     ports:
-      - "3001:3000"
-    environment:
-      NODE_ENV:                 production
-      NUXT_PUBLIC_API_BASE_URL: ${NUXT_PUBLIC_API_BASE_URL}
-      NUXT_HOST:                0.0.0.0
-      NUXT_PORT:                "3000"
+      - "3001:80"
     healthcheck:
-      test:         ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      test:         ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
       interval:     30s
       timeout:      5s
       retries:      3
