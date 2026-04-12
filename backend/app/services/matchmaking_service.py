@@ -74,7 +74,7 @@ class MatchmakingService(BaseService[Team]):
         """
         cfg = config or MatchmakingConfig()
 
-        # --- 1. Load requesting team ----------------------------------
+        # 1. Load requesting team
         team = (
             self.db.query(Team)
             .options(
@@ -87,7 +87,7 @@ class MatchmakingService(BaseService[Team]):
         if not team:
             raise TeamNotFoundError(team_id)
 
-        # --- 2. Fetch candidates (all other teams) --------------------
+        # 2. Fetch candidates (all other teams)
         candidates: List[Team] = (
             self.db.query(Team)
             .options(
@@ -106,13 +106,13 @@ class MatchmakingService(BaseService[Team]):
                 total_candidates=0,
             )
 
-        # --- 3. Pre-compute batch data --------------------------------
+        # 3. Pre-compute batch data
         recent_opponents = self._get_recent_opponents(team_id)
         activity_map = self._get_activity_counts(
             [c.id for c in candidates]
         )
 
-        # --- 4. Score each candidate -----------------------------------
+        # 4. Score each candidate
         scored: List[Tuple[float, MatchmakingSuggestion]] = []
 
         for candidate in candidates:
@@ -168,7 +168,7 @@ class MatchmakingService(BaseService[Team]):
             )
             scored.append((total, suggestion))
 
-        # --- 5. Sort and truncate --------------------------------------
+        # 5. Sort and truncate
         scored.sort(key=lambda x: x[0], reverse=True)
         top = [s for _, s in scored[: cfg.max_results]]
 

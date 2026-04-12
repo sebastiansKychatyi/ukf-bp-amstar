@@ -1,25 +1,4 @@
-"""
-Challenge Service — State Machine & Business Logic
-
-Implements the complete lifecycle of a team-vs-team challenge:
-
-    ┌─────────┐   accept    ┌──────────┐  submit_result  ┌───────────┐
-    │ PENDING │────────────►│ ACCEPTED │────────────────►│ COMPLETED │
-    └────┬────┘             └─────┬────┘                 └───────────┘
-         │                        │
-         │  reject                │  cancel
-         ▼                        ▼
-    ┌──────────┐            ┌───────────┐
-    │ REJECTED │            │ CANCELLED │
-    └──────────┘            └───────────┘
-
-Valid state transitions:
-    PENDING  → ACCEPTED | REJECTED | CANCELLED
-    ACCEPTED → COMPLETED | CANCELLED
-    REJECTED → (terminal)
-    COMPLETED → (terminal)
-    CANCELLED → (terminal)
-"""
+"""Challenge service implementing the battle system state machine."""
 
 from typing import List, Optional
 from datetime import datetime, timezone

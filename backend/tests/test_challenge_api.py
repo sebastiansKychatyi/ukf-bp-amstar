@@ -1,25 +1,4 @@
-"""
-test_challenge_api.py — HTTP integration tests for /api/v1/challenges
-=======================================================================
-
-These tests send real HTTP requests through the FastAPI ASGI app using
-httpx.AsyncClient with ASGITransport (no TCP connection to a real server).
-
-The auth dependencies (get_current_active_user, get_current_captain) are
-replaced via app.dependency_overrides, so no JWT tokens are needed.
-
-The database dependency (get_db) is replaced with a test SQLite session
-from conftest.py, so no PostgreSQL connection is required.
-
-Covered endpoints:
-    POST   /api/v1/challenges/              create_challenge
-    GET    /api/v1/challenges/{id}          get_challenge
-    PUT    /api/v1/challenges/{id}/accept   accept_challenge
-    PUT    /api/v1/challenges/{id}/reject   reject_challenge
-    PUT    /api/v1/challenges/{id}/cancel   cancel_challenge
-    PUT    /api/v1/challenges/{id}/result   submit_result
-    GET    /api/v1/challenges/              list_challenges
-"""
+"""HTTP integration tests for /api/v1/challenges endpoints."""
 
 import pytest
 from httpx import AsyncClient

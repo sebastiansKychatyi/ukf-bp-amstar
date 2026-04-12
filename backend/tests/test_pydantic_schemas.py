@@ -1,18 +1,4 @@
-"""
-test_pydantic_schemas.py — Pydantic V2 schema validation tests
-==============================================================
-
-These tests verify that the request/response schemas enforce their
-declared field constraints *before* any business logic or database
-interaction takes place.  A ValidationError raised at the schema
-boundary prevents invalid data from reaching the service layer.
-
-Test categories:
-    TC-P01  ChallengeCreate — input validation
-    TC-P02  ChallengeResultSubmit — score field constraints
-    TC-P03  ChallengeStatus — enum normalisation
-    TC-P04  ChallengeResponse — ORM serialisation via model_validate
-"""
+"""Pydantic V2 schema validation tests for challenge request/response models."""
 
 import pytest
 from datetime import datetime, timezone

@@ -1,20 +1,4 @@
-"""
-test_challenge_service.py — Unit tests for ChallengeService
-=============================================================
-
-These tests exercise the Battle System business logic directly at the
-service layer, bypassing HTTP routing and authentication entirely.
-Each test receives a real SQLAlchemy session connected to an in-memory
-SQLite database, which makes the tests fast and fully isolated.
-
-State machine under test:
-    PENDING  →  ACCEPTED   (accept_challenge)
-    PENDING  →  REJECTED   (reject_challenge)
-    PENDING  →  CANCELLED  (cancel_challenge)
-    ACCEPTED →  COMPLETED  (submit_result)
-    ACCEPTED →  CANCELLED  (cancel_challenge)
-    COMPLETED / REJECTED / CANCELLED  →  (terminal — no transitions allowed)
-"""
+"""Unit tests for ChallengeService — state machine and business logic."""
 
 import pytest
 from sqlalchemy.orm import Session

@@ -1,25 +1,4 @@
-"""
-test_elo_service.py — Unit tests for EloService
-=================================================
-
-Two categories of tests are present:
-
-1. Pure mathematical tests (no database required)
-   These test the static helper methods that implement the core ELO
-   formulas.  They call the methods directly without instantiating a
-   service or touching the database.
-
-2. Integration tests (database required)
-   These test update_ratings(), which reads a completed Challenge,
-   computes the new ratings, persists Rating audit records, and
-   updates the Team rows in one transaction.
-
-ELO formulas under test:
-    E_A = 1 / (1 + 10^((R_B - R_A) / 400))      expected score
-    S_A = 1.0 (win) | 0.5 (draw) | 0.0 (loss)   actual score
-    R'_A = R_A + K * (S_A - E_A)                 new rating
-    G    = 1 + ln(1 + |goal_diff|)               goal-diff multiplier
-"""
+"""Unit tests for EloService — ELO formulas and rating update logic."""
 
 import math
 import pytest

@@ -1,20 +1,7 @@
 """
-Team Category & K-Factor Service
+Team experience tiers and dynamic K-factor for the ELO rating system.
 
-Defines the three experience tiers used by the Elo rating system to
-calibrate how quickly a team's rating can change (the K-factor).
-
-Tiers
------
-Tier            Slovak label        Matches played   Base K-factor
------------     ------------------  ---------------  -------------
-PROVISIONAL     Provisorný tím      < 10             40
-DEVELOPING      Rozvíjajúci tím     10 – 29          30
-ESTABLISHED     Etablovaný tím      ≥ 30             20
-
-The higher K-factor for new teams lets their rating converge quickly to
-a realistic level.  Once a team has played 30+ matches its rating is
-considered stable and K is reduced to limit volatility.
+Tiers: PROVISIONAL (<10 matches, K=40), DEVELOPING (10-29, K=30), ESTABLISHED (≥30, K=20).
 """
 
 from __future__ import annotations

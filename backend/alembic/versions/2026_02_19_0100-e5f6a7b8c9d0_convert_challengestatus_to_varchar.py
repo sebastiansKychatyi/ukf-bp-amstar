@@ -1,23 +1,7 @@
 """Convert challengestatus column from PG ENUM to VARCHAR(20)
 
-Permanently eliminates the native PostgreSQL ENUM type for challenge.status,
-replacing it with a plain VARCHAR(20). This removes all case-sensitivity issues
-and makes the column immune to future enum-value migration problems.
-
-Background
-----------
-The original migration (62f47e93a625) created the PG enum with member NAMES
-('PENDING', 'ACCEPTED', ...) instead of VALUES ('pending', 'accepted', ...).
-Migration d4e5f6a7b8c9 attempted to RENAME the values to lowercase but was
-never applied. This migration supersedes it and fixes the DB regardless of
-whether the emergency docker exec fix was already run.
-
-Design
-------
-• Idempotent: safe to run even if the column is already VARCHAR (e.g. after
-  the emergency docker exec fix — the ALTER block is skipped via IF EXISTS).
-• Normalizes any residual UPPERCASE rows to lowercase after converting.
-• Drops the PG type with IF EXISTS so it never raises if already gone.
+Replaces the native PostgreSQL ENUM with VARCHAR(20) to eliminate case-sensitivity
+issues. Normalizes any existing UPPERCASE values to lowercase and drops the PG type.
 
 Revision ID: e5f6a7b8c9d0
 Revises:     d4e5f6a7b8c9

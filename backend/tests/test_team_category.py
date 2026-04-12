@@ -1,26 +1,4 @@
-"""
-test_team_category.py — Unit tests for the team categorisation module
-======================================================================
-
-Covers the three test cases specified in thesis section 3.4.1:
-
-    TC-E01  Expected-score invariants   (E_A + E_B = 1, E_A = 0.5 for equal ratings)
-    TC-E03  Goal-difference multiplier  (G ≥ 1.0 always)
-    TC-E04  Dynamic K-factor boundaries (9→10 and 29→30 match transitions)
-
-All tests in this file are **pure unit tests** — no database, no HTTP
-client, no fixtures from conftest.py are required.  Every assertion calls
-either a static method on EloService or the public ``get_team_category``
-function from the team_category module.
-
-Why a separate file?
---------------------
-The ``get_team_category`` function was extracted from EloService as a
-standalone, DB-free module so that it can be reused independently (e.g.
-in team profile API responses).  Testing it in isolation without a DB
-session fixture validates that the extraction is correct and that the
-category boundaries are enforced at the correct threshold values.
-"""
+"""Unit tests for team categorisation and ELO K-factor boundary logic."""
 
 import math
 
