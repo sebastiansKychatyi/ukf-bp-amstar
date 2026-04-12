@@ -3,9 +3,7 @@
 import { vi } from "vitest";
 import { ref, computed } from "vue";
 
-// ---------------------------------------------------------------------------
 // Nuxt composable stubs
-// ---------------------------------------------------------------------------
 
 // useCookie — returns a plain reactive ref so composables can read/write it.
 vi.stubGlobal("useCookie", (_key: string, _opts?: unknown) => ref<string | null>(null));

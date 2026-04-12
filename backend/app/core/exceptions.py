@@ -19,9 +19,7 @@ class AmStarException(Exception):
         super().__init__(self.message)
 
 
-# ============================================================================
 # AUTHENTICATION & AUTHORIZATION EXCEPTIONS
-# ============================================================================
 
 
 class AuthenticationError(AmStarException):
@@ -75,9 +73,7 @@ class InsufficientPermissionsError(AmStarException):
         )
 
 
-# ============================================================================
 # RESOURCE EXCEPTIONS
-# ============================================================================
 
 
 class ResourceNotFoundError(AmStarException):
@@ -113,9 +109,7 @@ class ChallengeNotFoundError(ResourceNotFoundError):
         super().__init__(resource_type="Challenge", identifier=challenge_id)
 
 
-# ============================================================================
 # BUSINESS RULE VIOLATIONS
-# ============================================================================
 
 
 class BusinessRuleViolationError(AmStarException):
@@ -277,9 +271,7 @@ class CannotRemoveCaptainError(BusinessRuleViolationError):
         )
 
 
-# ============================================================================
 # TOURNAMENT EXCEPTIONS
-# ============================================================================
 
 
 class TournamentNotFoundError(ResourceNotFoundError):
@@ -343,9 +335,7 @@ class TournamentNotEnoughTeamsError(BusinessRuleViolationError):
         )
 
 
-# ============================================================================
 # VALIDATION EXCEPTIONS
-# ============================================================================
 
 
 class ValidationError(AmStarException):
@@ -376,9 +366,7 @@ class InvalidDateError(ValidationError):
         super().__init__(field=field, message=reason)
 
 
-# ============================================================================
 # EXTERNAL SERVICE EXCEPTIONS
-# ============================================================================
 
 
 class ExternalServiceError(AmStarException):
@@ -406,9 +394,7 @@ class RedisServiceError(ExternalServiceError):
         super().__init__(service_name="Redis", reason=reason)
 
 
-# ============================================================================
 # RATE LIMITING EXCEPTIONS
-# ============================================================================
 
 
 class RateLimitExceededError(AmStarException):

@@ -47,9 +47,7 @@ from app.core.exceptions import (
 router = APIRouter()
 
 
-# =========================================================================
 # EXCEPTION -> HTTP MAPPING
-# =========================================================================
 
 def _handle(exc: Exception):
     """Map domain exceptions to HTTP responses."""
@@ -72,9 +70,7 @@ def _handle(exc: Exception):
     raise exc
 
 
-# =========================================================================
 # HELPER: build match response with scores from linked Challenge
-# =========================================================================
 
 def _match_response(m) -> dict:
     """Build a TournamentMatchResponse dict, pulling scores from Challenge."""
@@ -101,9 +97,7 @@ def _match_response(m) -> dict:
     return data
 
 
-# =========================================================================
 # LIST & DETAIL
-# =========================================================================
 
 @router.get(
     "/",
@@ -165,9 +159,7 @@ def get_tournament(
     return resp
 
 
-# =========================================================================
 # STANDINGS & BRACKET
-# =========================================================================
 
 @router.get(
     "/{tournament_id}/standings",
@@ -235,9 +227,7 @@ def get_bracket(
     )
 
 
-# =========================================================================
 # CRUD
-# =========================================================================
 
 @router.post(
     "/",
@@ -311,9 +301,7 @@ def delete_tournament(
         _handle(e)
 
 
-# =========================================================================
 # REGISTRATION
-# =========================================================================
 
 @router.post(
     "/{tournament_id}/open-registration",
@@ -382,9 +370,7 @@ def leave_tournament(
         _handle(e)
 
 
-# =========================================================================
 # START & CANCEL
-# =========================================================================
 
 @router.post(
     "/{tournament_id}/start",
@@ -438,9 +424,7 @@ def cancel_tournament(
     return TournamentResponse.model_validate(tournament)
 
 
-# =========================================================================
 # MATCH RESULTS
-# =========================================================================
 
 @router.post(
     "/{tournament_id}/matches/{match_id}/result",

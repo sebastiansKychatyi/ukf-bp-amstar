@@ -23,18 +23,14 @@ import enum
 from dataclasses import dataclass
 
 
-# ---------------------------------------------------------------------------
 # Thresholds (single source of truth — also imported by EloService)
-# ---------------------------------------------------------------------------
 
 PROVISIONAL_MAX_MATCHES: int = 10   # 0 – 9 matches  → PROVISIONAL
 DEVELOPING_MAX_MATCHES: int = 30    # 10 – 29 matches → DEVELOPING
                                     # 30+             → ESTABLISHED
 
 
-# ---------------------------------------------------------------------------
 # Enum
-# ---------------------------------------------------------------------------
 
 class TeamCategory(str, enum.Enum):
     """Experience tier of a team based on completed matches played."""
@@ -44,9 +40,7 @@ class TeamCategory(str, enum.Enum):
     ESTABLISHED = "established"
 
 
-# ---------------------------------------------------------------------------
 # Internal metadata table
-# ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class _CategoryMeta:
@@ -74,9 +68,7 @@ _META: dict[TeamCategory, _CategoryMeta] = {
 }
 
 
-# ---------------------------------------------------------------------------
 # Public result type
-# ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class TeamCategoryInfo:
@@ -89,9 +81,7 @@ class TeamCategoryInfo:
     matches_played: int
 
 
-# ---------------------------------------------------------------------------
 # Public function
-# ---------------------------------------------------------------------------
 
 def get_team_category(matches_played: int) -> TeamCategoryInfo:
     """

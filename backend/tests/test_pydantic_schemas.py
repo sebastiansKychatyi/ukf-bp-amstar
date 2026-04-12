@@ -27,9 +27,7 @@ from app.schemas.challenge import (
 from app.models.challenge import ChallengeStatus
 
 
-# =============================================================================
 # TC-P01  ChallengeCreate — input validation
-# =============================================================================
 
 class TestChallengeCreate:
 
@@ -132,9 +130,7 @@ class TestChallengeCreate:
         assert data.opponent_id == 5
 
 
-# =============================================================================
 # TC-P02  ChallengeResultSubmit — score field constraints
-# =============================================================================
 
 class TestChallengeResultSubmit:
 
@@ -227,9 +223,7 @@ class TestChallengeResultSubmit:
         assert data.opponent_score   == o_score
 
 
-# =============================================================================
 # TC-P03  ChallengeStatus — enum normalisation
-# =============================================================================
 
 class TestChallengeStatusEnum:
 
@@ -287,9 +281,7 @@ class TestChallengeStatusEnum:
             assert isinstance(member.value, str)
 
 
-# =============================================================================
 # TC-P04  ChallengeResponse — ORM serialisation
-# =============================================================================
 
 class TestChallengeResponseSerialisation:
     """

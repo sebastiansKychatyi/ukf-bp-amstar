@@ -20,9 +20,7 @@ import enum
 from app.db.base_class import Base
 
 
-# ---------------------------------------------------------------------------
 # Enums
-# ---------------------------------------------------------------------------
 
 class TournamentType(str, enum.Enum):
     LEAGUE = "league"          # Round-robin: all-vs-all
@@ -37,9 +35,7 @@ class TournamentStatus(str, enum.Enum):
     CANCELLED = "cancelled"    # Cancelled by organiser
 
 
-# ---------------------------------------------------------------------------
 # Tournament
-# ---------------------------------------------------------------------------
 
 class Tournament(Base):
     """
@@ -100,9 +96,7 @@ class Tournament(Base):
         return 0
 
 
-# ---------------------------------------------------------------------------
 # TournamentParticipant
-# ---------------------------------------------------------------------------
 
 class TournamentParticipant(Base):
     """
@@ -156,9 +150,7 @@ class TournamentParticipant(Base):
         return self.goals_for - self.goals_against
 
 
-# ---------------------------------------------------------------------------
 # TournamentMatch
-# ---------------------------------------------------------------------------
 
 class TournamentMatch(Base):
     """

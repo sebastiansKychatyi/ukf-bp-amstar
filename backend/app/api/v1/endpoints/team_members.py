@@ -23,9 +23,7 @@ from app.services.team_member_service import TeamMemberService
 router = APIRouter()
 
 
-# ============================================================================
 # DEPENDENCY INJECTION
-# ============================================================================
 
 
 def get_team_member_service(db: Session = Depends(get_db)) -> TeamMemberService:
@@ -33,9 +31,7 @@ def get_team_member_service(db: Session = Depends(get_db)) -> TeamMemberService:
     return TeamMemberService(db)
 
 
-# ============================================================================
 # TEAM ROSTER ENDPOINTS
-# ============================================================================
 
 
 @router.get("/{team_id}/members", response_model=List[schemas.TeamMemberResponse])
@@ -190,9 +186,7 @@ def transfer_captaincy(
     return team
 
 
-# ============================================================================
 # MY TEAM ENDPOINTS (for authenticated users)
-# ============================================================================
 
 
 @router.get("/my/membership", response_model=schemas.TeamMemberResponse)

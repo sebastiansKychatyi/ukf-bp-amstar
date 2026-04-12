@@ -1,4 +1,3 @@
-# =================================================================
 # Unified Caddy gateway
 #
 # Environment variables injected by docker-compose:
@@ -7,10 +6,8 @@
 #   PROJECT1_UPSTREAM  — container:port on web_network, e.g. app:3000
 #
 # TESTING vs PRODUCTION mode — see the global block below.
-# =================================================================
 
 {
-    # ---------------------------------------------------------------
     # TESTING MODE  (ports 8080:80 / 8443:443)
     #
     # When Caddy is NOT reachable on standard ports 80/443 from the
@@ -19,13 +16,10 @@
     # `auto_https off` disables ACME — Caddy serves plain HTTP only.
     #
     # REMOVE THIS LINE when you move to real ports 80/443 in production.
-    # ---------------------------------------------------------------
     auto_https off
 }
 
-# =================================================================
 # AMSTAR
-# =================================================================
 {$DOMAIN:localhost} {
 
     log {
@@ -109,9 +103,7 @@
     encode gzip zstd
 }
 
-# =================================================================
 # PROJECT 1  (remove this block entirely if not needed)
-# =================================================================
 {$PROJECT1_DOMAIN:_noop} {
 
     log {

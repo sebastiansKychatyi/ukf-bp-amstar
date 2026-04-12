@@ -23,9 +23,7 @@ from app.core.security import verify_password, get_password_hash
 router = APIRouter()
 
 
-# ---------------------------------------------------------------------------
 # Input schemas (small, endpoint-specific — no need for a separate file)
-# ---------------------------------------------------------------------------
 
 class ProfileUpdate(BaseModel):
     """Fields the user may update on their own profile."""
@@ -39,9 +37,7 @@ class PasswordChange(BaseModel):
     new_password: str
 
 
-# ---------------------------------------------------------------------------
 # Endpoints
-# ---------------------------------------------------------------------------
 
 @router.get("/me", response_model=UserSchema, summary="Get current user profile")
 def get_me(current_user: User = Depends(get_current_active_user)):

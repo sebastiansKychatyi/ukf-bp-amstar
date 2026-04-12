@@ -28,9 +28,7 @@ from app.services.team_service import TeamService
 router = APIRouter()
 
 
-# ============================================================================
 # DEPENDENCY INJECTION
-# ============================================================================
 
 
 def get_team_service(db: Session = Depends(get_db)) -> TeamService:
@@ -38,9 +36,7 @@ def get_team_service(db: Session = Depends(get_db)) -> TeamService:
     return TeamService(db)
 
 
-# ============================================================================
 # TEAM RETRIEVAL ENDPOINTS
-# ============================================================================
 
 
 @router.get("/", response_model=List[Team])
@@ -104,9 +100,7 @@ def get_team_roster_with_stats(
     return service.get_team_roster_with_stats(team_id)
 
 
-# ============================================================================
 # TEAM MUTATION ENDPOINTS (Captain only)
-# ============================================================================
 
 
 @router.post("/", response_model=Team, status_code=status.HTTP_201_CREATED)

@@ -32,9 +32,7 @@ from app.models.user import User
 BASE = "/api/v1/challenges"
 
 
-# =============================================================================
 # TC-A01  POST /challenges/  — create a challenge
-# =============================================================================
 
 class TestCreateChallengeEndpoint:
 
@@ -106,9 +104,7 @@ class TestCreateChallengeEndpoint:
         assert response.status_code == 400
 
 
-# =============================================================================
 # TC-A02  GET /challenges/{id}  — retrieve a challenge
-# =============================================================================
 
 class TestGetChallengeEndpoint:
 
@@ -153,9 +149,7 @@ class TestGetChallengeEndpoint:
         assert response.status_code == 404
 
 
-# =============================================================================
 # TC-A03  PUT /challenges/{id}/accept
-# =============================================================================
 
 class TestAcceptChallengeEndpoint:
 
@@ -212,9 +206,7 @@ class TestAcceptChallengeEndpoint:
         assert response.status_code == 403
 
 
-# =============================================================================
 # TC-A04  PUT /challenges/{id}/reject
-# =============================================================================
 
 class TestRejectChallengeEndpoint:
 
@@ -244,9 +236,7 @@ class TestRejectChallengeEndpoint:
         assert response.json()["status"] == "rejected"
 
 
-# =============================================================================
 # TC-A05  PUT /challenges/{id}/cancel
-# =============================================================================
 
 class TestCancelChallengeEndpoint:
 
@@ -302,9 +292,7 @@ class TestCancelChallengeEndpoint:
         assert response.status_code == 409
 
 
-# =============================================================================
 # TC-A06  PUT /challenges/{id}/result  — submit result & trigger ELO
-# =============================================================================
 
 class TestSubmitResultEndpoint:
 
@@ -397,9 +385,7 @@ class TestSubmitResultEndpoint:
         assert response.status_code == 409
 
 
-# =============================================================================
 # TC-A07  GET /challenges/  — list with filters
-# =============================================================================
 
 class TestListChallengesEndpoint:
 

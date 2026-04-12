@@ -63,9 +63,7 @@ from app.models.user import UserRole
 from app.models.challenge import ChallengeStatus
 
 
-# =============================================================================
 # ENGINE & SESSION FACTORY
-# =============================================================================
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 
@@ -89,9 +87,7 @@ TestingSessionLocal = sessionmaker(
 )
 
 
-# =============================================================================
 # INFRASTRUCTURE FIXTURES
-# =============================================================================
 
 @pytest.fixture(autouse=True)
 def disable_startup_events():
@@ -131,9 +127,7 @@ def mock_redis(monkeypatch):
     monkeypatch.setattr("app.core.redis.redis_client", mock)
 
 
-# =============================================================================
 # DATABASE SESSION FIXTURE
-# =============================================================================
 
 @pytest.fixture
 def db() -> Generator[Session, None, None]:
@@ -153,9 +147,7 @@ def db() -> Generator[Session, None, None]:
         Base.metadata.drop_all(bind=engine)
 
 
-# =============================================================================
 # USER FIXTURES
-# =============================================================================
 
 @pytest.fixture
 def captain_a(db: Session) -> User:
@@ -208,9 +200,7 @@ def player_user(db: Session) -> User:
     return user
 
 
-# =============================================================================
 # TEAM FIXTURES
-# =============================================================================
 
 @pytest.fixture
 def team_a(db: Session, captain_a: User) -> Team:
@@ -242,9 +232,7 @@ def team_b(db: Session, captain_b: User) -> Team:
     return team
 
 
-# =============================================================================
 # CHALLENGE FIXTURE  (accepted, ready for result submission)
-# =============================================================================
 
 @pytest.fixture
 def accepted_challenge(db: Session, team_a: Team, team_b: Team) -> Challenge:
@@ -266,9 +254,7 @@ def accepted_challenge(db: Session, team_a: Team, team_b: Team) -> Challenge:
     return challenge
 
 
-# =============================================================================
 # HTTP CLIENT FIXTURES  (for API integration tests)
-# =============================================================================
 
 @pytest_asyncio.fixture
 async def client_captain_a(db: Session, captain_a: User, team_a: Team) -> AsyncClient:

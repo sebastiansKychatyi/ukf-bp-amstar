@@ -32,17 +32,13 @@ from app.core.exceptions import (
 )
 
 
-# =============================================================================
 # HELPER
-# =============================================================================
 
 def make_service(db: Session) -> ChallengeService:
     return ChallengeService(db)
 
 
-# =============================================================================
 # TC-S01  Creating a new challenge
-# =============================================================================
 
 class TestCreateChallenge:
 
@@ -135,9 +131,7 @@ class TestCreateChallenge:
             )
 
 
-# =============================================================================
 # TC-S02  Accepting a challenge
-# =============================================================================
 
 class TestAcceptChallenge:
 
@@ -213,9 +207,7 @@ class TestAcceptChallenge:
             svc.accept_challenge(challenge.id, captain_b.id)  # second accept
 
 
-# =============================================================================
 # TC-S03  Rejecting a challenge
-# =============================================================================
 
 class TestRejectChallenge:
 
@@ -267,9 +259,7 @@ class TestRejectChallenge:
             svc.accept_challenge(challenge.id, captain_b.id)
 
 
-# =============================================================================
 # TC-S04  Cancelling a challenge
-# =============================================================================
 
 class TestCancelChallenge:
 
@@ -344,9 +334,7 @@ class TestCancelChallenge:
             svc.cancel_challenge(accepted_challenge.id, captain_a.id)
 
 
-# =============================================================================
 # TC-S05  Submitting a match result
-# =============================================================================
 
 class TestSubmitResult:
 

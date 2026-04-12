@@ -11,9 +11,7 @@ import { ref } from "vue";
 import { useAuth } from "../composables/useAuth";
 import type { User, TokenResponse } from "../types/auth";
 
-// ---------------------------------------------------------------------------
 // Fixtures
-// ---------------------------------------------------------------------------
 
 const mockUser: User = {
   id: 1,
@@ -32,9 +30,7 @@ const mockTokenResponse: TokenResponse = {
   token_type: "bearer",
 };
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Re-initialise useCookie stub so each test starts with a clean token state.
@@ -47,9 +43,7 @@ function resetCookieStub(initialValue: string | null = null) {
   return cookieRef;
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe("useAuth — isAuthenticated", () => {
   it("returns false when no token is stored", () => {

@@ -14,9 +14,7 @@ from typing import Optional, Any
 from urllib.parse import quote
 
 
-# ============================================================================
 # HTML/XSS SANITIZATION
-# ============================================================================
 
 
 def sanitize_html(text: str, allow_basic_formatting: bool = False) -> str:
@@ -84,9 +82,7 @@ def strip_html(text: str) -> str:
     return clean.strip()
 
 
-# ============================================================================
 # SCRIPT INJECTION PREVENTION
-# ============================================================================
 
 
 def sanitize_script_content(text: str) -> str:
@@ -118,9 +114,7 @@ def sanitize_script_content(text: str) -> str:
     return text
 
 
-# ============================================================================
 # SQL INJECTION PREVENTION (Additional Layer)
-# ============================================================================
 
 
 def sanitize_sql_string(text: str) -> str:
@@ -153,9 +147,7 @@ def sanitize_sql_string(text: str) -> str:
     return text
 
 
-# ============================================================================
 # PATH TRAVERSAL PREVENTION
-# ============================================================================
 
 
 def sanitize_filename(filename: str) -> str:
@@ -198,9 +190,7 @@ def sanitize_filename(filename: str) -> str:
     return filename or 'file'
 
 
-# ============================================================================
 # URL SANITIZATION
-# ============================================================================
 
 
 def sanitize_url(url: str, allow_schemes: Optional[list[str]] = None) -> str:
@@ -240,9 +230,7 @@ def sanitize_url(url: str, allow_schemes: Optional[list[str]] = None) -> str:
     return url
 
 
-# ============================================================================
 # EMAIL SANITIZATION
-# ============================================================================
 
 
 def sanitize_email(email: str) -> str:
@@ -272,9 +260,7 @@ def sanitize_email(email: str) -> str:
     return email
 
 
-# ============================================================================
 # GENERAL TEXT SANITIZATION
-# ============================================================================
 
 
 def sanitize_text(
@@ -332,9 +318,7 @@ def sanitize_text(
     return text
 
 
-# ============================================================================
 # PYDANTIC VALIDATOR HELPERS
-# ============================================================================
 
 
 def sanitize_string_field(v: Optional[str]) -> Optional[str]:
@@ -370,9 +354,7 @@ def sanitize_string_field(v: Optional[str]) -> Optional[str]:
     return v if v else None
 
 
-# ============================================================================
 # MIDDLEWARE HELPER
-# ============================================================================
 
 
 class InputSanitizer:
@@ -415,9 +397,7 @@ class InputSanitizer:
         return sanitized
 
 
-# ============================================================================
 # USAGE EXAMPLES
-# ============================================================================
 
 """
 IN PYDANTIC SCHEMAS:

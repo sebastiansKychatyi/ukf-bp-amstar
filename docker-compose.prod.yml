@@ -1,4 +1,3 @@
-# =================================================================
 # AmStar Platform - Production Environment
 # FastAPI Backend + Nuxt.js Frontend + PostgreSQL 15 + Redis + Caddy
 #
@@ -14,7 +13,6 @@
 #   http://server-ip:8001  → FastAPI  /health  /api/v1/...
 #   http://server-ip:3001  → Nuxt.js frontend
 #   http://server-ip:8080  → Full stack via Caddy (no TLS in testing mode)
-# =================================================================
 
 services:
 

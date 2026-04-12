@@ -1,6 +1,4 @@
-# ============================================================================
 # AmStar Football Platform - Master .gitignore
-# ============================================================================
 # This file prevents sensitive, temporary, and auto-generated files from
 # being tracked by Git version control.
 #
@@ -8,11 +6,8 @@
 # - Root: Docker, environment variables, documentation
 # - Frontend: Nuxt 3 (Node.js)
 # - Backend: FastAPI (Python)
-# ============================================================================
 
-# ============================================================================
 # ENVIRONMENT & SECRETS (CRITICAL - NEVER COMMIT)
-# ============================================================================
 # Environment files contain sensitive data like API keys, database passwords,
 # and secrets. These must NEVER be committed to version control.
 
@@ -28,9 +23,7 @@
 *.bak
 *.old
 
-# ============================================================================
 # PYTHON / FASTAPI (Backend)
-# ============================================================================
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -141,9 +134,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# ============================================================================
 # NODE.JS / NUXT 3 (Frontend)
-# ============================================================================
 
 # Dependencies
 node_modules/
@@ -206,9 +197,7 @@ coverage/
 *.tsbuildinfo
 next-env.d.ts
 
-# ============================================================================
 # DOCKER
-# ============================================================================
 
 # Docker volumes and data directories
 **/volumes/
@@ -219,9 +208,7 @@ db/data/
 # Docker override files (keep base docker-compose files)
 docker-compose.override.yml
 
-# ============================================================================
 # DATABASE
-# ============================================================================
 
 # SQLite databases
 *.sqlite
@@ -238,9 +225,7 @@ docker-compose.override.yml
 !database/init.sql
 !backend/app/sql/
 
-# ============================================================================
 # OPERATING SYSTEM
-# ============================================================================
 
 # macOS
 .DS_Store
@@ -283,9 +268,7 @@ $RECYCLE.BIN/
 .Trash-*
 .nfs*
 
-# ============================================================================
 # IDEs & EDITORS
-# ============================================================================
 
 # VSCode
 .vscode/
@@ -328,9 +311,7 @@ auto-save-list
 tramp
 .\#*
 
-# ============================================================================
 # BUILD ARTIFACTS & TEMPORARY FILES
-# ============================================================================
 
 # Compiled files
 *.com
@@ -359,9 +340,7 @@ tramp
 *~
 .#*
 
-# ============================================================================
 # CLOUD & DEPLOYMENT
-# ============================================================================
 
 # Terraform
 .terraform/
@@ -378,9 +357,7 @@ terraform.rc
 # Kubernetes
 *.kubeconfig
 
-# ============================================================================
 # TESTING & CI/CD
-# ============================================================================
 
 # Test coverage
 .coverage
@@ -390,18 +367,14 @@ htmlcov/
 # CI/CD artifacts
 .github/workflows/*.yml.bak
 
-# ============================================================================
 # DOCUMENTATION (Generated)
-# ============================================================================
 
 # Auto-generated docs
 /docs/_build/
 /docs/api/
 site/
 
-# ============================================================================
 # PROJECT-SPECIFIC
-# ============================================================================
 
 # User uploads (if any)
 /backend/uploads/
@@ -421,9 +394,7 @@ backups/
 logs/
 *.log
 
-# ============================================================================
 # IMPORTANT: Files to KEEP (whitelist)
-# ============================================================================
 # These files SHOULD be committed despite being in ignored directories
 
 # Keep example environment files
@@ -447,6 +418,7 @@ logs/
 !.github/workflows/
 !.gitlab-ci.yml
 
-# ============================================================================
 # END OF .gitignore
-# ============================================================================
+
+# IDE / AI tools
+.claude/

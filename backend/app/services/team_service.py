@@ -26,9 +26,7 @@ class TeamService(BaseService[models.Team]):
         self.team_crud = crud.team
         self.user_crud = crud.user
 
-    # =========================================================================
     # TEAM RETRIEVAL
-    # =========================================================================
 
     def get_team_by_id(
         self,
@@ -159,9 +157,7 @@ class TeamService(BaseService[models.Team]):
         self._log_operation("Retrieved my team", user_id=user_id, team_id=team.id)
         return team
 
-    # =========================================================================
     # TEAM STATISTICS & MATCH HISTORY
-    # =========================================================================
 
     def get_team_stats(self, team_id: int) -> TeamStatsSummary:
         """
@@ -358,9 +354,7 @@ class TeamService(BaseService[models.Team]):
         self._log_operation("Retrieved roster with stats", team_id=team_id, count=len(result))
         return result
 
-    # =========================================================================
     # TEAM CRUD OPERATIONS
-    # =========================================================================
 
     def create_team(
         self,
@@ -533,9 +527,7 @@ class TeamService(BaseService[models.Team]):
 
         return team
 
-    # =========================================================================
     # UTILITY METHODS
-    # =========================================================================
 
     def verify_team_ownership(
         self,

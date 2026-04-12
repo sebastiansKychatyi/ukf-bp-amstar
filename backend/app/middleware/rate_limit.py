@@ -207,9 +207,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return True, max_requests
 
 
-# ============================================================================
 # DECORATOR FOR ENDPOINT-SPECIFIC RATE LIMITING
-# ============================================================================
 
 
 def rate_limit(

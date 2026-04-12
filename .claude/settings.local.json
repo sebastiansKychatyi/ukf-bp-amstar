@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(wc -l /c/Users/ninja/Desktop/ukf-bp-amstar/AmStars/backend/app/services/*.py)",
-      "Bash(grep -l \"def test_\" /c/Users/ninja/Desktop/ukf-bp-amstar/AmStars/backend/tests/*.py)"
-    ]
-  }
-}

@@ -56,36 +56,26 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         """
         response = await call_next(request)
 
-        # ====================================================================
         # MIME Sniffing Protection
-        # ====================================================================
         # Prevents browsers from MIME-sniffing responses
         response.headers["X-Content-Type-Options"] = "nosniff"
 
-        # ====================================================================
         # Clickjacking Protection
-        # ====================================================================
         # Prevents page from being displayed in iframe
         response.headers["X-Frame-Options"] = "DENY"
 
-        # ====================================================================
         # XSS Protection (Legacy)
-        # ====================================================================
         # Enables XSS filter in older browsers
         response.headers["X-XSS-Protection"] = "1; mode=block"
 
-        # ====================================================================
         # HTTPS Enforcement (HSTS)
-        # ====================================================================
         # Forces HTTPS for specified duration
         if self.enable_hsts and request.url.scheme == "https":
             response.headers["Strict-Transport-Security"] = (
                 f"max-age={self.hsts_max_age}; includeSubDomains; preload"
             )
 
-        # ====================================================================
         # Content Security Policy
-        # ====================================================================
         # Restricts resource loading to prevent XSS
         if self.enable_csp:
             csp_directives = [
@@ -101,15 +91,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             ]
             response.headers["Content-Security-Policy"] = "; ".join(csp_directives)
 
-        # ====================================================================
         # Referrer Policy
-        # ====================================================================
         # Controls referrer information sent with requests
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
-        # ====================================================================
         # Permissions Policy (formerly Feature-Policy)
-        # ====================================================================
         # Disables unnecessary browser features
         permissions = [
             "geolocation=()",  # Disable geolocation
@@ -121,9 +107,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         ]
         response.headers["Permissions-Policy"] = ", ".join(permissions)
 
-        # ====================================================================
         # Remove Information Disclosure Headers
-        # ====================================================================
         # Remove headers that reveal server information
         headers_to_remove = ["Server", "X-Powered-By"]
         for header in headers_to_remove:
@@ -133,9 +117,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
-# ============================================================================
 # CONFIGURATION EXAMPLES
-# ============================================================================
 
 """
 DEVELOPMENT CSP (More Permissive):

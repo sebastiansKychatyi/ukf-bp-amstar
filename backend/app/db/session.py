@@ -58,9 +58,7 @@ SessionLocal = sessionmaker(
 )
 
 
-# ---------------------------------------------------------------------------
 # Pool monitoring event listeners
-# ---------------------------------------------------------------------------
 
 def _pool_status() -> dict:
     """Return a snapshot of current pool utilisation."""
@@ -104,9 +102,7 @@ def _on_checkin(dbapi_connection, connection_record) -> None:
         logger.info("DB connection returned to pool (still high utilization)", extra=s)
 
 
-# ---------------------------------------------------------------------------
 # Retry decorator
-# ---------------------------------------------------------------------------
 
 def db_retry(
     max_attempts: int = settings.DB_RETRY_MAX_ATTEMPTS,
@@ -134,9 +130,7 @@ def db_retry(
     )
 
 
-# ---------------------------------------------------------------------------
 # FastAPI dependency
-# ---------------------------------------------------------------------------
 
 def get_db() -> Generator[Session, None, None]:
     """

@@ -75,9 +75,7 @@ class ChallengeService(BaseService[Challenge]):
         super().__init__(db)
         self._notifier = NotificationService(db)
 
-    # =====================================================================
     # RETRIEVAL
-    # =====================================================================
 
     def get_challenge(self, challenge_id: int) -> Challenge:
         """Get a single challenge with team relationships eagerly loaded."""
@@ -144,9 +142,7 @@ class ChallengeService(BaseService[Challenge]):
         """Get all challenges involving a specific team."""
         return self.get_challenges(skip=skip, limit=limit, team_id=team_id)
 
-    # =====================================================================
     # STATE TRANSITIONS
-    # =====================================================================
 
     def create_challenge(
         self,
@@ -374,9 +370,7 @@ class ChallengeService(BaseService[Challenge]):
 
         return self.get_challenge(challenge_id)
 
-    # =====================================================================
     # INTERNAL HELPERS
-    # =====================================================================
 
     def _transition(self, challenge: Challenge, target: ChallengeStatus) -> None:
         """

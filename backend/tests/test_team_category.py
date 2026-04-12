@@ -36,9 +36,7 @@ from app.core.team_category import (
 )
 
 
-# =============================================================================
 # TC-E01  Expected-score formula
-# =============================================================================
 
 class TestExpectedScore:
     """
@@ -91,9 +89,7 @@ class TestExpectedScore:
         assert EloService._expected_score(800, 1000) < 0.5
 
 
-# =============================================================================
 # TC-E03  Goal-difference multiplier
-# =============================================================================
 
 class TestGoalDifferenceMultiplier:
     """
@@ -143,9 +139,7 @@ class TestGoalDifferenceMultiplier:
         )
 
 
-# =============================================================================
 # TC-E04  Dynamic K-factor / team category boundaries
-# =============================================================================
 
 class TestTeamCategory:
     """
@@ -165,9 +159,7 @@ class TestTeamCategory:
         F  Negative input raises ValueError.
     """
 
-    # ------------------------------------------------------------------
     # A — Interior values
-    # ------------------------------------------------------------------
 
     def test_provisional_interior(self):
         """TC-E04-A1: 5 matches → PROVISIONAL, K = 40."""
@@ -187,9 +179,7 @@ class TestTeamCategory:
         assert info.category == TeamCategory.ESTABLISHED
         assert info.k_factor == 20
 
-    # ------------------------------------------------------------------
     # B — PROVISIONAL → DEVELOPING boundary (match 9 vs 10)
-    # ------------------------------------------------------------------
 
     def test_match_9_is_still_provisional(self):
         """
@@ -220,9 +210,7 @@ class TestTeamCategory:
             f"> K({PROVISIONAL_MAX_MATCHES})={k_after}"
         )
 
-    # ------------------------------------------------------------------
     # C — DEVELOPING → ESTABLISHED boundary (match 29 vs 30)
-    # ------------------------------------------------------------------
 
     def test_match_29_is_still_developing(self):
         """
@@ -253,9 +241,7 @@ class TestTeamCategory:
             f"> K({DEVELOPING_MAX_MATCHES})={k_after}"
         )
 
-    # ------------------------------------------------------------------
     # D — Edge: zero matches (brand-new team)
-    # ------------------------------------------------------------------
 
     def test_zero_matches_is_provisional(self):
         """
@@ -265,9 +251,7 @@ class TestTeamCategory:
         assert info.category == TeamCategory.PROVISIONAL
         assert info.k_factor == 40
 
-    # ------------------------------------------------------------------
     # E — Return type and field correctness
-    # ------------------------------------------------------------------
 
     def test_return_type_is_team_category_info(self):
         """
@@ -295,9 +279,7 @@ class TestTeamCategory:
             assert isinstance(info.label_en, str) and info.label_en.strip()
             assert isinstance(info.label_sk, str) and info.label_sk.strip()
 
-    # ------------------------------------------------------------------
     # F — Input validation
-    # ------------------------------------------------------------------
 
     def test_negative_input_raises_value_error(self):
         """
@@ -309,9 +291,7 @@ class TestTeamCategory:
         with pytest.raises(ValueError, match=r"non-negative"):
             get_team_category(-1)
 
-    # ------------------------------------------------------------------
     # G — EloService integration: _dynamic_k_factor delegates correctly
-    # ------------------------------------------------------------------
 
     def test_dynamic_k_factor_uses_category_k_at_9_matches(self, db):
         """

@@ -32,9 +32,7 @@ from app.models.team import Team
 from app.models.user import User
 
 
-# =============================================================================
 # TC-E01  Expected score formula
-# =============================================================================
 
 class TestExpectedScore:
 
@@ -89,9 +87,7 @@ class TestExpectedScore:
         assert e_stronger == pytest.approx(10 / 11, abs=1e-4)
 
 
-# =============================================================================
 # TC-E02  Actual score mapping
-# =============================================================================
 
 class TestActualScores:
 
@@ -133,9 +129,7 @@ class TestActualScores:
         assert s_a == expected_a
 
 
-# =============================================================================
 # TC-E03  Goal-difference multiplier
-# =============================================================================
 
 class TestGoalDifferenceMultiplier:
 
@@ -172,9 +166,7 @@ class TestGoalDifferenceMultiplier:
             assert EloService._goal_difference_multiplier(diff) >= 1.0
 
 
-# =============================================================================
 # TC-E04  Dynamic K-factor selection
-# =============================================================================
 
 class TestDynamicKFactor:
     """
@@ -235,9 +227,7 @@ class TestDynamicKFactor:
         assert k_at_29 > k_at_30   # 30 > 20
 
 
-# =============================================================================
 # TC-E05  Full ELO update via database
-# =============================================================================
 
 class TestUpdateRatings:
 

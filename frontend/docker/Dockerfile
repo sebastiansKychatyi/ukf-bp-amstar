@@ -1,10 +1,7 @@
-# =========================================================
-# AmStar Frontend - Optimized Multi-Stage Docker Build
-# Nuxt 3 + Vuetify 3 + Vue 3
-# Node.js 20 LTS (Iron) - Required for Nuxt 3.13+ ecosystem
-# =========================================================
+# AmStar Frontend - Multi-Stage Docker Build
+# Nuxt 3 + Vuetify 3 + Vue 3 | Node.js 20 LTS
 
-# ============ BUILD STAGE ============
+# BUILD STAGE
 # Install dependencies and build the application
 # Using Node.js 20 LTS to satisfy engine requirements (>=20.19.0)
 FROM node:20-alpine AS build
@@ -26,7 +23,7 @@ COPY . .
 # Creates optimized .output directory with SSR server and static assets
 RUN npm run build
 
-# ============ PRODUCTION STAGE ============
+# PRODUCTION STAGE
 # Nuxt's .output bundle is fully self-contained — no npm packages are needed
 # at runtime.  Copying .output alone is sufficient; running npm ci here would
 # trigger the postinstall script (nuxi prepare) which fails because nuxi is a

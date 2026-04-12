@@ -26,9 +26,7 @@ from app.core.exceptions import TeamNotFoundError, NotTeamOwnerError
 router = APIRouter()
 
 
-# -------------------------------------------------------------------------
 # MATCHMAKING
-# -------------------------------------------------------------------------
 
 
 @router.post(
@@ -76,9 +74,7 @@ def find_opponent_for_team(
     return service.find_opponents(team_id, config)
 
 
-# -------------------------------------------------------------------------
 # TEAM AVAILABILITY
-# -------------------------------------------------------------------------
 
 
 @router.get(
@@ -137,9 +133,7 @@ def set_team_availability(
     return service.set_team_availability(team_id, payload.slots)
 
 
-# -------------------------------------------------------------------------
 # HELPERS
-# -------------------------------------------------------------------------
 
 
 def _get_captain_team(db: Session, user_id: int):

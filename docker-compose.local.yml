@@ -1,9 +1,7 @@
 version: '3.8'
 
-# =================================================================
 # AmStar Platform - Local Development Environment
 # FastAPI Backend + Nuxt.js Frontend + PostgreSQL 15
-# =================================================================
 
 services:
   db:

@@ -9,9 +9,7 @@ from typing import Optional, List
 from datetime import datetime
 
 
-# ---------------------------------------------------------------------------
 # Input schemas
-# ---------------------------------------------------------------------------
 
 class TournamentCreate(BaseModel):
     """Schema for creating a new tournament."""
@@ -43,9 +41,7 @@ class MatchResultSubmit(BaseModel):
     away_score: int = Field(..., ge=0, le=99, description="Goals scored by away team")
 
 
-# ---------------------------------------------------------------------------
 # Response sub-schemas
-# ---------------------------------------------------------------------------
 
 class TeamBrief(BaseModel):
     """Minimal team info for embedding in tournament responses."""
@@ -99,9 +95,7 @@ class TournamentMatchResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-# ---------------------------------------------------------------------------
 # Main tournament response
-# ---------------------------------------------------------------------------
 
 class CreatorBrief(BaseModel):
     """Brief info about the tournament organiser."""
@@ -170,9 +164,7 @@ class BracketResponse(BaseModel):
     rounds: List[BracketRound]
 
 
-# ---------------------------------------------------------------------------
 # Match result submission response (includes ELO updates)
-# ---------------------------------------------------------------------------
 
 class EloUpdateInfo(BaseModel):
     """ELO rating change for one team after a tournament match."""

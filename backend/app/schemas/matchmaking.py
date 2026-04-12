@@ -3,9 +3,7 @@ from typing import List, Optional
 from datetime import time
 
 
-# ============================================================================
 # TEAM AVAILABILITY SCHEMAS
-# ============================================================================
 
 
 class AvailabilitySlotBase(BaseModel):
@@ -39,9 +37,7 @@ class TeamAvailabilityResponse(BaseModel):
     slots: List[AvailabilitySlotResponse]
 
 
-# ============================================================================
 # MATCHMAKING SCHEMAS
-# ============================================================================
 
 
 class MatchmakingScoreBreakdown(BaseModel):

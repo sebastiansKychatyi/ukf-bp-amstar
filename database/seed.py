@@ -33,9 +33,7 @@ NOW = datetime.now(timezone.utc)
 
 
 def seed(session: Session):
-    # ------------------------------------------------------------------
     # 1. Users  (15 total: 3 captains + 11 players + 1 admin)
-    # ------------------------------------------------------------------
     users_data = [
         # Captains
         {"email": "jan.novak@amstar.test",        "username": "jan_novak",        "full_name": "Jan Novák",          "role": "CAPTAIN"},
@@ -75,9 +73,7 @@ def seed(session: Session):
 
     session.flush()
 
-    # ------------------------------------------------------------------
     # 2. Teams
-    # ------------------------------------------------------------------
     teams_data = [
         {
             "name": "Thunder FC",
@@ -121,9 +117,7 @@ def seed(session: Session):
 
     session.flush()
 
-    # ------------------------------------------------------------------
     # 3. Team Members
-    # ------------------------------------------------------------------
     members_data = [
         # Thunder FC
         {"team": "Thunder FC",      "user": "jan_novak",        "role": "CAPTAIN", "position": "FWD", "jersey": 10},
@@ -158,10 +152,8 @@ def seed(session: Session):
 
     session.flush()
 
-    # ------------------------------------------------------------------
     # 4. Completed matches (challenges)
     # Format: challenger vs opponent, challenger_score:opponent_score, days_ago
-    # ------------------------------------------------------------------
     matches = [
         # Thunder FC vs Lightning United  — 5 matches
         ("Thunder FC",      "Lightning United", 3, 1, 75, "Letná Sports Complex, Prague"),
@@ -210,9 +202,7 @@ def seed(session: Session):
 
     session.flush()
 
-    # ------------------------------------------------------------------
     # 5. Player Statistics (aggregated from match history)
-    # ------------------------------------------------------------------
     stats_data = [
         # Thunder FC — strong attack
         {"user": "jan_novak",        "mp": 11, "mw": 8, "md": 2, "ml": 1, "g": 18, "a": 7,  "yc": 2, "rc": 0, "cs": 0,  "sot": 32},
@@ -252,9 +242,7 @@ def seed(session: Session):
 
     session.flush()
 
-    # ------------------------------------------------------------------
     # 6. Join Requests
-    # ------------------------------------------------------------------
     # Pending — player wants to join Thunder FC
     session.execute(text(
         "INSERT INTO joinrequest (team_id, user_id, status, message, position, created_at, updated_at) "
