@@ -1,24 +1,3 @@
-"""
-Player Statistics Service
-
-Handles the two-tier statistics architecture:
-
-1. **MatchPlayerStatistics** — per-match granular data (source of truth)
-2. **PlayerStatistics** — aggregated lifetime totals (derived / cache)
-
-After every match, per-player stats are recorded into MatchPlayerStatistics.
-Then the aggregated PlayerStatistics row is recomputed by summing all
-per-match records for that player.  This ensures data integrity:
-the aggregated row can always be rebuilt from the transactional records.
-
-Data-integrity rule
--------------------
-A player can only have MatchPlayerStatistics for a challenge in which
-their team actually participated.  The service enforces this at write time
-by verifying that the player's team_id matches either the challenger_id
-or the opponent_id of the challenge.
-"""
-
 from typing import List, Optional
 
 from sqlalchemy.orm import Session, joinedload

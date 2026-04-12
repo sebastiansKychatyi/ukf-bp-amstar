@@ -1,26 +1,3 @@
-"""
-Smart Matchmaking Service
-
-Implements a multi-factor scoring algorithm that ranks potential opponents
-for a given team. The algorithm balances competitive fairness (ELO proximity),
-logistic feasibility (geographic and schedule overlap), engagement freshness
-(recency penalty), and platform health (activity bonus).
-
-Mathematical formulation
-------------------------
-For a requesting team T and each candidate opponent O, the composite
-matchmaking score is computed as:
-
-    S(T, O) = w1 * ELO(T, O)
-            + w2 * GEO(T, O)
-            + w3 * AVAIL(T, O)
-            - w4 * RECENCY(T, O)
-            + w5 * ACTIVITY(O)
-
-Each component is normalized to the [0, 1] interval before weighting.
-The final score is scaled to [0, 100] for readability.
-"""
-
 import math
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Dict, Tuple

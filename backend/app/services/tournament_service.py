@@ -1,22 +1,3 @@
-"""
-Tournament Service — Business Logic & Fixture Generation
-
-Lifecycle:
-    DRAFT  ──►  REGISTRATION  ──►  ACTIVE  ──►  COMPLETED
-                                       │
-                                       └──►  CANCELLED
-
-Key operations:
-    1. create / update / delete tournament   (organiser)
-    2. join / leave                          (captain, during REGISTRATION)
-    3. start tournament                      (organiser → generates fixtures)
-    4. record match result                   (triggers standings recalc)
-    5. advance round (knockout)              (after all round matches done)
-
-Fixture generation algorithms:
-    - LEAGUE:   round-robin via circle method (N-1 or N rounds)
-    - KNOCKOUT: seeded single-elimination bracket with BYEs
-"""
 
 import math
 from itertools import combinations

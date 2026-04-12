@@ -10,7 +10,8 @@ Handles player join request workflow:
 """
 
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -67,12 +68,18 @@ def create_join_request(
     - 400: Pending request already exists
     - 404: Team not found
     """
-    join_request = service.create_join_request(
-        team_id=request_in.team_id,
-        user_id=current_user.id,
-        message=request_in.message,
-        position=request_in.position
-    )
+    try:
+        join_request = service.create_join_request(
+            team_id=request_in.team_id,
+            user_id=current_user.id,
+            message=request_in.message,
+            position=request_in.position
+        )
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A join request for this team already exists.",
+        )
     return join_request
 
 

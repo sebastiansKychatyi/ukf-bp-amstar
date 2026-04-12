@@ -1,11 +1,3 @@
-"""
-Team Member Service Layer
-
-Contains all business logic related to team membership including:
-- Join requests management
-- Member roster management
-- Role management within teams
-"""
 
 from typing import List, Optional
 from datetime import datetime, timezone

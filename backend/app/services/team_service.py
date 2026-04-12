@@ -1,13 +1,3 @@
-"""
-Team Service Layer
-
-Contains all business logic related to teams including:
-- Team CRUD with validation
-- Team statistics aggregation
-- Match history retrieval
-- Roster management with player stats
-- Ownership verification
-"""
 
 from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
@@ -30,12 +20,6 @@ from app.core.exceptions import (
 
 
 class TeamService(BaseService[models.Team]):
-    """
-    Service class for team-related business logic.
-
-    Encapsulates all business rules and operations related to teams,
-    providing a clean separation between the API layer and data access layer.
-    """
 
     def __init__(self, db: Session):
         super().__init__(db)

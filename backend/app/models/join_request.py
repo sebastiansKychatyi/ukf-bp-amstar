@@ -5,7 +5,7 @@ Represents player requests to join teams.
 Managed by team captains who can accept or reject requests.
 """
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from enum import Enum as PyEnum
@@ -57,6 +57,10 @@ class JoinRequest(Base):
     # Timestamps
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "team_id", name="uq_joinrequest_user_team"),
+    )
 
     # Relationships
     team = relationship("Team", back_populates="join_requests")

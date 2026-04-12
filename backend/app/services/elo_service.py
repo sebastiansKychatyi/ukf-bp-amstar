@@ -1,52 +1,3 @@
-"""
-ELO Rating Service
-
-Implements the Elo rating system adapted for team sports.
-
-The Elo system, originally devised by Arpad Elo for chess (1960),
-provides a method for calculating the relative skill levels of
-competitors.  This implementation adapts the standard formulas
-for two-team football matches.
-
-Core formulas
--------------
-
-1. **Expected score** of team A against team B:
-
-       E_A = 1 / (1 + 10^((R_B - R_A) / 400))
-
-   where R_A and R_B are the current ratings.
-
-2. **Actual score** S_A:
-
-       S_A = 1.0  (win)
-       S_A = 0.5  (draw)
-       S_A = 0.0  (loss)
-
-3. **Rating update**:
-
-       R'_A = R_A + K * (S_A - E_A)
-
-   where K is a dynamic factor that controls rating volatility.
-
-K-factor policy
----------------
-
-The K-factor varies by team maturity to let newcomers converge
-faster while keeping established teams stable:
-
-    Matches played < 10  → K = 40  (provisional)
-    Matches played < 30  → K = 30  (developing)
-    Matches played >= 30 → K = 20  (established)
-
-Additionally, a goal-difference multiplier amplifies K for
-decisive victories, rewarding dominant performance:
-
-    G = 1 + ln(1 + |goal_diff|)
-
-    Effective K = base_K * G
-"""
-
 import math
 from typing import Tuple
 
@@ -70,9 +21,7 @@ class EloService(BaseService[Rating]):
     def __init__(self, db: Session):
         super().__init__(db)
 
-    # =====================================================================
     # PUBLIC API
-    # =====================================================================
 
     def update_ratings(
         self,
@@ -232,9 +181,8 @@ class EloService(BaseService[Rating]):
             for r in records
         ]
 
-    # =====================================================================
     # CORE MATHEMATICAL FUNCTIONS
-    # =====================================================================
+
 
     @staticmethod
     def _expected_score(r_a: int, r_b: int) -> float:
@@ -282,9 +230,9 @@ class EloService(BaseService[Rating]):
         base_k = get_team_category(matches_played).k_factor
         return base_k * self._goal_difference_multiplier(goal_diff)
 
-    # =====================================================================
+
     # DATA HELPERS
-    # =====================================================================
+  
 
     def _count_completed_matches(self, team_id: int) -> int:
         """Count completed challenges for a team (used for K-factor tier)."""
