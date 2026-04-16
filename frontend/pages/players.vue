@@ -148,6 +148,10 @@
               <div class="text-caption text-medium-emphasis">Team</div>
               <div>{{ selectedPlayer.team_name || 'Free Agent' }}</div>
             </v-col>
+            <v-col v-if="selectedPlayer.email" cols="12">
+              <div class="text-caption text-medium-emphasis">Email</div>
+              <a :href="`mailto:${selectedPlayer.email}`" class="text-body-2">{{ selectedPlayer.email }}</a>
+            </v-col>
             <v-col v-if="selectedPlayer.position" cols="6">
               <div class="text-caption text-medium-emphasis">Position</div>
               <v-chip size="small" color="primary">{{ selectedPlayer.position }}</v-chip>
@@ -248,9 +252,10 @@ const fetchPlayers = async () => {
         const members = rosterData.members || rosterData || []
         for (const member of members) {
           allPlayers.push({
-            id: member.user_id || member.id,
-            username: member.username,
-            full_name: member.full_name,
+            id: member.user_id || member.user?.id || member.id,
+            username: member.user?.username || member.username,
+            full_name: member.user?.full_name || member.full_name,
+            email: member.user?.email || member.email,
             role: member.role,
             position: member.position,
             jersey_number: member.jersey_number,
