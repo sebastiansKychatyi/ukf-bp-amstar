@@ -565,9 +565,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 
-definePageMeta({
-  middleware: ['auth'],
-})
+// No auth required — team pages are public; auth-gated actions (join/leave/edit) are handled per-button
 
 const route = useRoute()
 const router = useRouter()

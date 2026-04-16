@@ -275,9 +275,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 
-definePageMeta({
-  middleware: ['auth'],
-})
+// No auth required — tournament list is public
 
 const { user, isAuthenticated, isCaptain, isReferee } = useAuth()
 const config = useRuntimeConfig()

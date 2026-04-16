@@ -10,7 +10,7 @@ Handles team CRUD operations, statistics, match history, and roster:
 All business logic is delegated to TeamService (Separation of Concerns).
 """
 
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
@@ -49,7 +49,7 @@ def get_teams(
     return service.get_teams(skip=skip, limit=limit)
 
 
-@router.get("/my/team", response_model=TeamDetailResponse)
+@router.get("/my/team", response_model=Optional[TeamDetailResponse])
 def get_my_team(
     current_user: User = Depends(get_current_active_user),
     service: TeamService = Depends(get_team_service),
@@ -58,8 +58,12 @@ def get_my_team(
     Get the current user's team.
 
     Works for both captains (team they own) and players (team they belong to).
+    Returns null (200) when the user is not part of any team.
     """
-    return service.get_my_team(user_id=current_user.id)
+    try:
+        return service.get_my_team(user_id=current_user.id)
+    except Exception:
+        return None
 
 
 @router.get("/{team_id}", response_model=TeamDetailResponse)

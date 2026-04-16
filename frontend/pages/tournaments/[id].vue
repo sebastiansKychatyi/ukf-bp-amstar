@@ -518,9 +518,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 
-definePageMeta({
-  middleware: ['auth'],
-})
+// No auth required — tournament pages are public
 
 const route = useRoute()
 const tournamentId = computed(() => Number(route.params.id))
