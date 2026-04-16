@@ -185,51 +185,131 @@
           <v-card elevation="2" rounded="lg" class="mb-4">
             <v-card-title class="text-h6 font-weight-bold">
               <v-icon start size="small">mdi-chart-bar</v-icon>
-              Player Stats
+              Player Statistics
             </v-card-title>
             <v-divider />
 
-            <v-card-text>
-              <v-row dense>
-                <!-- Goals -->
-                <v-col cols="6">
-                  <v-card color="primary" dark class="text-center pa-3">
-                    <v-icon size="large" class="mb-2">mdi-soccer</v-icon>
-                    <div class="text-h4 font-weight-bold">
-                      <v-progress-circular v-if="statsLoading" indeterminate size="28" width="3" />
-                      <span v-else>{{ playerProfile?.statistics?.goals ?? 0 }}</span>
-                    </div>
-                    <div class="text-caption">Goals</div>
+            <v-card-text class="pa-3">
+              <div v-if="statsLoading" class="text-center pa-4">
+                <v-progress-circular indeterminate color="primary" />
+              </div>
+              <template v-else>
+                <!-- Team ELO -->
+                <div v-if="myTeam" class="mb-3">
+                  <v-card color="primary" variant="flat" class="text-center pa-3">
+                    <div class="text-caption text-white mb-1">Team ELO Rating</div>
+                    <div class="text-h4 font-weight-bold text-white">{{ myTeam.rating_score || 1000 }}</div>
+                    <div class="text-caption text-white opacity-80">{{ myTeam.name }}</div>
                   </v-card>
-                </v-col>
+                </div>
 
-                <!-- Matches -->
-                <v-col cols="6">
-                  <v-card color="secondary" dark class="text-center pa-3">
-                    <v-icon size="large" class="mb-2">mdi-trophy</v-icon>
-                    <div class="text-h4 font-weight-bold">
-                      <v-progress-circular v-if="statsLoading" indeterminate size="28" width="3" />
-                      <span v-else>{{ playerProfile?.statistics?.matches_played ?? 0 }}</span>
-                    </div>
-                    <div class="text-caption">Matches</div>
-                  </v-card>
-                </v-col>
+                <!-- Match stats row -->
+                <v-row dense class="mb-2">
+                  <v-col cols="3" class="text-center">
+                    <div class="text-h6 font-weight-bold">{{ playerProfile?.statistics?.matches_played ?? 0 }}</div>
+                    <div class="text-caption text-medium-emphasis">Played</div>
+                  </v-col>
+                  <v-col cols="3" class="text-center">
+                    <div class="text-h6 font-weight-bold text-success">{{ playerProfile?.statistics?.matches_won ?? 0 }}</div>
+                    <div class="text-caption text-medium-emphasis">Won</div>
+                  </v-col>
+                  <v-col cols="3" class="text-center">
+                    <div class="text-h6 font-weight-bold text-warning">{{ playerProfile?.statistics?.matches_drawn ?? 0 }}</div>
+                    <div class="text-caption text-medium-emphasis">Draw</div>
+                  </v-col>
+                  <v-col cols="3" class="text-center">
+                    <div class="text-h6 font-weight-bold text-error">{{ playerProfile?.statistics?.matches_lost ?? 0 }}</div>
+                    <div class="text-caption text-medium-emphasis">Lost</div>
+                  </v-col>
+                </v-row>
 
-                <!-- Team ELO or Assists fallback -->
-                <v-col cols="12">
-                  <v-card color="success" dark class="text-center pa-3">
-                    <v-icon size="large" class="mb-2">mdi-star</v-icon>
-                    <div class="text-h4 font-weight-bold">
-                      <v-progress-circular
-                        v-if="statsLoading || teamLoading"
-                        indeterminate size="28" width="3"
-                      />
-                      <span v-else>{{ myTeam?.rating_score ?? playerProfile?.statistics?.assists ?? 0 }}</span>
-                    </div>
-                    <div class="text-caption">{{ myTeam ? 'Team ELO' : 'Assists' }}</div>
-                  </v-card>
-                </v-col>
-              </v-row>
+                <v-divider class="mb-2" />
+
+                <!-- Attack stats -->
+                <v-list density="compact" class="pa-0">
+                  <v-list-item density="compact" class="px-0">
+                    <template #prepend>
+                      <v-icon color="success" size="small" class="mr-2">mdi-soccer</v-icon>
+                    </template>
+                    <v-list-item-title class="text-body-2">Goals</v-list-item-title>
+                    <template #append>
+                      <span class="font-weight-bold text-success">{{ playerProfile?.statistics?.goals ?? 0 }}</span>
+                    </template>
+                  </v-list-item>
+
+                  <v-list-item density="compact" class="px-0">
+                    <template #prepend>
+                      <v-icon color="info" size="small" class="mr-2">mdi-shoe-cleat</v-icon>
+                    </template>
+                    <v-list-item-title class="text-body-2">Assists</v-list-item-title>
+                    <template #append>
+                      <span class="font-weight-bold text-info">{{ playerProfile?.statistics?.assists ?? 0 }}</span>
+                    </template>
+                  </v-list-item>
+
+                  <v-list-item density="compact" class="px-0">
+                    <template #prepend>
+                      <v-icon color="primary" size="small" class="mr-2">mdi-target</v-icon>
+                    </template>
+                    <v-list-item-title class="text-body-2">Shots on Target</v-list-item-title>
+                    <template #append>
+                      <span class="font-weight-bold">{{ playerProfile?.statistics?.shots_on_target ?? 0 }}</span>
+                    </template>
+                  </v-list-item>
+
+                  <v-list-item density="compact" class="px-0">
+                    <template #prepend>
+                      <v-icon color="teal" size="small" class="mr-2">mdi-shield-check</v-icon>
+                    </template>
+                    <v-list-item-title class="text-body-2">Clean Sheets</v-list-item-title>
+                    <template #append>
+                      <span class="font-weight-bold text-teal">{{ playerProfile?.statistics?.clean_sheets ?? 0 }}</span>
+                    </template>
+                  </v-list-item>
+
+                  <v-list-item density="compact" class="px-0">
+                    <template #prepend>
+                      <v-icon color="teal" size="small" class="mr-2">mdi-handball</v-icon>
+                    </template>
+                    <v-list-item-title class="text-body-2">Saves</v-list-item-title>
+                    <template #append>
+                      <span class="font-weight-bold">{{ playerProfile?.statistics?.saves ?? 0 }}</span>
+                    </template>
+                  </v-list-item>
+
+                  <v-divider class="my-1" />
+
+                  <!-- Cards -->
+                  <v-list-item density="compact" class="px-0">
+                    <template #prepend>
+                      <v-icon color="warning" size="small" class="mr-2">mdi-card</v-icon>
+                    </template>
+                    <v-list-item-title class="text-body-2">Yellow Cards</v-list-item-title>
+                    <template #append>
+                      <v-chip size="x-small" color="warning" variant="flat">
+                        {{ playerProfile?.statistics?.yellow_cards ?? 0 }}
+                      </v-chip>
+                    </template>
+                  </v-list-item>
+
+                  <v-list-item density="compact" class="px-0">
+                    <template #prepend>
+                      <v-icon color="error" size="small" class="mr-2">mdi-card</v-icon>
+                    </template>
+                    <v-list-item-title class="text-body-2">Red Cards</v-list-item-title>
+                    <template #append>
+                      <v-chip size="x-small" color="error" variant="flat">
+                        {{ playerProfile?.statistics?.red_cards ?? 0 }}
+                      </v-chip>
+                    </template>
+                  </v-list-item>
+                </v-list>
+
+                <div v-if="!playerProfile?.statistics" class="text-center text-medium-emphasis py-3">
+                  <v-icon size="40" class="mb-2">mdi-chart-bar</v-icon>
+                  <div class="text-caption">No statistics recorded yet</div>
+                </div>
+              </template>
             </v-card-text>
           </v-card>
 
