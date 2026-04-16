@@ -13,7 +13,7 @@
       </v-col>
     </v-row>
 
-    <!-- ── Loading skeletons ── -->
+    <!-- Loading skeletons -->
     <template v-if="loading">
       <v-row class="mt-2">
         <v-col cols="12" md="4">
@@ -33,7 +33,7 @@
       </v-row>
     </template>
 
-    <!-- ── No Team State ── -->
+    <!-- No Team State -->
     <v-row v-else-if="!myTeam" class="mt-4">
       <v-col cols="12" md="8">
         <v-card class="pa-8 text-center" elevation="0" border>
@@ -61,7 +61,7 @@
       </v-col>
     </v-row>
 
-    <!-- ── Main Dashboard (has team) ── -->
+    <!-- Main Dashboard (has team) -->
     <template v-else>
       <!-- Row 1: Team Card + ELO Chart -->
       <v-row class="mt-2">
@@ -289,8 +289,7 @@ const teamInitials = computed(() => {
     .slice(0, 2)
 })
 
-// ── Data fetching ──
-
+// Data fetching
 const fetchMyTeam = async () => {
   try {
     const data = await $fetch<any>(`${apiBase.value}/teams/my/team`, {
@@ -356,8 +355,7 @@ const fetchNotifications = async () => {
   }
 }
 
-// ── Chart rendering (theme-aware) ──
-
+// Chart rendering (theme-aware)
 const renderChart = async () => {
   if (!ratingHistory.value.length || !chartCanvas.value) return
 
@@ -438,8 +436,7 @@ const renderChart = async () => {
   })
 }
 
-// ── Helpers ──
-
+// Helpers
 const getResultColor = (challenge: any) => {
   if (!myTeam.value) return 'grey'
   const isChallenger = challenge.challenger_id === myTeam.value.id
@@ -460,8 +457,7 @@ const getResultLabel = (challenge: any) => {
   return 'DRAW'
 }
 
-// ── Lifecycle ──
-
+// Lifecycle
 onMounted(async () => {
   loading.value = true
   await fetchMyTeam()
@@ -477,7 +473,7 @@ watch(() => theme.global.current.value.dark, () => nextTick(() => renderChart())
 </script>
 
 <style scoped>
-/* ── Team card ── */
+/* Team card */
 .team-card-header {
   background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
   min-height: 160px;
@@ -496,7 +492,7 @@ watch(() => theme.global.current.value.dark, () => nextTick(() => renderChart())
   background: rgb(var(--v-theme-surface-variant));
 }
 
-/* ── Empty state icon wrap ── */
+/* Empty state icon wrap */
 .empty-icon-wrap {
   display: inline-flex;
   align-items: center;

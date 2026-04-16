@@ -274,7 +274,7 @@
     </v-container>
   </v-container>
 
-  <!-- ── Edit Profile Dialog ────────────────────────────────────────── -->
+  <!-- Edit Profile Dialog -->
   <v-dialog v-model="showEditDialog" max-width="480" persistent>
     <v-card>
       <v-card-title>
@@ -311,7 +311,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- ── Change Password Dialog ─────────────────────────────────────── -->
+  <!-- Change Password Dialog -->
   <v-dialog v-model="showPasswordDialog" max-width="480" persistent>
     <v-card>
       <v-card-title>
@@ -360,7 +360,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- ── Snackbar ───────────────────────────────────────────────────── -->
+  <!-- Snackbar -->
   <v-snackbar v-model="showSnackbar" :color="snackbarColor" :timeout="3000">
     {{ snackbarMessage }}
     <template #actions>
@@ -384,19 +384,19 @@ const getAuthHeaders = () => {
   return token.value ? { Authorization: `Bearer ${token.value}` } : {}
 }
 
-// ── Data ───────────────────────────────────────────────────────────────
+// Data
 const playerProfile = ref<any>(null)
 const myTeam = ref<any>(null)
 const statsLoading = ref(true)
 const teamLoading = ref(false)
 
-// ── Edit Profile dialog ────────────────────────────────────────────────
+// Edit Profile dialog
 const showEditDialog = ref(false)
 const editSaving = ref(false)
 const editError = ref<string | null>(null)
 const editForm = ref({ full_name: '', email: '' })
 
-// ── Change Password dialog ─────────────────────────────────────────────
+// Change Password dialog
 const showPasswordDialog = ref(false)
 const pwSaving = ref(false)
 const pwError = ref<string | null>(null)
@@ -404,12 +404,12 @@ const showCurrentPw = ref(false)
 const showNewPw = ref(false)
 const pwForm = ref({ current_password: '', new_password: '' })
 
-// ── Snackbar ───────────────────────────────────────────────────────────
+// Snackbar
 const showSnackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('success')
 
-// ── Computed ───────────────────────────────────────────────────────────
+// Computed
 const initials = computed(() => {
   if (user.value?.full_name) {
     return user.value.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -417,7 +417,7 @@ const initials = computed(() => {
   return user.value?.username?.slice(0, 2).toUpperCase() || 'U'
 })
 
-// ── Data fetching ──────────────────────────────────────────────────────
+// Data fetching
 const fetchPlayerStats = async () => {
   if (!user.value?.id) return
   statsLoading.value = true
@@ -444,7 +444,7 @@ const fetchMyTeam = async () => {
   }
 }
 
-// ── Edit Profile ───────────────────────────────────────────────────────
+// Edit Profile
 const openEditProfile = () => {
   editForm.value = { full_name: user.value?.full_name || '', email: user.value?.email || '' }
   editError.value = null
@@ -485,7 +485,7 @@ const saveProfile = async () => {
   }
 }
 
-// ── Change Password ────────────────────────────────────────────────────
+// Change Password
 const closePasswordDialog = () => {
   showPasswordDialog.value = false
   pwForm.value = { current_password: '', new_password: '' }
@@ -510,7 +510,7 @@ const changePassword = async () => {
   }
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────
+// Helpers
 const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return 'N/A'
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -529,7 +529,7 @@ const showMsg = (message: string, color: string) => {
   showSnackbar.value = true
 }
 
-// ── Init ───────────────────────────────────────────────────────────────
+// Init
 onMounted(() => {
   fetchPlayerStats()
   fetchMyTeam()

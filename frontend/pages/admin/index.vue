@@ -26,7 +26,7 @@
     </v-tabs>
 
     <v-window v-model="tab">
-      <!-- ── Users Tab ─────────────────────────────────────────────────────── -->
+      <!-- Users tab -->
       <v-window-item value="users">
         <v-card>
           <v-card-title class="d-flex align-center py-4 px-4">
@@ -94,7 +94,7 @@
         </v-card>
       </v-window-item>
 
-      <!-- ── Teams Tab ─────────────────────────────────────────────────────── -->
+      <!-- Teams tab -->
       <v-window-item value="teams">
         <v-card>
           <v-card-title class="d-flex align-center py-4 px-4">
@@ -134,7 +134,7 @@
         </v-card>
       </v-window-item>
 
-      <!-- ── Announcement Tab ──────────────────────────────────────────────── -->
+      <!-- Announcement tab -->
       <v-window-item value="announcement">
         <v-card>
           <v-card-title>Global Announcement</v-card-title>
@@ -187,7 +187,7 @@
       </v-window-item>
     </v-window>
 
-    <!-- ── Delete Confirmation Dialog ───────────────────────────────────── -->
+    <!-- Delete confirmation dialog -->
     <v-dialog v-model="deleteDialog" max-width="420">
       <v-card>
         <v-card-title class="text-h6">Confirm Delete</v-card-title>
@@ -204,7 +204,7 @@
       </v-card>
     </v-dialog>
 
-    <!-- ── Snackbar ──────────────────────────────────────────────────────── -->
+    <!-- Snackbar -->
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="bottom">
       {{ snackbar.text }}
     </v-snackbar>
@@ -270,7 +270,7 @@ const showSnack = (text: string, color = 'success') => {
   snackbar.value = { show: true, text, color }
 }
 
-// ── Data loading ──────────────────────────────────────────────────────────────
+// Data loading
 
 const loadUsers = async () => {
   usersLoading.value = true
@@ -302,7 +302,7 @@ const loadAnnouncement = async () => {
   } catch { /* non-critical; failure does not affect core functionality */ }
 }
 
-// ── User actions ──────────────────────────────────────────────────────────────
+// User actions
 
 const deactivateUser = async (user: any) => {
   try {
@@ -330,7 +330,7 @@ const activateUser = async (user: any) => {
   }
 }
 
-// ── Delete ────────────────────────────────────────────────────────────────────
+// Delete
 
 const confirmDelete = (type: 'user' | 'team', item: any) => {
   deleteType.value = type
@@ -362,7 +362,7 @@ const executeDelete = async () => {
   }
 }
 
-// ── Announcement ──────────────────────────────────────────────────────────────
+// Announcement
 
 const saveAnnouncement = async () => {
   announcementSaving.value = true
@@ -386,7 +386,7 @@ const clearAnnouncement = async () => {
   await saveAnnouncement()
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// Init
 
 onMounted(() => {
   loadUsers()

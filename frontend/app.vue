@@ -187,10 +187,7 @@
         {{ announcement }}
       </v-alert>
 
-      <!-- Page transition -->
-      <v-fade-transition mode="out-in">
-        <NuxtPage />
-      </v-fade-transition>
+      <NuxtPage />
     </v-main>
 
     <!-- Footer -->
@@ -229,7 +226,7 @@ const currentYear = new Date().getFullYear()
 
 const isSuperuser = computed(() => user.value?.is_superuser === true)
 
-// ── Global announcement banner ────────────────────────────────────────────────
+// Global announcement banner
 const announcement = ref<string | null>(null)
 const announcementDismissed = ref(false)
 

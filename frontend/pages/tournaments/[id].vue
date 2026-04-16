@@ -612,8 +612,7 @@ const participantHeaders = [
   { title: 'Status', key: 'status', align: 'center' as const },
 ]
 
-// ── Data Fetching ──
-
+// Data Fetching
 const fetchTournament = async () => {
   try {
     const data = await $fetch<any>(`${apiBase.value}/tournaments/${tournamentId.value}`, {
@@ -656,8 +655,7 @@ const refreshAll = async () => {
   await fetchStandings()
 }
 
-// ── Organiser Actions ──
-
+// Organiser Actions
 const openRegistration = async () => {
   actionLoading.value = 'open'
   try {
@@ -722,8 +720,7 @@ const deleteTournament = async () => {
   }
 }
 
-// ── Join / Leave ──
-
+// Join / Leave
 const joinTournament = async () => {
   if (!myTeam.value) {
     showMessage('You need to be in a team first', 'error')
@@ -762,8 +759,7 @@ const leaveTournament = async () => {
   }
 }
 
-// ── Match Result ──
-
+// Match Result
 const canSubmitResult = (match: any) => {
   if (!user.value || !tournament.value) return false
   if (tournament.value.status !== 'active') return false
@@ -825,8 +821,7 @@ const submitResult = async () => {
   }
 }
 
-// ── Helpers ──
-
+// Helpers
 const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
     draft: 'grey', registration: 'info', active: 'success', completed: 'primary', cancelled: 'error',

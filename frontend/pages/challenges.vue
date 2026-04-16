@@ -254,7 +254,7 @@
 
         <v-divider />
 
-        <!-- ── Step 1: Final Score ────────────────────────────────────────── -->
+        
         <v-card-text v-if="resultStep === 1" class="pa-6">
           <p class="text-body-2 text-medium-emphasis mb-5">
             Enter the final score. If goals were scored you will be able to assign
@@ -306,7 +306,7 @@
           </v-row>
         </v-card-text>
 
-        <!-- ── Step 2: Player Stats ───────────────────────────────────────── -->
+        <!-- Step 2: Player Stats -->
         <v-card-text v-else-if="resultStep === 2" class="pa-4">
           <!-- Loading rosters -->
           <div v-if="rosterLoading" class="text-center py-6">
@@ -346,7 +346,7 @@
               No roster data available. You can still submit the final score.
             </v-alert>
 
-            <!-- ── Challenger team ── -->
+            <!-- Challenger team -->
             <template v-if="challengerRoster.length > 0">
               <div class="d-flex align-center mb-2">
                 <v-icon color="primary" size="small" class="mr-1">mdi-shield</v-icon>
@@ -431,7 +431,7 @@
               </v-table>
             </template>
 
-            <!-- ── Opponent team ── -->
+            <!-- Opponent team -->
             <template v-if="opponentRoster.length > 0">
               <div class="d-flex align-center mb-2">
                 <v-icon color="error" size="small" class="mr-1">mdi-shield</v-icon>
@@ -602,7 +602,7 @@ const resultChallenge = ref<any>(null)
 const newChallenge = ref({ opponent_id: null as number | null, match_date: '', location: '' })
 const matchResult = ref({ challenger_score: 0, opponent_score: 0 })
 
-// ── Result wizard state ──────────────────────────────────────────────────────
+// Result wizard state
 const resultStep = ref(1)
 const rosterLoading = ref(false)
 const challengerRoster = ref<any[]>([])
@@ -726,8 +726,7 @@ const getCaptainId = (team: any) => {
   return fullTeam?.captain_id
 }
 
-// ── Roster helpers ───────────────────────────────────────────────────────────
-
+// Roster helpers
 const fetchRosters = async (challenge: any) => {
   rosterLoading.value = true
   playerStats.value = {}
@@ -844,7 +843,7 @@ const submitResult = async () => {
   if (!resultChallenge.value) return
   submitting.value = true
   try {
-    // ── Step A: record the final score and trigger ELO update ────────────────
+    // Step A: record the final score and trigger ELO update
     const data = await $fetch<any>(
       `${apiBase.value}/challenges/${resultChallenge.value.id}/result`,
       {
@@ -854,7 +853,7 @@ const submitResult = async () => {
       },
     )
 
-    // ── Step B: submit per-player statistics (non-critical) ──────────────────
+    // Step B: submit per-player statistics (non-critical)
     // Only attempt when we have roster data (Step 2 was shown or rosters loaded).
     const statsPayload = Object.values(playerStats.value).map((s) => ({
       user_id: s.user_id,
@@ -956,7 +955,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ── Challenge card status stripe ── */
+/* Challenge card status stripe */
 .challenge-status-bar {
   height: 4px;
   width: 100%;
@@ -968,7 +967,7 @@ onMounted(() => {
 .status-rejected   { background: rgb(var(--v-theme-error)); }
 .status-cancelled  { background: #9e9e9e; }
 
-/* ── Empty state icon ── */
+/* Empty state icon */
 .challenge-empty-icon {
   display: inline-flex;
   align-items: center;

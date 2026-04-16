@@ -72,7 +72,7 @@
       </v-col>
     </v-row>
 
-    <!-- ── TABLE VIEW ── -->
+    <!-- TABLE VIEW -->
     <v-row v-if="viewMode === 'table'" class="mt-2">
       <v-col cols="12">
         <v-card elevation="0" border>
@@ -146,7 +146,7 @@
       </v-col>
     </v-row>
 
-    <!-- ── GRID VIEW ── -->
+    <!-- GRID VIEW -->
     <template v-else>
       <!-- Loading grid skeletons -->
       <v-row v-if="loading" class="mt-2">
@@ -620,7 +620,7 @@ onMounted(() => {
   cursor: pointer;
 }
 
-/* ── Team grid cards ── */
+/* Team grid cards */
 .team-grid-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border-radius: 16px !important;

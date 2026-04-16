@@ -252,7 +252,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ── Hero ─────────────────────────────────────────────────────────────────── */
+/* Hero */
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
@@ -311,7 +311,7 @@ onMounted(() => {
   display: block;
 }
 
-/* ── Stats cards ──────────────────────────────────────────────────────────── */
+/* Stats cards */
 .stat-card {
   border-radius: 16px !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -332,7 +332,7 @@ onMounted(() => {
   background: rgba(var(--v-theme-surface-variant), 1);
 }
 
-/* ── Features ─────────────────────────────────────────────────────────────── */
+/* Features */
 .features-section {
   background: rgb(var(--v-theme-surface-variant));
 }
@@ -357,12 +357,12 @@ onMounted(() => {
   background: rgb(var(--v-theme-background));
 }
 
-/* ── CTA ──────────────────────────────────────────────────────────────────── */
+/* CTA */
 .cta-section {
   background: rgb(var(--v-theme-background));
 }
 
-/* ── Gap utility (Vuetify 3 uses ga-N but scoped style needs this too) ─────── */
+/* Gap utility (Vuetify 3 uses ga-N but scoped style needs this too) */
 .gap-4 {
   gap: 1rem;
 }
