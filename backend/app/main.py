@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -5,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.redis import redis_client
 from app.api.v1.router import api_router
+from app.tasks.tournament_scheduler import tournament_scheduler_loop
 
 # Import refactored components
 from app.core.exception_handlers import register_exception_handlers
@@ -22,7 +24,9 @@ async def lifespan(app: FastAPI):
     # create_all is a no-op for tables that already exist — safe to call every startup
     Base.metadata.create_all(bind=engine)
     redis_client.connect()
+    scheduler_task = asyncio.create_task(tournament_scheduler_loop())
     yield
+    scheduler_task.cancel()
     redis_client.disconnect()
 
 

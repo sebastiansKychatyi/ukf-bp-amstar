@@ -337,7 +337,35 @@ const fetchTournaments = async () => {
     if (query) url += `?${query}`
 
     const data = await $fetch<any>(url, { headers: getAuthHeaders() })
-    tournaments.value = data.items || []
+    const items: any[] = data.items || []
+
+    const statusPriority: Record<string, number> = {
+      active: 0,
+      registration: 1,
+      draft: 2,
+      completed: 3,
+      cancelled: 4,
+    }
+    const now = Date.now()
+    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000
+
+    tournaments.value = items.sort((a, b) => {
+      const pa = statusPriority[a.status] ?? 5
+      const pb = statusPriority[b.status] ?? 5
+
+      // Completed within 7 days stays near active; older sinks to bottom
+      const ageA = a.status === 'completed' && a.updated_at
+        ? (now - new Date(a.updated_at).getTime() > ONE_WEEK ? 1 : 0)
+        : 0
+      const ageB = b.status === 'completed' && b.updated_at
+        ? (now - new Date(b.updated_at).getTime() > ONE_WEEK ? 1 : 0)
+        : 0
+
+      if (pa !== pb) return pa - pb
+      if (ageA !== ageB) return ageA - ageB
+      // Within same group — newest first
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
   } catch (err: any) {
     error.value = err.data?.detail || 'Failed to load tournaments'
   } finally {

@@ -453,6 +453,11 @@ class TournamentService(BaseService[Tournament]):
         # Recalculate standings
         self._recalculate_standings(tournament_id)
 
+        # For knockout: advance winner to next round BEFORE checking completion
+        # so that the final match slot exists when the completion check runs
+        if tournament.type == TournamentType.KNOCKOUT:
+            self.advance_knockout_winner(tournament_id, match_id)
+
         # Check if tournament / round is complete
         self._check_tournament_completion(tournament_id)
 
@@ -644,46 +649,30 @@ class TournamentService(BaseService[Tournament]):
 
             match_order += 1
 
-        # Create placeholder matches for subsequent rounds
+        # Create placeholder matches for subsequent rounds (only when BYE winners are known)
         prev_round_matches = round1_matches
         for rnd in range(2, total_rounds + 1):
             current_round_matches = []
             num_matches = len(prev_round_matches) // 2
             for i in range(num_matches):
-                # Winners of match 2i and 2i+1 will fill this match
                 m1 = prev_round_matches[2 * i]
                 m2 = prev_round_matches[2 * i + 1]
 
-                # If both feeder matches already have winners (BYEs), fill in
-                home = m1.winner_team_id
-                away = m2.winner_team_id
+                home = m1.winner_team_id if m1 else None
+                away = m2.winner_team_id if m2 else None
+
+                if not home and not away:
+                    # Both TBD — skip; advance_knockout_winner will create this match
+                    current_round_matches.append(None)
+                    continue
 
                 t_match = TournamentMatch(
                     tournament_id=tournament_id,
                     round_number=rnd,
                     match_order=i + 1,
-                    home_team_id=home if home else 0,  # placeholder, will be updated
-                    away_team_id=away,
+                    home_team_id=home or away,
+                    away_team_id=away if home else None,
                 )
-                # If both are filled from BYEs, set them properly
-                if home and away:
-                    t_match.home_team_id = home
-                    t_match.away_team_id = away
-                elif home and not away:
-                    t_match.home_team_id = home
-                    t_match.away_team_id = None
-                elif away and not home:
-                    t_match.home_team_id = away
-                    t_match.away_team_id = None
-                else:
-                    # Both TBD — use 0 as placeholder; will be updated on advance
-                    # We'll store home_team_id as the first feeder match id
-                    # Actually, we'll handle this differently:
-                    # We skip creating the match until winners are known.
-                    # But for bracket visualization, we create empty slots.
-                    # Use the home_team from first BYE winner if available.
-                    t_match.home_team_id = 0  # placeholder
-
                 self.db.add(t_match)
                 self.db.flush()
 
@@ -738,7 +727,32 @@ class TournamentService(BaseService[Tournament]):
             .first()
         )
         if not next_match:
-            return  # This was the final
+            # Check if a next round is expected (not the final)
+            round1_count = (
+                self.db.query(TournamentMatch)
+                .filter(
+                    TournamentMatch.tournament_id == tournament_id,
+                    TournamentMatch.round_number == 1,
+                )
+                .count()
+            )
+            total_rounds = round1_count.bit_length() if round1_count else 0
+            if t_match.round_number >= total_rounds:
+                self.db.commit()
+                return  # This was the final
+
+            # Create the next-round match with this winner as the first known team
+            next_match = TournamentMatch(
+                tournament_id=tournament_id,
+                round_number=next_round,
+                match_order=next_match_order,
+                home_team_id=t_match.winner_team_id,
+                away_team_id=None,
+            )
+            self.db.add(next_match)
+            self.db.flush()
+            self.db.commit()
+            return
 
         # Odd match_order → fills home_team; even → fills away_team
         if t_match.match_order % 2 == 1:

@@ -463,11 +463,6 @@ def submit_match_result(
     # Build the match response dict before any further DB commits
     match_data = _match_response(t_match)
 
-    # Advance winner in knockout
-    tournament = svc.get_tournament(tournament_id)
-    if tournament.type == TournamentType.KNOCKOUT:
-        svc.advance_knockout_winner(tournament_id, match_id)
-
     # Update global ELO ratings — non-fatal if it fails
     elo_home: EloUpdateInfo | None = None
     elo_away: EloUpdateInfo | None = None
