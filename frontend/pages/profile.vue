@@ -28,7 +28,7 @@
                 {{ user?.full_name || user?.username }}
               </h1>
               <p class="text-subtitle-1 mb-2">@{{ user?.username }}</p>
-              <v-chip v-if="user?.is_active" color="success" size="small" prepend-icon="mdi-check-circle">
+              <v-chip v-if="user?.is_active" variant="outlined" size="small" prepend-icon="mdi-check-circle" style="color: white; border-color: white;">
                 Active Account
               </v-chip>
             </v-col>

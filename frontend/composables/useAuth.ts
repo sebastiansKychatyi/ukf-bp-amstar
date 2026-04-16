@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import type { User, LoginCredentials, RegisterData, TokenResponse, UserRole } from '@/types/auth'
+import type { User, LoginCredentials, RegisterData, TokenResponse } from '@/types/auth'
 
 const user = ref<User | null>(null)
 
@@ -109,21 +109,17 @@ export const useAuth = () => {
     }
   }
 
-  const logout = async () => {
-    // Call backend logout endpoint to blacklist token
-    if (token.value) {
-      try {
-        await $fetch(`${apiBase}/auth/logout`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token.value}`,
-          },
-        })
-      } catch (error) {
-        console.error('Logout API call failed:', error)
-      }
+  const logout = () => {
+    // Blacklist the token on the backend in the background (fire and forget)
+    const currentToken = token.value
+    if (currentToken) {
+      $fetch(`${apiBase}/auth/logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${currentToken}` },
+      }).catch(() => {})
     }
 
+    // Clear state and redirect immediately without waiting for the backend
     clearToken()
     router.push('/auth/login')
   }

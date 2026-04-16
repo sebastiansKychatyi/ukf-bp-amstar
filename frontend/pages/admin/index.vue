@@ -45,7 +45,7 @@
             density="comfortable"
           >
             <template #item.is_active="{ item }">
-              <v-chip :color="item.is_active ? 'success' : 'error'" size="small" label>
+              <v-chip :color="item.is_active ? 'success' : 'error'" size="small" label class="text-white">
                 {{ item.is_active ? 'Active' : 'Inactive' }}
               </v-chip>
             </template>
@@ -61,27 +61,26 @@
 
             <template #item.actions="{ item }">
               <div class="d-flex gap-1">
-                <v-tooltip location="top" bg-color="white">
+                <v-tooltip :text="item.is_active ? 'Deactivate' : 'Activate'" location="top" bg-color="grey-darken-3">
                   <template #activator="{ props }">
                     <v-btn
                       v-bind="props"
                       :icon="item.is_active ? 'mdi-account-cancel' : 'mdi-account-check'"
-                      variant="text"
+                      variant="tonal"
                       size="small"
                       :color="item.is_active ? 'warning' : 'success'"
                       :disabled="item.is_superuser"
                       @click="item.is_active ? deactivateUser(item) : activateUser(item)"
                     />
                   </template>
-                  <span class="text-black">{{ item.is_active ? 'Deactivate' : 'Activate' }}</span>
                 </v-tooltip>
 
-                <v-tooltip text="Delete user" location="top">
+                <v-tooltip text="Delete user" location="top" bg-color="grey-darken-3">
                   <template #activator="{ props }">
                     <v-btn
                       v-bind="props"
                       icon="mdi-delete"
-                      variant="text"
+                      variant="tonal"
                       size="small"
                       color="error"
                       :disabled="item.is_superuser"
@@ -118,12 +117,12 @@
             </template>
 
             <template #item.actions="{ item }">
-              <v-tooltip text="Delete team" location="top">
+              <v-tooltip text="Delete team" location="top" bg-color="grey-darken-3">
                 <template #activator="{ props }">
                   <v-btn
                     v-bind="props"
                     icon="mdi-delete"
-                    variant="text"
+                    variant="tonal"
                     size="small"
                     color="error"
                     @click="confirmDelete('team', item)"

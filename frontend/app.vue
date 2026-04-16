@@ -254,6 +254,13 @@ body {
 .announcement-banner {
   border-radius: 0 !important;
 }
+
+/* Tooltip — dark background with white text in all themes */
+.v-tooltip .v-overlay__content {
+  background: #424242 !important;
+  color: #ffffff !important;
+  font-size: 12px;
+}
 </style>
 
 <style scoped>
