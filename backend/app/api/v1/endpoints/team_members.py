@@ -80,14 +80,14 @@ def get_team_member(
     return member
 
 
-@router.delete("/{team_id}/members/{user_id}", response_model=schemas.TeamMemberResponse)
+@router.delete("/{team_id}/members/{user_id}", status_code=204)
 def remove_team_member(
     *,
     team_id: int,
     user_id: int,
     current_user: models.User = Depends(deps.require_role(UserRole.CAPTAIN)),
     service: TeamMemberService = Depends(get_team_member_service)
-) -> models.TeamMember:
+) -> None:
     """
     Remove a member from the team (Captain only)
 
@@ -100,12 +100,11 @@ def remove_team_member(
     - 404: Team or member not found
     - 400: Cannot remove captain
     """
-    member = service.remove_member(
+    service.remove_member(
         team_id=team_id,
         user_id=user_id,
         captain_id=current_user.id
     )
-    return member
 
 
 @router.put("/{team_id}/members/{user_id}", response_model=schemas.TeamMemberResponse)

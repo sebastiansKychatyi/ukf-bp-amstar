@@ -84,7 +84,7 @@
             <v-card-text class="pa-0">
               <v-row dense class="ma-0">
                 <v-col cols="4" class="stat-cell text-center py-4">
-                  <div class="text-h5 font-weight-black text-primary">{{ myTeam.rating || 1000 }}</div>
+                  <div class="text-h5 font-weight-black text-primary">{{ myTeam.rating_score || 1000 }}</div>
                   <div class="text-caption text-medium-emphasis">ELO</div>
                 </v-col>
                 <v-divider vertical />
@@ -154,9 +154,9 @@
                 <v-list-item
                   v-for="ch in activeChallenges"
                   :key="ch.id"
-                  :to="`/challenges`"
                   rounded="lg"
-                  class="mb-1"
+                  class="mb-1 cursor-pointer"
+                  @click="$router.push('/challenges')"
                 >
                   <template #prepend>
                     <v-chip
