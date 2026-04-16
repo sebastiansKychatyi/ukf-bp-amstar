@@ -1,15 +1,5 @@
 <template>
-  <!--
-    Captain Dashboard Component
-    ===========================
-    Dashboard for team captains to manage their team
-
-    Features:
-    - View/edit team info
-    - Manage team roster
-    - Review join requests
-    - Delete team
-  -->
+  <!-- Captain Dashboard: manage team info, roster, and join requests -->
   <v-container>
     <!-- Team Info Card -->
     <v-row>

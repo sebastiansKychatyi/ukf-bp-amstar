@@ -99,7 +99,7 @@ def logout(
         )
 
 
-# ── Password Reset ────────────────────────────────────────────────────────────
+# Password reset endpoints
 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr

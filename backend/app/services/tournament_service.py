@@ -50,7 +50,7 @@ class TournamentService(BaseService[Tournament]):
         super().__init__(db)
         self._notifier = NotificationService(db)
 
-    # RETRIEVAL
+    # Retrieval
 
     def get_tournament(self, tournament_id: int) -> Tournament:
         """Get a tournament with participants and matches eagerly loaded."""
@@ -95,7 +95,7 @@ class TournamentService(BaseService[Tournament]):
         )
         return items, total
 
-    # CRUD
+    # CRUD operations
 
     def create_tournament(
         self,
@@ -177,7 +177,7 @@ class TournamentService(BaseService[Tournament]):
         self.db.commit()
         self._log_operation("Tournament deleted", tournament_id=tournament_id)
 
-    # REGISTRATION
+    # Registration
 
     def open_registration(self, tournament_id: int, user_id: int) -> Tournament:
         """Transition DRAFT -> REGISTRATION."""
@@ -287,7 +287,7 @@ class TournamentService(BaseService[Tournament]):
             "Team left tournament", tournament_id=tournament_id, team_id=team_id
         )
 
-    # START TOURNAMENT (generate fixtures)
+    # Start tournament and generate fixtures
 
     def start_tournament(self, tournament_id: int, user_id: int) -> Tournament:
         """
@@ -350,7 +350,7 @@ class TournamentService(BaseService[Tournament]):
         )
         return self.get_tournament(tournament_id)
 
-    # MATCH RESULT & STANDINGS
+    # Match results and standings
 
     def record_match_result(
         self,
@@ -531,7 +531,7 @@ class TournamentService(BaseService[Tournament]):
             })
         return result
 
-    # CANCEL
+    # Cancellation
 
     def cancel_tournament(self, tournament_id: int, user_id: int) -> Tournament:
         """Cancel a tournament from any non-terminal state."""
@@ -540,7 +540,7 @@ class TournamentService(BaseService[Tournament]):
         self._transition(tournament, TournamentStatus.CANCELLED)
         return self.get_tournament(tournament_id)
 
-    # FIXTURE GENERATION — LEAGUE (Round-Robin)
+    # Fixture generation: league (round-robin)
 
     def _generate_league_fixtures(
         self, tournament_id: int, team_ids: List[int]
@@ -592,7 +592,7 @@ class TournamentService(BaseService[Tournament]):
             rounds=num_rounds,
         )
 
-    # FIXTURE GENERATION — KNOCKOUT (Single Elimination)
+    # Fixture generation: knockout (single elimination)
 
     def _generate_knockout_fixtures(
         self, tournament_id: int, team_ids: List[int]
@@ -748,7 +748,7 @@ class TournamentService(BaseService[Tournament]):
 
         self.db.commit()
 
-    # STANDINGS RECALCULATION
+    # Standings recalculation
 
     def _recalculate_standings(self, tournament_id: int) -> None:
         """
@@ -829,7 +829,7 @@ class TournamentService(BaseService[Tournament]):
         self.db.commit()
         self._log_operation("Standings recalculated", tournament_id=tournament_id)
 
-    # COMPLETION CHECK
+    # Completion check
 
     def _check_tournament_completion(self, tournament_id: int) -> None:
         """
@@ -882,7 +882,7 @@ class TournamentService(BaseService[Tournament]):
                 "Tournament auto-completed", tournament_id=tournament_id
             )
 
-    # INTERNAL HELPERS
+    # Internal helpers
 
     def _transition(self, tournament: Tournament, target: TournamentStatus) -> None:
         """Validate and execute a status transition."""

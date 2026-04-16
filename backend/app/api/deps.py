@@ -85,7 +85,7 @@ class RoleChecker:
         return f"RoleChecker({roles})"
 
 
-# ── Pre-built role checkers (reusable across all endpoints) ──
+# Pre-built role checkers used across all endpoints
 allow_any_authenticated = RoleChecker(UserRole.PLAYER, UserRole.CAPTAIN, UserRole.REFEREE)
 allow_captain = RoleChecker(UserRole.CAPTAIN)
 allow_referee = RoleChecker(UserRole.REFEREE)

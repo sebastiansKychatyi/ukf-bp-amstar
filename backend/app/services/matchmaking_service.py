@@ -48,7 +48,7 @@ class MatchmakingService(BaseService[Team]):
     def __init__(self, db: Session):
         super().__init__(db)
 
-    # PUBLIC API
+    # Public methods
 
     def find_opponents(
         self,
@@ -186,7 +186,7 @@ class MatchmakingService(BaseService[Team]):
             total_candidates=len(candidates),
         )
 
-    # AVAILABILITY MANAGEMENT
+    # Availability management
 
     def get_team_availability(self, team_id: int) -> TeamAvailabilityResponse:
         """Return all availability slots for a team."""
@@ -255,7 +255,7 @@ class MatchmakingService(BaseService[Team]):
             slots=[AvailabilitySlotResponse.model_validate(r) for r in new_rows],
         )
 
-    # SCORING COMPONENTS  (each returns a float in [0, 1])
+    # Scoring components, each returns a float in [0, 1]
 
     @staticmethod
     def _elo_similarity(team: Team, candidate: Team, elo_range: int) -> float:
@@ -377,7 +377,7 @@ class MatchmakingService(BaseService[Team]):
         count = activity_map.get(candidate_id, 0)
         return min(1.0, count / 5.0)
 
-    # DATA HELPERS  (batch queries to avoid N+1)
+    # Data helpers (batch queries to avoid N+1)
 
     def _get_recent_opponents(self, team_id: int) -> Dict[int, int]:
         """
@@ -456,7 +456,7 @@ class MatchmakingService(BaseService[Team]):
         return result
 
 
-# PURE UTILITY FUNCTIONS
+# Utility functions
 
 
 def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

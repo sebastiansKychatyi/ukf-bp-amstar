@@ -65,7 +65,7 @@ apiClient.interceptors.response.use(
   }
 )
 
-// PLAYER API
+// Player API
 
 export const playerApi = {
   /**
@@ -119,7 +119,7 @@ export const playerApi = {
   },
 }
 
-// TEAM API
+// Team API
 
 export const teamApi = {
   /**
@@ -303,7 +303,7 @@ export const teamApi = {
   },
 }
 
-// JOIN REQUEST API
+// Join request API
 
 export const joinRequestApi = {
   /**
@@ -367,7 +367,7 @@ export const joinRequestApi = {
   },
 }
 
-// STATISTICS API
+// Statistics API
 
 export const statisticsApi = {
   /**
@@ -381,7 +381,7 @@ export const statisticsApi = {
   },
 }
 
-// AUTH API (placeholder - implement based on your auth system)
+// Auth API
 
 export const authApi = {
   /**

@@ -18,7 +18,7 @@ class NotificationService(BaseService[Notification]):
     def __init__(self, db: Session):
         super().__init__(db)
 
-    # ── Creation helpers (called from other services) ────────────────
+    # Creation helpers called from other services
 
     def notify(
         self,
@@ -64,7 +64,7 @@ class NotificationService(BaseService[Notification]):
         self.db.flush()
         return notifications
 
-    # ── Retrieval ────────────────────────────────────────────────────
+    # Retrieval
 
     def get_notifications(
         self,
@@ -104,7 +104,7 @@ class NotificationService(BaseService[Notification]):
             .scalar()
         )
 
-    # ── Mark as read ────────────────────────────────────────────────
+    # Mark as read
 
     def mark_as_read(self, user_id: int, notification_ids: List[int]) -> int:
         """Mark specific notifications as read. Returns count updated."""

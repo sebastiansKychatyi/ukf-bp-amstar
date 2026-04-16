@@ -5,7 +5,9 @@ from app.models.user import UserRole
 
 
 class UserBase(BaseModel):
-    email: EmailStr
+    # Use str so Pydantic does not re-validate emails already stored in the DB.
+    # Input validation (registration) is handled separately in UserCreate.
+    email: str
     username: str
     full_name: Optional[str] = None
 
@@ -13,6 +15,16 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     role: Optional[UserRole] = UserRole.PLAYER
+
+    @field_validator('email')
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        from email_validator import validate_email, EmailNotValidError
+        try:
+            info = validate_email(v, check_deliverability=False)
+            return info.normalized
+        except EmailNotValidError as e:
+            raise ValueError(str(e))
 
     @field_validator('role')
     @classmethod

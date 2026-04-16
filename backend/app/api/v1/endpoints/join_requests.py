@@ -25,7 +25,7 @@ from app.services.team_member_service import TeamMemberService
 router = APIRouter()
 
 
-# DEPENDENCY INJECTION
+# Dependencies
 
 
 def get_team_member_service(db: Session = Depends(get_db)) -> TeamMemberService:
@@ -33,7 +33,7 @@ def get_team_member_service(db: Session = Depends(get_db)) -> TeamMemberService:
     return TeamMemberService(db)
 
 
-# PLAYER ENDPOINTS - Join Request Management
+# Player endpoints: join request management
 
 
 @router.post("/", response_model=schemas.JoinRequestResponse, status_code=status.HTTP_201_CREATED)
@@ -127,7 +127,7 @@ def cancel_join_request(
     return request
 
 
-# CAPTAIN ENDPOINTS - Review Join Requests
+# Captain endpoints: review join requests
 
 
 @router.get("/team/{team_id}/pending", response_model=List[schemas.JoinRequestResponse])
@@ -216,7 +216,7 @@ def review_join_request(
     return request
 
 
-# CONVENIENCE ENDPOINTS
+# Convenience endpoints
 
 
 @router.get("/{request_id}", response_model=schemas.JoinRequestResponse)

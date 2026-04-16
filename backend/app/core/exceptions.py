@@ -19,7 +19,7 @@ class AmStarException(Exception):
         super().__init__(self.message)
 
 
-# AUTHENTICATION & AUTHORIZATION EXCEPTIONS
+# Authentication and authorization exceptions
 
 
 class AuthenticationError(AmStarException):
@@ -73,7 +73,7 @@ class InsufficientPermissionsError(AmStarException):
         )
 
 
-# RESOURCE EXCEPTIONS
+# Resource exceptions
 
 
 class ResourceNotFoundError(AmStarException):
@@ -109,7 +109,7 @@ class ChallengeNotFoundError(ResourceNotFoundError):
         super().__init__(resource_type="Challenge", identifier=challenge_id)
 
 
-# BUSINESS RULE VIOLATIONS
+# Business rule violations
 
 
 class BusinessRuleViolationError(AmStarException):
@@ -271,7 +271,7 @@ class CannotRemoveCaptainError(BusinessRuleViolationError):
         )
 
 
-# TOURNAMENT EXCEPTIONS
+# Tournament exceptions
 
 
 class TournamentNotFoundError(ResourceNotFoundError):
@@ -335,7 +335,7 @@ class TournamentNotEnoughTeamsError(BusinessRuleViolationError):
         )
 
 
-# VALIDATION EXCEPTIONS
+# Validation exceptions
 
 
 class ValidationError(AmStarException):
@@ -366,7 +366,7 @@ class InvalidDateError(ValidationError):
         super().__init__(field=field, message=reason)
 
 
-# EXTERNAL SERVICE EXCEPTIONS
+# External service exceptions
 
 
 class ExternalServiceError(AmStarException):
@@ -394,7 +394,7 @@ class RedisServiceError(ExternalServiceError):
         super().__init__(service_name="Redis", reason=reason)
 
 
-# RATE LIMITING EXCEPTIONS
+# Rate limiting exceptions
 
 
 class RateLimitExceededError(AmStarException):

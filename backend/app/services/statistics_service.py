@@ -32,7 +32,7 @@ class StatisticsService(BaseService[PlayerStatistics]):
     def __init__(self, db: Session):
         super().__init__(db)
 
-    # MATCH STATISTICS (per-match recording)
+    # Match statistics (per-match recording)
 
     def record_match_stats(
         self,
@@ -123,7 +123,7 @@ class StatisticsService(BaseService[PlayerStatistics]):
 
         return [MatchPlayerStatisticsResponse.model_validate(r) for r in created]
 
-    # AGGREGATION ENGINE
+    # Aggregation
 
     def _reaggregate_player(self, user_id: int, challenge: Challenge) -> None:
         """
@@ -133,7 +133,7 @@ class StatisticsService(BaseService[PlayerStatistics]):
         produces the same result, because it reads from the source-of-truth
         (per-match records) and overwrites the aggregate.
         """
-        # SUM all per-match stats
+        # Sum all per-match stats
         agg = (
             self.db.query(
                 func.count(MatchPlayerStatistics.id).label("matches_played"),
@@ -218,7 +218,7 @@ class StatisticsService(BaseService[PlayerStatistics]):
         self._log_operation("Full reaggregation", player_count=len(user_ids))
         return len(user_ids)
 
-    # QUERY METHODS
+    # Query methods
 
     def get_player_stats(self, user_id: int) -> Optional[PlayerStatistics]:
         """Get aggregated statistics for a single player."""
@@ -296,7 +296,7 @@ class StatisticsService(BaseService[PlayerStatistics]):
             statistics=PlayerStatisticsResponse.model_validate(stats) if stats else None,
         )
 
-    # HELPERS
+    # Helpers
 
     def _to_leaderboard(self, rows: list, sort_field: str) -> list[dict]:
         """Convert PlayerStatistics rows to leaderboard dicts."""

@@ -29,7 +29,7 @@ from app.core.exceptions import (
 router = APIRouter()
 
 
-# MATCH STATISTICS
+# Match statistics endpoints
 
 
 @router.post(
@@ -64,7 +64,7 @@ def record_match_stats(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=e.message)
 
 
-# PLAYER STATS & PROFILES
+# Player stats and profiles
 
 
 @router.get(
@@ -104,7 +104,7 @@ def get_player_match_stats(
     return [MatchPlayerStatisticsResponse.model_validate(r) for r in rows]
 
 
-# LEADERBOARDS
+# Leaderboards
 
 
 @router.get(

@@ -39,7 +39,7 @@ class TeamMemberService(BaseService[models.TeamMember]):
         super().__init__(db)
         self._notifier = NotificationService(db)
 
-    # JOIN REQUEST OPERATIONS
+    # Join request operations
 
     def create_join_request(
         self,
@@ -376,7 +376,7 @@ class TeamMemberService(BaseService[models.TeamMember]):
 
         return request
 
-    # TEAM ROSTER OPERATIONS
+    # Team roster operations
 
     def get_team_roster(
         self,

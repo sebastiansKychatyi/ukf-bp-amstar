@@ -56,7 +56,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         """
         response = await call_next(request)
 
-        # MIME Sniffing Protection
+        # MIME sniffing protection
         # Prevents browsers from MIME-sniffing responses
         response.headers["X-Content-Type-Options"] = "nosniff"
 
@@ -64,11 +64,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Prevents page from being displayed in iframe
         response.headers["X-Frame-Options"] = "DENY"
 
-        # XSS Protection (Legacy)
+        # XSS protection (legacy browsers)
         # Enables XSS filter in older browsers
         response.headers["X-XSS-Protection"] = "1; mode=block"
 
-        # HTTPS Enforcement (HSTS)
+        # HTTPS enforcement (HSTS)
         # Forces HTTPS for specified duration
         if self.enable_hsts and request.url.scheme == "https":
             response.headers["Strict-Transport-Security"] = (
@@ -117,7 +117,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
-# CONFIGURATION EXAMPLES
+# Configuration examples
 
 """
 DEVELOPMENT CSP (More Permissive):

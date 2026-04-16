@@ -82,7 +82,7 @@ def strip_html(text: str) -> str:
     return clean.strip()
 
 
-# SCRIPT INJECTION PREVENTION
+# Script injection prevention
 
 
 def sanitize_script_content(text: str) -> str:
@@ -147,7 +147,7 @@ def sanitize_sql_string(text: str) -> str:
     return text
 
 
-# PATH TRAVERSAL PREVENTION
+# Path traversal prevention
 
 
 def sanitize_filename(filename: str) -> str:
@@ -190,7 +190,7 @@ def sanitize_filename(filename: str) -> str:
     return filename or 'file'
 
 
-# URL SANITIZATION
+# URL sanitization
 
 
 def sanitize_url(url: str, allow_schemes: Optional[list[str]] = None) -> str:
@@ -230,7 +230,7 @@ def sanitize_url(url: str, allow_schemes: Optional[list[str]] = None) -> str:
     return url
 
 
-# EMAIL SANITIZATION
+# Email sanitization
 
 
 def sanitize_email(email: str) -> str:
@@ -260,7 +260,7 @@ def sanitize_email(email: str) -> str:
     return email
 
 
-# GENERAL TEXT SANITIZATION
+# General text sanitization
 
 
 def sanitize_text(
@@ -397,7 +397,7 @@ class InputSanitizer:
         return sanitized
 
 
-# USAGE EXAMPLES
+# Usage examples
 
 """
 IN PYDANTIC SCHEMAS:

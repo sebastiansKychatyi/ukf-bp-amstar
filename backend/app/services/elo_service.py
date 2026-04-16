@@ -21,7 +21,7 @@ class EloService(BaseService[Rating]):
     def __init__(self, db: Session):
         super().__init__(db)
 
-    # PUBLIC API
+    # Public methods
 
     def update_ratings(
         self,
@@ -181,7 +181,7 @@ class EloService(BaseService[Rating]):
             for r in records
         ]
 
-    # CORE MATHEMATICAL FUNCTIONS
+    # Math functions
 
 
     @staticmethod
@@ -231,7 +231,7 @@ class EloService(BaseService[Rating]):
         return base_k * self._goal_difference_multiplier(goal_diff)
 
 
-    # DATA HELPERS
+    # Data helpers
   
 
     def _count_completed_matches(self, team_id: int) -> int:

@@ -24,7 +24,7 @@ from app.schemas.team import TeamResponse
 
 router = APIRouter()
 
-# ── Module-level announcement (ephemeral) ────────────────────────────────────
+# Module-level announcement, resets on process restart
 _announcement: Optional[str] = None
 
 
@@ -32,7 +32,7 @@ class AnnouncementPayload(BaseModel):
     message: Optional[str] = None
 
 
-# ── Users ─────────────────────────────────────────────────────────────────────
+# User management
 
 @router.get("/users", response_model=List[UserSchema])
 def list_users(
@@ -91,7 +91,7 @@ def delete_user(
     db.commit()
 
 
-# ── Teams ─────────────────────────────────────────────────────────────────────
+# Team management
 
 @router.get("/teams", response_model=List[TeamResponse])
 def list_teams(
@@ -116,7 +116,7 @@ def delete_team(
     db.commit()
 
 
-# ── Announcement ──────────────────────────────────────────────────────────────
+# Announcement endpoints
 
 @router.get("/announcement")
 def get_announcement():

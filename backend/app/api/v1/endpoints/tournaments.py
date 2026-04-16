@@ -47,7 +47,7 @@ from app.core.exceptions import (
 router = APIRouter()
 
 
-# EXCEPTION -> HTTP MAPPING
+# Exception to HTTP status mapping
 
 def _handle(exc: Exception):
     """Map domain exceptions to HTTP responses."""
@@ -70,7 +70,7 @@ def _handle(exc: Exception):
     raise exc
 
 
-# HELPER: build match response with scores from linked Challenge
+# Build match response with scores from linked challenge
 
 def _match_response(m) -> dict:
     """Build a TournamentMatchResponse dict, pulling scores from Challenge."""
@@ -97,7 +97,7 @@ def _match_response(m) -> dict:
     return data
 
 
-# LIST & DETAIL
+# List and detail endpoints
 
 @router.get(
     "/",
@@ -159,7 +159,7 @@ def get_tournament(
     return resp
 
 
-# STANDINGS & BRACKET
+# Standings and bracket
 
 @router.get(
     "/{tournament_id}/standings",
@@ -227,7 +227,7 @@ def get_bracket(
     )
 
 
-# CRUD
+# CRUD operations
 
 @router.post(
     "/",
@@ -301,7 +301,7 @@ def delete_tournament(
         _handle(e)
 
 
-# REGISTRATION
+# Registration
 
 @router.post(
     "/{tournament_id}/open-registration",
@@ -370,7 +370,7 @@ def leave_tournament(
         _handle(e)
 
 
-# START & CANCEL
+# Start and cancel
 
 @router.post(
     "/{tournament_id}/start",
@@ -424,7 +424,7 @@ def cancel_tournament(
     return TournamentResponse.model_validate(tournament)
 
 
-# MATCH RESULTS
+# Match results
 
 @router.post(
     "/{tournament_id}/matches/{match_id}/result",

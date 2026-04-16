@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import time
 
 
-# TEAM AVAILABILITY SCHEMAS
+# Team availability schemas
 
 
 class AvailabilitySlotBase(BaseModel):
@@ -37,7 +37,7 @@ class TeamAvailabilityResponse(BaseModel):
     slots: List[AvailabilitySlotResponse]
 
 
-# MATCHMAKING SCHEMAS
+# Matchmaking schemas
 
 
 class MatchmakingScoreBreakdown(BaseModel):

@@ -16,14 +16,14 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # --- Tournament types ---
+    # Tournament type and status enums
     tournament_type = sa.Enum("league", "knockout", name="tournamenttype")
     tournament_status = sa.Enum(
         "draft", "registration", "active", "completed", "cancelled",
         name="tournamentstatus",
     )
 
-    # --- Tournament table ---
+    # Tournament table
     op.create_table(
         "tournament",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
@@ -51,7 +51,7 @@ def upgrade() -> None:
         sa.CheckConstraint("max_teams >= 2", name="ck_tournament_min_teams"),
     )
 
-    # --- TournamentParticipant table ---
+    # TournamentParticipant table
     op.create_table(
         "tournamentparticipant",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
@@ -86,7 +86,7 @@ def upgrade() -> None:
         ["tournament_id"],
     )
 
-    # --- TournamentMatch table ---
+    # TournamentMatch table
     op.create_table(
         "tournamentmatch",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
@@ -137,7 +137,7 @@ def upgrade() -> None:
         ),
     )
 
-    # --- Extend notification enum with tournament events ---
+    # Extend notification enum with tournament events
     # PostgreSQL requires ALTER TYPE to add values to an existing enum
     op.execute("ALTER TYPE notificationtype ADD VALUE IF NOT EXISTS 'tournament_started'")
     op.execute("ALTER TYPE notificationtype ADD VALUE IF NOT EXISTS 'tournament_match_scheduled'")
