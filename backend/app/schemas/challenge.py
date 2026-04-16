@@ -69,6 +69,6 @@ class EloUpdateResult(BaseModel):
 
 
 class ChallengeCompleteResponse(BaseModel):
-    """Response after completing a challenge (scores + ELO updates)."""
+    """Response after submitting a result. elo_updates is empty until both captains confirm."""
     challenge: ChallengeResponse
-    elo_updates: List[EloUpdateResult]
+    elo_updates: List[EloUpdateResult] = []

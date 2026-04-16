@@ -327,20 +327,31 @@ class TestSubmitResult:
         db: Session,
         accepted_challenge: Challenge,
         captain_a: User,
+        captain_b: User,
         team_a: Team,
         team_b: Team,
     ):
         """
-        TC-S05-A: Either participating captain can submit the match result.
+        TC-S05-A: Both captains confirm the result → COMPLETED.
 
-        Verifies the state machine transition ACCEPTED → COMPLETED and
-        that the scores are persisted on the challenge record.
+        Verifies the two-step state machine transition ACCEPTED → COMPLETED
+        and that the scores are persisted on the challenge record.
         """
         svc = make_service(db)
 
-        completed = svc.submit_result(
+        # First captain submits scores
+        after_first = svc.submit_result(
             challenge_id=accepted_challenge.id,
             user_id=captain_a.id,
+            challenger_score=3,
+            opponent_score=1,
+        )
+        assert after_first.status == ChallengeStatus.ACCEPTED  # still waiting
+
+        # Second captain confirms → COMPLETED
+        completed = svc.submit_result(
+            challenge_id=accepted_challenge.id,
+            user_id=captain_b.id,
             challenger_score=3,
             opponent_score=1,
         )
@@ -353,21 +364,32 @@ class TestSubmitResult:
         self,
         db: Session,
         accepted_challenge: Challenge,
+        captain_a: User,
         captain_b: User,
         team_a: Team,
         team_b: Team,
     ):
         """
-        TC-S05-B: The *opponent* captain can also submit the result.
+        TC-S05-B: Opponent captain initiates, challenger confirms → COMPLETED.
 
         Verifies that permission is granted to both participating captains,
         not just the one who created the challenge.
         """
         svc = make_service(db)
 
+        # Opponent submits first
+        after_first = svc.submit_result(
+            challenge_id=accepted_challenge.id,
+            user_id=captain_b.id,
+            challenger_score=0,
+            opponent_score=2,
+        )
+        assert after_first.status == ChallengeStatus.ACCEPTED
+
+        # Challenger confirms → COMPLETED
         completed = svc.submit_result(
             challenge_id=accepted_challenge.id,
-            user_id=captain_b.id,        # opponent side
+            user_id=captain_a.id,
             challenger_score=0,
             opponent_score=2,
         )

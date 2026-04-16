@@ -19,6 +19,13 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, get_current_superuser
 from app.models.user import User as UserModel
 from app.models.team import Team as TeamModel
+from app.models.challenge import Challenge as ChallengeModel
+from app.models.tournament import TournamentParticipant, Tournament as TournamentModel
+from app.models.notification import Notification
+from app.models.password_reset import PasswordResetToken
+from app.models.team_member import TeamMember
+from app.models.player_statistics import PlayerStatistics
+from app.models.rating import Rating
 from app.schemas.user import User as UserSchema
 from app.schemas.team import TeamResponse
 
@@ -87,6 +94,41 @@ def delete_user(
     target = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not target:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    # Remove from team membership
+    db.query(TeamMember).filter(TeamMember.user_id == user_id).delete(synchronize_session=False)
+
+    # Delete notifications
+    db.query(Notification).filter(Notification.user_id == user_id).delete(synchronize_session=False)
+
+    # Delete password reset tokens
+    db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user_id).delete(synchronize_session=False)
+
+    # Delete player statistics
+    db.query(PlayerStatistics).filter(PlayerStatistics.user_id == user_id).delete(synchronize_session=False)
+
+    # Reassign tournaments created by this user to the admin performing the delete
+    db.query(TournamentModel).filter(TournamentModel.created_by_id == user_id).update(
+        {"created_by_id": admin.id}, synchronize_session=False
+    )
+
+    # Delete teams where this user is captain (cascades members/join requests)
+    captain_teams = db.query(TeamModel).filter(TeamModel.captain_id == user_id).all()
+    for team in captain_teams:
+        db.query(TournamentParticipant).filter(
+            TournamentParticipant.team_id == team.id
+        ).delete(synchronize_session=False)
+        challenge_ids = [c.id for c in db.query(ChallengeModel.id).filter(
+            (ChallengeModel.challenger_id == team.id) | (ChallengeModel.opponent_id == team.id)
+        ).all()]
+        if challenge_ids:
+            db.query(Rating).filter(Rating.challenge_id.in_(challenge_ids)).delete(synchronize_session=False)
+        db.query(ChallengeModel).filter(
+            (ChallengeModel.challenger_id == team.id) | (ChallengeModel.opponent_id == team.id)
+        ).delete(synchronize_session=False)
+        db.delete(team)
+
+    db.flush()
     db.delete(target)
     db.commit()
 
@@ -112,6 +154,24 @@ def delete_team(
     target = db.query(TeamModel).filter(TeamModel.id == team_id).first()
     if not target:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Team not found")
+
+    # Delete tournament participations for this team
+    db.query(TournamentParticipant).filter(
+        TournamentParticipant.team_id == team_id
+    ).delete(synchronize_session=False)
+
+    # Delete rating records that reference challenges of this team
+    challenge_ids = [c.id for c in db.query(ChallengeModel.id).filter(
+        (ChallengeModel.challenger_id == team_id) | (ChallengeModel.opponent_id == team_id)
+    ).all()]
+    if challenge_ids:
+        db.query(Rating).filter(Rating.challenge_id.in_(challenge_ids)).delete(synchronize_session=False)
+
+    # Delete challenges that reference this team
+    db.query(ChallengeModel).filter(
+        (ChallengeModel.challenger_id == team_id) | (ChallengeModel.opponent_id == team_id)
+    ).delete(synchronize_session=False)
+
     db.delete(target)
     db.commit()
 

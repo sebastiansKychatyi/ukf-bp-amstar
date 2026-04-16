@@ -211,9 +211,13 @@ def submit_result(
     except (ChallengeNotFoundError, InvalidChallengeStatusError, InsufficientPermissionsError) as e:
         _handle(e)
 
-    update_a, update_b = elo_svc.update_ratings(challenge_id)
+    # ELO is computed only after both captains confirm (COMPLETED state)
+    elo_updates = []
+    if challenge.status == ChallengeStatus.COMPLETED:
+        update_a, update_b = elo_svc.update_ratings(challenge_id)
+        elo_updates = [update_a, update_b]
 
     return ChallengeCompleteResponse(
         challenge=ChallengeResponse.model_validate(challenge),
-        elo_updates=[update_a, update_b],
+        elo_updates=elo_updates,
     )

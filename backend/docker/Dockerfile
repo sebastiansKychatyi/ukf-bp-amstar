@@ -22,11 +22,11 @@ RUN useradd -m -u 1000 appuser
 WORKDIR /app
 
 
-COPY requirements.txt .
+COPY requirements.txt requirements-dev.txt ./
 
 
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
+    pip install -r requirements-dev.txt
 
 
 COPY --chown=appuser:appuser . .

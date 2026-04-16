@@ -277,18 +277,16 @@ class TestSubmitResultEndpoint:
 
     async def test_submit_result_returns_200_with_elo_updates(
         self,
-        client_captain_a: AsyncClient,
+        client_captain_b: AsyncClient,
         db: Session,
         team_a: Team,
         team_b: Team,
     ):
         """
-        TC-A06-A: Submitting a valid result transitions the challenge to
-        COMPLETED and returns ELO update data for both teams.
+        TC-A06-A: Both captains confirm the result → COMPLETED with ELO updates.
 
-        This is the most critical end-to-end test of the Battle System:
-        it validates the full pipeline from HTTP request through service
-        layer to ELO calculation and database persistence.
+        Two-step confirmation: captain_a submits scores, captain_b confirms.
+        The second response contains the final COMPLETED challenge and ELO data.
 
         Expected response structure:
             {
@@ -299,16 +297,22 @@ class TestSubmitResultEndpoint:
                 ]
             }
         """
+        # Challenge with challenger already confirmed — one more confirmation triggers COMPLETED
         challenge = Challenge(
             challenger_id=team_a.id,
             opponent_id=team_b.id,
             status=ChallengeStatus.ACCEPTED,
+            challenger_score=3,
+            opponent_score=1,
+            result_confirmed_by_challenger=True,
         )
         db.add(challenge)
         db.commit()
 
         payload = {"challenger_score": 3, "opponent_score": 1}
-        response = await client_captain_a.put(
+
+        # Opponent captain confirms → both confirmed → COMPLETED + ELO
+        response = await client_captain_b.put(
             f"{BASE}/{challenge.id}/result", json=payload
         )
 

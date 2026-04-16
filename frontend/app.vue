@@ -218,7 +218,7 @@ const apiBase = config.public.apiBaseUrl || 'http://localhost:8000/api/v1'
 
 const isDark = computed(() => theme.global.current.value.dark)
 const toggleTheme = () => {
-  theme.global.name.value = isDark.value ? 'light' : 'dark'
+  theme.change(isDark.value ? 'light' : 'dark')
 }
 
 const drawer = ref(false)
