@@ -61,7 +61,7 @@
 
             <template #item.actions="{ item }">
               <div class="d-flex gap-1">
-                <v-tooltip :text="item.is_active ? 'Deactivate' : 'Activate'" location="top">
+                <v-tooltip location="top" bg-color="white">
                   <template #activator="{ props }">
                     <v-btn
                       v-bind="props"
@@ -73,6 +73,7 @@
                       @click="item.is_active ? deactivateUser(item) : activateUser(item)"
                     />
                   </template>
+                  <span class="text-black">{{ item.is_active ? 'Deactivate' : 'Activate' }}</span>
                 </v-tooltip>
 
                 <v-tooltip text="Delete user" location="top">
